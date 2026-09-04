@@ -10,65 +10,64 @@
 <body class="bg-gray-50 flex font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0f172a] text-white min-h-screen flex flex-col justify-between">
+    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0">
         <div>
             <!-- Logo -->
-            <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-700">
-                <i class="fa-solid fa-book-open text-blue-400 text-2xl"></i>
-                <h1 class="text-xl font-bold tracking-wider">SIMARSIP</h1>
+            <div class="flex items-center gap-3 px-6 py-6 mb-2">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
             
             <!-- Menu -->
-            <nav class="mt-4 px-4 space-y-2">
-                <a href="#" class="flex items-center gap-3 bg-blue-600 px-4 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
+            <nav class="px-4 space-y-1">
+                <!-- Dashboard (Active) -->
+                <a href="/admin-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
                 <!-- Wrapper Menu Arsip Pokja -->
-                <div>
-                    <!-- Tombol Utama Arsip Pokja -->
-                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm hover:text-blue-300 transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-solid fa-folder-open"></i> Arsip Pokja</span>
+                <div class="pt-2">
+                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition-colors focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
+                        <!-- Panah default menghadap kanan -->
                         <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
                     
                     <!-- Sub-menu (Ajukan & Upload) -->
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
-                        <a href="#" class="block pl-11 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition rounded-md">- Ajukan Peminjaman</a>
-                        <a href="#" class="block pl-11 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition rounded-md">- Upload File Arsip</a>
+                        <div class="flex flex-col gap-2 pt-1 pb-2">
+                            <!-- TAUTAN SUDAH DITAMBAHKAN DI SINI -->
+                            <a href="/admin-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
+                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                        </div>
                     </div>
                 </div>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm hover:text-blue-300 transition">
-                    <i class="fa-solid fa-user"></i> Profil
+                <!-- Profil -->
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-regular fa-user"></i> Profil
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm hover:text-blue-300 transition">
-                    <i class="fa-solid fa-file-lines"></i> Panduan Penggunaan
+                
+                <!-- History -->
+                <a href="/admin-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-regular fa-clock"></i> History
+                </a>
+
+                <!-- Panduan Penggunaan -->
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
-        </div>
-
-        <!-- Profil Bawah -->
-        <div class="p-4 border-t border-gray-700 flex items-center gap-3 bg-[#1e293b]">
-            <div class="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden">
-                <i class="fa-solid fa-user text-xl text-gray-200"></i>
-            </div>
-            <div>
-                <p class="text-sm font-semibold">Admin Pokja<br>Kelembagaan</p>
-                <p class="text-xs text-green-400 flex items-center gap-1">
-                    <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span> Online
-                </p>
-            </div>
         </div>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 flex flex-col">
+    <main class="flex-1 ml-64 flex flex-col min-h-screen">
         <!-- Navbar Atas -->
-        <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-            <button class="text-gray-500 hover:text-gray-700 text-xl transition">
-                <i class="fa-solid fa-bars"></i>
-            </button>
+        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+            <span class="text-sm font-semibold text-gray-700">Dashboard Admin Pokja</span>
             <div class="flex items-center gap-3">
                 <span class="text-sm font-semibold text-gray-700">Admin Pokja Kelembagaan</span>
                 <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
@@ -103,12 +102,12 @@
             <!-- Tombol Aksi Cepat -->
             <h3 class="text-lg font-bold mb-4">Aksi Cepat</h3>
             <div class="flex gap-4 mb-8">
-                <button class="flex items-center gap-2 bg-green-50 text-green-600 border border-green-200 px-4 py-2 rounded-lg font-semibold hover:bg-green-100 transition shadow-sm">
+                <a href="/admin-pokja/ajukan" class="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     <i class="fa-solid fa-file-circle-plus"></i> Ajukan Peminjaman Arsip
-                </button>
-                <button class="flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg font-semibold hover:bg-blue-100 transition shadow-sm">
+                </a>
+                <a href="/admin-pokja/upload" class="flex items-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Upload File Arsip Pokja
-                </button>
+                </a>
             </div>
 
             <!-- Tabel Arsip Terbaru -->
@@ -127,7 +126,7 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="py-3 px-6 text-sm text-gray-800">Laporan Kelembagaan 2024</td>
                             <td class="py-3 px-6 text-sm text-gray-600">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-600">23/05/2024</td>
+                            <td class="py-3 px-6 text-sm text-gray-600">19/09/2024</td>
                             <td class="py-3 px-6">
                                 <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
                             </td>
@@ -135,7 +134,7 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="py-3 px-6 text-sm text-gray-800">Dokumentasi Rapat</td>
                             <td class="py-3 px-6 text-sm text-gray-600">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-600">22/05/2024</td>
+                            <td class="py-3 px-6 text-sm text-gray-600">32/10/2024</td>
                             <td class="py-3 px-6">
                                 <button class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
                             </td>
@@ -143,19 +142,18 @@
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-200 text-center">
-                    <a href="#" class="text-blue-600 text-sm font-semibold hover:underline">Lihat semua</a>
+                    <a href="#" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- SCRIPT UNTUK ANIMASI MENU -->
+    <!-- SCRIPT ANIMASI MENU -->
     <script>
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
             const ikonPanah = document.getElementById('ikon-panah');
             
-            // Mengecek apakah menu sedang tertutup (punya class max-h-0)
             if (submenu.classList.contains('max-h-0')) {
                 // Buka menu
                 submenu.classList.remove('max-h-0');
@@ -166,7 +164,7 @@
                 // Tutup menu
                 submenu.classList.remove('max-h-40');
                 submenu.classList.add('max-h-0');
-                // Kembalikan ikon panah menghadap kanan
+                // Kembalikan ikon panah ke kanan
                 ikonPanah.classList.remove('rotate-90');
             }
         }

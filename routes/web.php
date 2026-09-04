@@ -13,6 +13,21 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Route untuk halaman Dashboard Utama
 Route::get('/admin-pokja', function () {
-    return view('admin_pokja');
+    return view('Admin_Pokja.admin_pokja'); 
+});
+
+// Route untuk halaman Ajukan Peminjaman
+Route::get('/admin-pokja/ajukan', function () {
+    return view('Admin_Pokja.ajukan_peminjaman');
+});
+
+Route::get('/admin-pokja/upload', function () {
+    return view('Admin_Pokja.upload_arsip');
+});
+
+// Route ke halaman History
+Route::get('/admin-pokja/history', function () {
+    return view('Admin_Pokja.history_pokja');
 });
