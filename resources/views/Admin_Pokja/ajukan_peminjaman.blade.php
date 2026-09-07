@@ -79,9 +79,9 @@
                 <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     Download Template <i class="fa-solid fa-arrow-down ml-1 text-xs"></i>
                 </button>
-                <button class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
+                <a href="{{ url('/admin-pokja/form-peminjaman-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     Ajukan Peminjaman <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
-                </button>
+                </a>
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Peminjaman Terakhir</h3>

@@ -31,3 +31,18 @@ Route::get('/admin-pokja/upload', function () {
 Route::get('/admin-pokja/history', function () {
     return view('Admin_Pokja.history_pokja');
 });
+
+// Route untuk halaman profil
+Route::get('/admin-pokja/profil', function () {
+    return view('Admin_Pokja.profile_pokja');
+});
+
+// Route untuk halaman form peminjaman
+Route::get('/admin-pokja/form-peminjaman-pokja', function () {
+    return view('Admin_Pokja.form_peminjaman_pokja');
+});
+
+// Route untuk halaman form upload
+Route::get('/admin-pokja/form-upload-pokja', function () {
+    return view('Admin_Pokja.form_upload_pokja');
+});

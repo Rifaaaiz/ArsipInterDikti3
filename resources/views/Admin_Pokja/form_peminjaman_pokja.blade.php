@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permohonan Peminjaman - SIMARSIP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f4f4f5] flex font-sans text-gray-800">
+
+    <!-- SIDEBAR KIRI -->
+    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
+        <div>
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-6 py-6 mb-2">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
+            </div>
+            
+            <!-- Menu -->
+            <nav class="px-4 space-y-1">
+                <a href="/admin-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                
+                <div class="pt-2">
+                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 transition-colors focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
+                        <!-- Panah menghadap ke bawah karena sub-menu sedang aktif dibuka -->
+                        <i id="ikon-panah" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    
+                    <!-- Sub-menu Terbuka -->
+                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
+                        <div class="flex flex-col gap-2 pt-1 pb-2">
+                            <!-- Menu Aktif (Biru Solid) -->
+                            <a href="/admin-pokja/ajukan" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
+                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/admin-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                    <i class="fa-regular fa-user"></i> Profil
+                </a>
+                
+                <a href="/admin-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                    <i class="fa-regular fa-clock"></i> History
+                </a>
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                    <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
+                </a>
+            </nav>
+        </div>
+
+        <!-- Tombol Logout -->
+        <div class="p-6">
+            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
+                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- AREA KONTEN UTAMA -->
+    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+        
+        <!-- Navbar Atas -->
+        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f4f4f5]">
+            <div class="flex items-center gap-3">
+                <span class="text-base font-bold text-gray-900">admin Pokja Kelembagaan</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
+            </div>
+        </header>
+
+        <!-- KONTEN FORMULIR -->
+        <div class="px-8 pb-10 max-w-5xl">
+            <h2 class="text-3xl font-bold mb-8 text-black">Permohonan Peminjaman Formulir</h2>
+
+            <form action="#" method="POST">
+                <!-- Nama Surat -->
+                <div class="mb-5">
+                    <label class="block text-sm font-bold text-black mb-1.5">Nama Surat</label>
+                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                </div>
+
+                <!-- Grid 3 Kolom: Kategori, Tanggal Mulai, Tanggal Selesai -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
+                    
+                    <!-- Kategori (Custom Dropdown) -->
+                    <div class="relative">
+                        <label class="block text-sm font-bold text-black mb-1.5">Kategori</label>
+                        
+                        <!-- Trigger Dropdown -->
+                        <button type="button" onclick="toggleKategori()" class="w-full flex items-center justify-between border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm focus:outline-none group">
+                            <span id="kategori-text" class="text-gray-400">Kategori Surat</span>
+                            <i id="kategori-icon" class="fa-solid fa-arrow-right text-black transition-transform duration-300"></i>
+                        </button>
+                        
+                        <!-- Menu Dropdown Gelap (Sesuai Gambar 2) -->
+                        <div id="kategori-menu" class="hidden absolute top-0 left-0 w-full bg-[#1c1c1c] text-gray-300 rounded-md shadow-xl border border-gray-700 z-20 overflow-hidden">
+                            <!-- Header Dropdown -->
+                            <div class="px-4 py-3 flex justify-between items-center cursor-pointer border-b border-gray-700 bg-[#222222]" onclick="toggleKategori()">
+                                <span class="font-medium text-gray-400">Kategori Surat</span>
+                                <i class="fa-solid fa-arrow-down text-black font-bold"></i>
+                            </div>
+                            <!-- Opsi Dropdown -->
+                            <div class="px-4 py-3 cursor-pointer hover:bg-gray-700 hover:text-white transition" onclick="selectKategori('Surat Peminjaman')">
+                                Surat Peminjaman
+                            </div>
+                        </div>
+                        
+                        <!-- Input Hidden untuk menampung nilai yang dipilih agar bisa di-submit -->
+                        <input type="hidden" name="kategori" id="kategori-input" value="">
+                    </div>
+
+                    <!-- Tanggal Mulai -->
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1.5">Tanggal Mulai</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Tanggal Mulai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                        </div>
+                    </div>
+
+                    <!-- Tanggal Selesai -->
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1.5">Tanggal Selesai</label>
+                        <div class="relative">
+                            <input type="text" placeholder="Tanggal Selesai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keterangan -->
+                <div class="mb-8">
+                    <label class="block text-sm font-bold text-black mb-1.5">Keterangan</label>
+                    <textarea rows="8" placeholder="Keterangan" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none"></textarea>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="flex gap-4">
+                    <button type="button" class="flex-1 py-3 rounded-md border border-blue-600 text-blue-600 font-bold bg-[#f4f4f5] hover:bg-blue-50 transition shadow-sm">
+                        Upload File
+                    </button>
+                    <button type="submit" class="flex-1 py-3 rounded-md bg-[#2563eb] text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-sm">
+                        Submit Peminjaman <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT -->
+    <script>
+        // Script Animasi Menu Sidebar
+        function toggleMenuArsip() {
+            const submenu = document.getElementById('submenu-arsip');
+            const ikonPanah = document.getElementById('ikon-panah');
+            
+            if (submenu.classList.contains('max-h-0')) {
+                submenu.classList.remove('max-h-0');
+                submenu.classList.add('max-h-40');
+                ikonPanah.classList.add('rotate-180');
+            } else {
+                submenu.classList.remove('max-h-40');
+                submenu.classList.add('max-h-0');
+                ikonPanah.classList.remove('rotate-180');
+            }
+        }
+
+        // Script Custom Dropdown Kategori
+        function toggleKategori() {
+            const menu = document.getElementById('kategori-menu');
+            
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        function selectKategori(value) {
+            // Ubah teks di tombol trigger
+            const textElement = document.getElementById('kategori-text');
+            textElement.textContent = value;
+            textElement.classList.remove('text-gray-400');
+            textElement.classList.add('text-black');
+            
+            // Simpan value ke input hidden
+            document.getElementById('kategori-input').value = value;
+            
+            // Tutup dropdown
+            document.getElementById('kategori-menu').classList.add('hidden');
+        }
+
+        // Menutup dropdown jika user klik di luar area dropdown
+        window.addEventListener('click', function(e) {
+            const menu = document.getElementById('kategori-menu');
+            const triggerBtn = document.querySelector('button[onclick="toggleKategori()"]');
+            
+            if (!menu.contains(e.target) && !triggerBtn.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
