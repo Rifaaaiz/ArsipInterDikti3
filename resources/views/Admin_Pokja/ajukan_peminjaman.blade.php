@@ -22,7 +22,7 @@
             
             <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <a href="/admin-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
@@ -37,16 +37,16 @@
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
                             <!-- Menu Aktif (Biru Solid) dengan tautan yang tepat -->
-                            <a href="/admin-pokja/ajukan" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
-                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                            <a href="/dashboard-pokja/ajukan" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
+                            <a href="/dashboard-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-                <a href="/admin-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
@@ -79,7 +79,7 @@
                 <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     Download Template <i class="fa-solid fa-arrow-down ml-1 text-xs"></i>
                 </button>
-                <a href="{{ url('/admin-pokja/form-peminjaman-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
+                <a href="{{ url('/dashboard-pokja/form-peminjaman-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     Ajukan Peminjaman <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
                 </a>
             </div>
@@ -206,7 +206,7 @@
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="#" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="/dashboard-pokja/riwayat-peminjaman-terakhir-pokja" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
         </div>

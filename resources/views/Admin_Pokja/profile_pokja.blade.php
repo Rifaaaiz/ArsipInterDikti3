@@ -22,7 +22,7 @@
             
             <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <a href="/admin-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
@@ -35,18 +35,18 @@
                     <!-- Sub-menu Tersembunyi -->
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <a href="/admin-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                            <a href="/dashboard-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
+                            <a href="/dashboard-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Menu Aktif (Biru Solid) untuk Profil -->
-                <a href="/admin-pokja/profil" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-2">
+                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-2">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
-                <a href="/admin-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-2">
+                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-2">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
                 
@@ -127,11 +127,11 @@
             if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
-                ikonPanah.classList.add('rotate-180');
+                ikonPanah.classList.add('rotate-90');
             } else {
                 submenu.classList.remove('max-h-40');
                 submenu.classList.add('max-h-0');
-                ikonPanah.classList.remove('rotate-180');
+                ikonPanah.classList.remove('rotate-90');
             }
         }
     </script>

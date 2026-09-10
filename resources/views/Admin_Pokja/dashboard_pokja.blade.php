@@ -23,7 +23,7 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <!-- Dashboard (Active) -->
-                <a href="/admin-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
+                <a href="/dashboard-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
@@ -39,19 +39,19 @@
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
                             <!-- TAUTAN SUDAH DITAMBAHKAN DI SINI -->
-                            <a href="/admin-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                            <a href="/dashboard-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
+                            <a href="/dashboard-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Profil -->
-                <a href="/admin-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
                 <!-- History -->
-                <a href="/admin-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
 
@@ -81,31 +81,36 @@
             <h2 class="text-2xl font-bold mb-6">Dashboard Admin Pokja</h2>
 
             <!-- 3 Kartu Statistik -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
-                    <p class="text-gray-500 text-sm font-semibold mb-2">Total Arsip Pokja</p>
-                    <p class="text-3xl font-bold text-gray-800">162</p>
-                    <p class="text-xs text-gray-400 mt-2">Dokumen</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Kartu 1: Total Arsip Pokja -->
+                    <a href="/dashboard-pokja/history" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Total Arsip Pokja</p>
+                        <p class="text-3xl font-bold text-gray-800">162</p>
+                        <p class="text-xs text-gray-400 mt-2">Dokumen</p>
+                    </a>
+
+                    <!-- Kartu 2: Peminjaman Aktif -->
+                    <a href="/dashboard-pokja/peminjaman-aktif" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Peminjaman Aktif</p>
+                        <p class="text-3xl font-bold text-gray-800">3</p>
+                        <p class="text-xs text-gray-400 mt-2">Peminjaman</p>
+                    </a>
+
+                    <!-- Kartu 3: Upload Arsip -->
+                    <a href="/dashboard-pokja/upload" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Upload Arsip</p>
+                        <p class="text-3xl font-bold text-gray-800">12</p>
+                        <p class="text-xs text-gray-400 mt-2">Dokumen</p>
+                    </a>
                 </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
-                    <p class="text-gray-500 text-sm font-semibold mb-2">Peminjaman Aktif</p>
-                    <p class="text-3xl font-bold text-gray-800">3</p>
-                    <p class="text-xs text-gray-400 mt-2">Peminjaman</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition">
-                    <p class="text-gray-500 text-sm font-semibold mb-2">Upload Arsip</p>
-                    <p class="text-3xl font-bold text-gray-800">12</p>
-                    <p class="text-xs text-gray-400 mt-2">Dokumen</p>
-                </div>
-            </div>
 
             <!-- Tombol Aksi Cepat -->
             <h3 class="text-lg font-bold mb-4">Aksi Cepat</h3>
             <div class="flex gap-4 mb-8">
-                <a href="/admin-pokja/ajukan" class="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
+                <a href="/dashboard-pokja/ajukan" class="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     <i class="fa-solid fa-file-circle-plus"></i> Ajukan Peminjaman Arsip
                 </a>
-                <a href="/admin-pokja/upload" class="flex items-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
+                <a href="/dashboard-pokja/upload" class="flex items-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Upload File Arsip Pokja
                 </a>
             </div>
