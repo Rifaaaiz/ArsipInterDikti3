@@ -27,7 +27,7 @@
                 </a>
                 
                 <!-- Validasi Peminjaman (Aktif) -->
-                <a href="/admin-tu/validasi-peminjaman" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
+                <a href="/admin-tu/validasi" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
                     <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
                 </a>
 
@@ -35,7 +35,7 @@
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                <a href="/admin-tu/laporan-arsip" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-file-lines"></i> Laporan Arsip
                 </a>
 

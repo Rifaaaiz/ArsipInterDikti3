@@ -143,3 +143,35 @@ use Illuminate\Support\Facades\Route;
             return view('Admin_TU.profile_admintu');
         });
 
+        // Route untuk halaman laporan arsip admin TU
+        Route::get('/admin-tu/laporan-arsip', function () {
+            return view('Admin_TU.laporanarsip_admintu');
+        });
+
+// ==========================================
+// DASHBOARD SUPER ADMIN TUBMN
+// ==========================================
+
+        Route::get('/super-admin', function () {
+            return view('Super_Admin.dashboard_superadmin'); // Sesuaikan dengan nama file/folder Mas
+        });
+
+        Route::get('/super-admin/laporan', function () {
+            return view('Super_Admin.laporan_arsip_superadmin'); // Sesuaikan dengan nama folder jika ada, misal: 'Super_Admin.laporan_arsip'
+        });
+
+        Route::get('/super-admin/kelola', function () {
+            return view('Super_Admin.kelola_user_superadmin'); // Sesuaikan dengan nama file/folder Mas
+        });
+
+        Route::get('/super-admin/penghapusan', function () {
+            return view('Super_Admin.penghapusan_arsip_superadmin'); // Sesuaikan dengan penamaan folder Mas
+        });
+
+        Route::get('/super-admin/validasi', function () {
+            return view('Super_Admin.validasi_peminjaman_superadmin'); // Sesuaikan dengan penamaan folder Mas
+        });
+
+        Route::get('/super-admin/peminjaman-aktif', function () {
+            return view('Super_Admin.peminjaman_aktif_superadmin'); // Sesuaikan dengan penamaan folder Mas
+        });

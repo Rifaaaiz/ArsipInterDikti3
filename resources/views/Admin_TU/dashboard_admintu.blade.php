@@ -35,7 +35,7 @@
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <a href="/admin-tu/laporan-arsip" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
                     <i class="fa-regular fa-file-lines"></i> Laporan Arsip
                 </a>
 
