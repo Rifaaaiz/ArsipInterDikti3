@@ -241,6 +241,7 @@
                         <option value="hukum">Hukum, Kepegawaian, dan Tata Laksana</option>
                         <option value="keuangan">Keuangan</option>
                         <option value="pembelajaran">Pembelajaran dan Kemahasiswaan</option>
+                        <option value="sumber-daya">Sumber Daya Manusia</option>
                     </select>
                     <i class="fa-solid fa-arrow-right absolute right-4 top-4 text-black text-sm pointer-events-none"></i>
                 </div>

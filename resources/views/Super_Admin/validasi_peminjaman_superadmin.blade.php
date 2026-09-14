@@ -31,7 +31,7 @@
                 <div class="pt-2">
                     <button onclick="toggleMenu('submenu-kelola')" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition-colors focus:outline-none">
                         <span class="flex items-center gap-3"><i class="fa-regular fa-folder-open"></i> Kelola Arsip</span>
-                        <i id="ikon-kelola" class="fa-solid fa-arrow-down text-xs transition-transform duration-300"></i>
+                        <i id="ikon-kelola" class="fa-solid fa-arrow-right text-xs transition-transform duration-300"></i>
                     </button>
                     
                     <!-- Sub-menu Terbuka -->
@@ -287,22 +287,16 @@
         // Untuk menu Kelola Arsip di sidebar
         function toggleMenu(id) {
             const submenu = document.getElementById(id);
-            const icon = document.getElementById('ikon-kelola');
-
-            if (submenu.classList.contains('max-h-40')) {
-                submenu.classList.remove('max-h-40');
-                submenu.classList.add('max-h-0');
-
-                if (icon) {
-                    icon.classList.remove('rotate-180');
-                }
-            } else {
+            const ikon = document.getElementById('ikon-kelola');
+            
+            if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
-
-                if (icon) {
-                    icon.classList.add('rotate-180');
-                }
+                ikon.classList.add('rotate-90'); // Putar panah ke bawah
+            } else {
+                submenu.classList.remove('max-h-40');
+                submenu.classList.add('max-h-0');
+                ikon.classList.remove('rotate-90'); // Balikkan panah ke kanan
             }
         }
     </script>
