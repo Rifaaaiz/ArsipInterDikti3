@@ -40,7 +40,7 @@
                     </div>
                 </div>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <a href="/super-admin/validasi" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
                     <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
                 </a>
                 

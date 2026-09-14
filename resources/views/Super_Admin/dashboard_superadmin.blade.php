@@ -83,34 +83,35 @@
         <!-- KONTEN DASHBOARD SUPER ADMIN -->
         <div class="px-8 pb-10 max-w-7xl">
             <h2 class="text-3xl font-bold mb-6 text-black">Dashboard Super Admin</h2>
-
             <!-- 4 Kartu Statistik -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                <!-- Kartu 1 -->
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-gray-400 text-sm font-bold mb-2">Total Arsip Pokja</p>
-                    <p class="text-4xl font-bold text-gray-800 mb-1">1909</p>
-                    <p class="text-xs text-gray-400 font-semibold">Dokumen</p>
+                    <!-- Kartu 1: Total Arsip Pokja -->
+                    <a href="super-admin/laporan" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-400 text-sm font-bold mb-2">Total Arsip Pokja</p>
+                        <p class="text-4xl font-bold text-gray-800 mb-1">1909</p>
+                        <p class="text-xs text-gray-400 font-semibold">Dokumen</p>
+                    </a>
+
+                    <!-- Kartu 2: Peminjaman Aktif -->
+                    <a href="super-admin/peminjaman-aktif" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-400 text-sm font-bold mb-2">Peminjaman Aktif</p>
+                        <p class="text-4xl font-bold text-gray-800 mb-1">32</p>
+                        <p class="text-xs text-gray-400 font-semibold">Peminjaman</p>
+                    </a>
+
+                    <!-- Kartu 3: Upload Arsip -->
+                    <a href="super-admin/kelola" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-400 text-sm font-bold mb-2">User Aktif</p>
+                        <p class="text-4xl font-bold text-gray-800 mb-1">38</p>
+                        <p class="text-xs text-gray-400 font-semibold">User</p>
+                    </a>
+
+                    <a href="#" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                        <p class="text-gray-400 text-sm font-bold mb-2">Total Pokja</p>
+                        <p class="text-4xl font-bold text-gray-800 mb-1">11</p>
+                        <p class="text-xs text-gray-400 font-semibold">Kelompok</p>
+                    </a>
                 </div>
-                <!-- Kartu 2 -->
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-gray-400 text-sm font-bold mb-2">Peminjaman Aktif</p>
-                    <p class="text-4xl font-bold text-gray-800 mb-1">32</p>
-                    <p class="text-xs text-gray-400 font-semibold">Peminjaman</p>
-                </div>
-                <!-- Kartu 3 -->
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-gray-400 text-sm font-bold mb-2">User Aktif</p>
-                    <p class="text-4xl font-bold text-gray-800 mb-1">38</p>
-                    <p class="text-xs text-gray-400 font-semibold">User</p>
-                </div>
-                <!-- Kartu 4 -->
-                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    <p class="text-gray-400 text-sm font-bold mb-2">Total Pokja</p>
-                    <p class="text-4xl font-bold text-gray-800 mb-1">11</p>
-                    <p class="text-xs text-gray-400 font-semibold">Kelompok</p>
-                </div>
-            </div>
 
             <!-- Tabel Arsip Terbaru Pokja -->
             <h3 class="text-2xl font-bold mb-4 text-black">Arsip Terbaru Pokja</h3>

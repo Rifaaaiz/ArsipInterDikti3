@@ -82,7 +82,7 @@
         <!-- Navbar Atas -->
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
-                <a href="/dashboard-pokja" class="text-black hover:text-blue-600 text-lg transition">
+                <a href="/super-admin" class="text-black hover:text-blue-600 text-lg transition">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
             </div>

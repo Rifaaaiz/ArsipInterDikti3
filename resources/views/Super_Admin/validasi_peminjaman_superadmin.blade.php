@@ -90,15 +90,26 @@
                     <input type="text" placeholder="Nama Surat" class="w-full bg-white border border-gray-300 px-4 py-2.5 rounded-md text-sm text-gray-600 focus:outline-none focus:border-blue-500">
                 </div>
                 <div class="relative w-48">
-                    <div class="w-full bg-white border border-gray-300 px-4 py-2.5 rounded-md text-sm text-gray-600 flex items-center justify-between cursor-pointer">
-                        <span>Kategori Surat</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <button onclick="toggleDropdown('dropdown-kategori')" type="button" class="w-full bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 flex items-center justify-between focus:outline-none">
+                        <span id="label-kategori">Kategori Surat</span>
+                        <i class="fa-solid fa-arrow-right text-black text-xs"></i>
+                    </button>
+                    <div id="dropdown-kategori" class="hidden absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-30">
+                        <div onclick="selectOption('kategori', 'Dokumen SK')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Dokumen SK</div>
+                        <div onclick="selectOption('kategori', 'Dokumen Perjanjian')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Dokumen Perjanjian</div>
                     </div>
                 </div>
+                
+                <!-- Dropdown Kelompok Kerja -->
                 <div class="relative w-48">
-                    <div class="w-full bg-white border border-gray-300 px-4 py-2.5 rounded-md text-sm text-gray-600 flex items-center justify-between cursor-pointer">
-                        <span>Kelompok Kerja</span>
-                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <button onclick="toggleDropdown('dropdown-pokja')" type="button" class="w-full bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 flex items-center justify-between focus:outline-none">
+                        <span id="label-pokja">Kelompok Kerja</span>
+                        <i class="fa-solid fa-arrow-right text-black text-xs"></i>
+                    </button>
+                    <div id="dropdown-pokja" class="hidden absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-30 max-h-60 overflow-y-auto">
+                        <div onclick="selectOption('pokja', 'Hukum, Kepegawaian, dan Tata Laksana')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer">Hukum, Kepegawaian, dan Tata Laksana</div>
+                        <div onclick="selectOption('pokja', 'Pembelajaran dan Kemahasiswaan')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer">Pembelajaran dan Kemahasiswaan</div>
+                        <div onclick="selectOption('pokja', 'Keuangan')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 cursor-pointer">Keuangan</div>
                     </div>
                 </div>
                 <div>
@@ -244,6 +255,57 @@
 
         </div>
     </main>
+
+
+    <script>
+        // Untuk dropdown Kategori & Pokja
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id);
+
+            // Tutup dropdown lain
+            document.querySelectorAll('[id^="dropdown-"]').forEach(function(item) {
+                if (item.id !== id) {
+                    item.classList.add('hidden');
+                }
+            });
+
+            // Buka/tutup dropdown yang diklik
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Untuk memilih isi dropdown
+        function selectOption(type, value) {
+            if(type === 'kategori') {
+                document.getElementById('label-kategori').innerText = value;
+                document.getElementById('dropdown-kategori').classList.add('hidden');
+            } else if(type === 'pokja') {
+                document.getElementById('label-pokja').innerText = value;
+                document.getElementById('dropdown-pokja').classList.add('hidden');
+            }
+        }
+
+        // Untuk menu Kelola Arsip di sidebar
+        function toggleMenu(id) {
+            const submenu = document.getElementById(id);
+            const icon = document.getElementById('ikon-kelola');
+
+            if (submenu.classList.contains('max-h-40')) {
+                submenu.classList.remove('max-h-40');
+                submenu.classList.add('max-h-0');
+
+                if (icon) {
+                    icon.classList.remove('rotate-180');
+                }
+            } else {
+                submenu.classList.remove('max-h-0');
+                submenu.classList.add('max-h-40');
+
+                if (icon) {
+                    icon.classList.add('rotate-180');
+                }
+            }
+        }
+    </script>
 
 </body>
 </html>
