@@ -91,11 +91,12 @@
         <div class="px-8 pb-10 max-w-5xl">
             <h2 class="text-3xl font-bold mb-8 text-black">Permohonan Peminjaman Formulir</h2>
 
-            <form action="#" method="POST">
+            <form action="{{ route('ketua.peminjaman.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
                 <!-- Nama Surat -->
                 <div class="mb-5">
                     <label class="block text-sm font-bold text-black mb-1.5">Nama Surat</label>
-                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                    <input type="text" name="nama_surat" value="{{ old('nama_surat') }}" required placeholder="Nama Surat" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
                 </div>
 
                 <!-- Grid 3 Kolom: Kategori, Tanggal Mulai, Tanggal Selesai -->
@@ -119,20 +120,22 @@
                                 <i class="fa-solid fa-arrow-down text-black font-bold"></i>
                             </div>
                             <!-- Opsi Dropdown -->
-                            <div class="px-4 py-3 cursor-pointer hover:bg-gray-700 hover:text-white transition" onclick="selectKategori('Surat Peminjaman')">
-                                Surat Peminjaman
-                            </div>
+                            @foreach ($kategoris as $kategori)
+                                <div class="px-4 py-3 cursor-pointer hover:bg-gray-700 hover:text-white transition" onclick="selectKategori('{{ $kategori->id }}', '{{ addslashes($kategori->name) }}')">
+                                    {{ $kategori->name }}
+                                </div>
+                            @endforeach
                         </div>
                         
                         <!-- Input Hidden untuk menampung nilai yang dipilih agar bisa di-submit -->
-                        <input type="hidden" name="kategori" id="kategori-input" value="">
+                        <input type="hidden" name="kategori_id" id="kategori-input" value="{{ old('kategori_id') }}" required>
                     </div>
 
                     <!-- Tanggal Mulai -->
                     <div>
                         <label class="block text-sm font-bold text-black mb-1.5">Tanggal Mulai</label>
                         <div class="relative">
-                            <input type="text" placeholder="Tanggal Mulai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                            <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
                         </div>
                     </div>
 
@@ -140,7 +143,7 @@
                     <div>
                         <label class="block text-sm font-bold text-black mb-1.5">Tanggal Selesai</label>
                         <div class="relative">
-                            <input type="text" placeholder="Tanggal Selesai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                            <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
                         </div>
                     </div>
                 </div>
@@ -148,14 +151,15 @@
                 <!-- Keterangan -->
                 <div class="mb-8">
                     <label class="block text-sm font-bold text-black mb-1.5">Keterangan</label>
-                    <textarea rows="8" placeholder="Keterangan" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none"></textarea>
+                    <textarea name="keperluan" rows="8" required placeholder="Keterangan" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none">{{ old('keperluan') }}</textarea>
                 </div>
 
                 <!-- Tombol Aksi -->
                 <div class="flex gap-4">
-                    <button type="button" class="flex-1 py-3 rounded-md border border-blue-600 text-blue-600 font-bold bg-[#f4f4f5] hover:bg-blue-50 transition shadow-sm">
+                    <label for="file_pengajuan" class="flex-1 py-3 rounded-md border border-blue-600 text-blue-600 font-bold bg-[#f4f4f5] hover:bg-blue-50 transition shadow-sm text-center cursor-pointer">
                         Upload File
-                    </button>
+                    </label>
+                    <input type="file" id="file_pengajuan" name="file_pengajuan" accept=".pdf,application/pdf" class="hidden">
                     <button type="submit" class="flex-1 py-3 rounded-md bg-[#2563eb] text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-sm">
                         Submit Peminjaman <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -194,10 +198,10 @@
             }
         }
 
-        function selectKategori(value) {
+        function selectKategori(value, label) {
             // Ubah teks di tombol trigger
             const textElement = document.getElementById('kategori-text');
-            textElement.textContent = value;
+            textElement.textContent = label;
             textElement.classList.remove('text-gray-400');
             textElement.classList.add('text-black');
             

@@ -132,7 +132,6 @@
                 </div>
             </div>
 
-            <!-- Tabel Riwayat Arsip Terakhir -->
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-200">
@@ -145,59 +144,31 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/328/448</td>
-                            <td class="py-3.5 px-6 text-gray-700">Laporan Kelembagaan 2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/327/449</td>
-                            <td class="py-3.5 px-6 text-gray-700">SK an. Nanang Sunanang SPD</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Vital</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/328/448</td>
-                            <td class="py-3.5 px-6 text-gray-700">Laporan Kelembagaan 2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/327/449</td>
-                            <td class="py-3.5 px-6 text-gray-700">SK an. Nanang Sunanang SPD</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Vital</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($arsips as $arsip)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3.5 px-6 text-gray-600 font-medium">{{ $arsip->nomor_dokumen ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-700">{{ $arsip->nama_arsip }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6">
+                                    @if ($arsip->file_path)
+                                        <a href="{{ asset('storage/' . $arsip->file_path) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat PDF</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada arsip terbaru.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
 
-            <!-- Navigasi Halaman (Pagination) -->
             <div class="flex justify-center items-center gap-3">
-                <button class="text-gray-400 hover:text-black transition px-2 py-1">
-                    <i class="fa-solid fa-arrow-left text-sm"></i>
-                </button>
-                <div class="flex items-center gap-1.5">
-                    <button class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded text-sm font-bold shadow-sm">1</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-700 rounded text-sm font-bold hover:bg-gray-200 transition">2</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-700 rounded text-sm font-bold hover:bg-gray-200 transition">3</button>
-                </div>
-                <button class="text-gray-700 hover:text-black transition px-2 py-1">
-                    <i class="fa-solid fa-arrow-right text-sm"></i>
-                </button>
+                {{ $arsips->links() }}
             </div>
         </div>
     </main>

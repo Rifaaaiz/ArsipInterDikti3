@@ -65,109 +65,99 @@
     <!-- AREA KONTEN UTAMA -->
     <main class="flex-1 ml-64 flex flex-col min-h-screen p-8">
         
-        <h2 class="text-3xl font-bold mb-6 text-gray-900 mt-4">History Arsip Pokja</h2>
-        
-        <!-- Tabel History -->
+        <h2 class="text-3xl font-bold mb-6 text-gray-900 mt-4">History Surat Pokja</h2>
+
+        <form method="GET" action="{{ route('ketua.history') }}" class="mb-8">
+            <div class="w-full max-w-2xl">
+                <label for="filter" class="block text-sm font-bold text-black mb-2">Kategori</label>
+                <div class="relative">
+                    <select id="filter" name="filter" onchange="this.form.submit()" class="w-full border border-gray-400 bg-white rounded-md px-4 py-3 pr-10 text-sm text-gray-700 focus:outline-none focus:border-blue-600 transition appearance-none cursor-pointer">
+                        <option value="semua" {{ $filter === 'semua' ? 'selected' : '' }}>Semua Surat</option>
+                        <option value="arsip" {{ $filter === 'arsip' ? 'selected' : '' }}>Arsip</option>
+                        <option value="peminjaman" {{ $filter === 'peminjaman' ? 'selected' : '' }}>Peminjaman</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
+                        <i class="fa-solid fa-chevron-down text-sm"></i>
+                    </div>
+                </div>
+            </div>
+        </form>
+
         <div class="bg-[#f8f9fa] rounded-xl overflow-hidden shadow-sm border border-gray-200">
             <table class="w-full text-left border-collapse">
                 <thead class="border-b border-gray-200">
                     <tr>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Nama Arsip</th>
+                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Nama Surat</th>
+                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Jenis</th>
                         <th class="py-4 px-6 text-base font-bold text-indigo-800">Kategori</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Tanggal Upload</th>
+                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Tanggal</th>
+                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Status</th>
                         <th class="py-4 px-6 text-base font-bold text-indigo-800">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-                    <!-- Baris 1 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Laporan Kelembagaan 2024</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 2 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumentasi Rapat</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Vital</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">32/10/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 3 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Laporan Kelembagaan 2024</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 4 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumentasi Rapat</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Vital</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">32/10/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 5 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Laporan Kelembagaan 2024</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 6 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumentasi Rapat</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Vital</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">32/10/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 7 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Laporan Kelembagaan 2024</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
-                    <!-- Baris 8 -->
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumentasi Rapat</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">Dokumen Vital</td>
-                        <td class="py-4 px-6 text-sm text-gray-500 font-semibold">32/10/2024</td>
-                        <td class="py-4 px-6">
-                            <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                        </td>
-                    </tr>
+                    @forelse ($history as $item)
+                        @php
+                            $statusLabels = [
+                                'menunggu_validasi' => 'Menunggu Validasi',
+                                'disetujui' => 'Disetujui',
+                                'ditolak' => 'Ditolak',
+                                'dikembalikan' => 'Dikembalikan',
+                                'selesai' => 'Selesai',
+                                'aktif' => 'Aktif',
+                            ];
+                            $statusClasses = [
+                                'menunggu_validasi' => 'text-amber-700 bg-amber-100',
+                                'disetujui' => 'text-green-700 bg-green-100',
+                                'ditolak' => 'text-red-700 bg-red-100',
+                                'dikembalikan' => 'text-orange-700 bg-orange-100',
+                                'selesai' => 'text-gray-700 bg-gray-200',
+                                'aktif' => 'text-blue-700 bg-blue-100',
+                            ];
+                            $status = $item->status ?? 'tidak_diketahui';
+                            $statusLabel = $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
+                            $statusClass = $statusClasses[$status] ?? 'text-gray-700 bg-gray-200';
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->nama }}</td>
+                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ ucfirst($item->jenis) }}</td>
+                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->kategori ?? '-' }}</td>
+                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') : '-' }}</td>
+                            <td class="py-4 px-6">
+                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">
+                                    <span class="h-2 w-2 rounded-full bg-current"></span>{{ $statusLabel }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-6">
+                                @if ($item->file_path)
+                                    <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" rel="noopener" class="inline-block bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</a>
+                                @else
+                                    <span class="text-sm text-gray-400">File tidak tersedia</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-10 px-6 text-center text-sm text-gray-500">
+                                @if ($filter === 'arsip')
+                                    Belum ada surat arsip.
+                                @elseif ($filter === 'peminjaman')
+                                    Belum ada surat peminjaman.
+                                @else
+                                    Belum ada riwayat surat.
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
 
-        <!-- Pagination (Bisa Dipakai) -->
-        <div class="flex justify-center items-center gap-4 mt-8">
-            <button class="text-gray-600 hover:text-black transition">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-            <div class="flex gap-2">
-                <button class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-bold shadow-sm">1</button>
-                <button class="w-8 h-8 flex items-center justify-center text-gray-700 font-bold hover:bg-gray-200 rounded transition">2</button>
-                <button class="w-8 h-8 flex items-center justify-center text-gray-700 font-bold hover:bg-gray-200 rounded transition">3</button>
-            </div>
-            <button class="text-gray-600 hover:text-black transition">
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
+        <div class="mt-6">
+            <p class="mb-3 text-sm text-gray-500">
+                Menampilkan {{ $history->firstItem() ?? 0 }}-{{ $history->lastItem() ?? 0 }} dari {{ $history->total() }} surat
+            </p>
+            {{ $history->withQueryString()->links() }}
         </div>
         
     </main>

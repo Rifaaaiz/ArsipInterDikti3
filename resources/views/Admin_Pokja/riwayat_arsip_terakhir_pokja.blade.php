@@ -30,7 +30,7 @@
             
             <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <a href="/admin-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
@@ -43,8 +43,8 @@
                     <!-- Sub-menu Terbuka -->
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <a href="/admin-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <a href="/admin-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                            <a href="/dashboard-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
+                            <a href="/dashboard-pokja/upload" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
@@ -62,11 +62,12 @@
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -75,7 +76,7 @@
         <!-- Navbar Atas -->
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
-                <a href="/dashboard-pokja/ajukan" class="text-black hover:text-blue-600 text-lg transition">
+                <a href="{{ route('arsip.index') }}" class="text-black hover:text-blue-600 text-lg transition">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
             </div>
@@ -141,42 +142,29 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/328/448</td>
-                            <td class="py-3.5 px-6 text-gray-700">Laporan Kelembagaan 2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/327/449</td>
-                            <td class="py-3.5 px-6 text-gray-700">SK an. Nanang Sunanang SPD</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Vital</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/328/448</td>
-                            <td class="py-3.5 px-6 text-gray-700">Laporan Kelembagaan 2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">067/327/449</td>
-                            <td class="py-3.5 px-6 text-gray-700">SK an. Nanang Sunanang SPD</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Vital</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($riwayatArsip as $arsip)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3.5 px-6 text-gray-600 font-medium">{{ $arsip->nomor_dokumen ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-700">{{ $arsip->nama_arsip }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6">
+                                    @if ($arsip->file_path)
+                                        <a href="{{ asset('storage/' . $arsip->file_path) }}" target="_blank" rel="noopener" class="inline-flex bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">
+                                            Lihat
+                                        </a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-10 px-6 text-center text-sm text-gray-500">
+                                    Belum ada riwayat arsip.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

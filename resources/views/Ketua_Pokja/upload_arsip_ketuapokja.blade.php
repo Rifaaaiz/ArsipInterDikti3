@@ -49,10 +49,10 @@
                     <i class="fa-regular fa-circle-check"></i> Validasi Upload
                 </a>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/ketua-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <a href="/ketua-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
@@ -91,8 +91,7 @@
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Upload Arsip Terakhir</h3>
-            
-            <!-- Tabel Riwayat Upload Arsip -->
+
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-100">
@@ -104,26 +103,28 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Laporan Kelembagaan 2024</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">19/09/2024</td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Dokumentasi Rapat</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">32/10/2024</td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($arsips as $arsip)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3 px-6 text-sm text-gray-600 font-medium">{{ $arsip->nama_arsip }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3 px-6">
+                                    @if ($arsip->file_path)
+                                        <a href="{{ asset('storage/' . $arsip->file_path) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada arsip terbaru.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="/ketua-pokja/riwayat-arsip-terakhir" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="{{ route('ketua.riwayat.arsip') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
         </div>

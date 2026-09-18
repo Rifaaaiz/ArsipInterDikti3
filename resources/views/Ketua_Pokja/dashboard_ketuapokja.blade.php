@@ -66,9 +66,12 @@
 
         <!-- Tombol Logout -->
         <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
+                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -79,35 +82,37 @@
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <span class="text-sm font-semibold text-gray-500">Dashboard - Ketua Pokja</span>
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
+                <span class="text-base font-bold text-gray-900">
+                    {{ $user->name }}{{ $user->pokja ? ' - Ketua ' . $user->pokja->name : '' }}
+                </span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
             </div>
         </header>
 
         <!-- KONTEN UTAMA DASHBOARD KETUA POKJA -->
         <div class="px-8 pb-10 max-w-7xl">
-            <h2 class="text-3xl font-bold mb-6 text-black">Dashboard Admint Pokja</h2>
+            <h2 class="text-3xl font-bold mb-6 text-black">Dashboard Ketua Pokja</h2>
 
             <!-- 3 Kartu Statistik (Termasuk Usulan Upload / Menunggu Validasi) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <!-- Kartu 1: Total Arsip Pokja -->
-                    <a href="ketua-pokja/history" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                    <a href="{{ url('/ketua-pokja/history') }}" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
                         <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Total Arsip Pokja</p>
-                        <p class="text-3xl font-bold text-gray-800">162</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ $totalArsip }}</p>
                         <p class="text-xs text-gray-400 mt-2">Dokumen</p>
                     </a>
 
                     <!-- Kartu 2: Peminjaman Aktif -->
-                    <a href="ketua-pokja/peminjaman-aktif" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                    <a href="{{ url('/ketua-pokja/peminjaman-aktif') }}" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
                         <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Peminjaman Aktif</p>
-                        <p class="text-3xl font-bold text-gray-800">3</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ $peminjamanAktif }}</p>
                         <p class="text-xs text-gray-400 mt-2">Peminjaman</p>
                     </a>
 
                     <!-- Kartu 3: Upload Arsip -->
-                    <a href="ketua-pokja/upload" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
+                    <a href="{{ url('/ketua-pokja/upload') }}" class="block bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-500 transition group">
                         <p class="text-gray-500 text-sm font-semibold mb-2 group-hover:text-blue-600 transition">Upload Arsip</p>
-                        <p class="text-3xl font-bold text-gray-800">12</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ $totalPeminjaman }}</p>
                         <p class="text-xs text-gray-400 mt-2">Dokumen</p>
                     </a>
                 </div>
@@ -116,17 +121,17 @@
             <h3 class="text-lg font-bold mb-4 text-black">Aksi Cepat</h3>
             <div class="flex flex-wrap gap-4 mb-8">
                 <!-- Tombol Ajukan Peminjaman Arsip (Hijau) -->
-                <button class="flex items-center gap-2 bg-[#dcfce7] text-[#15803d] border border-[#bbf7d0] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#bbf7d0] transition shadow-sm text-sm">
+                <a href="{{ url('/ketua-pokja/ajukan') }}" class="flex items-center gap-2 bg-[#dcfce7] text-[#15803d] border border-[#bbf7d0] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#bbf7d0] transition shadow-sm text-sm">
                     <i class="fa-solid fa-file-circle-plus"></i> Ajukan Peminjaman Arsip
-                </button>
+                </a>
                 <!-- Tombol Upload File Arsip Pokja (Biru) -->
-                <button class="flex items-center gap-2 bg-[#dbeafe] text-[#1d4ed8] border border-[#bfdbfe] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#bfdbfe] transition shadow-sm text-sm">
+                <a href="{{ url('/ketua-pokja/upload') }}" class="flex items-center gap-2 bg-[#dbeafe] text-[#1d4ed8] border border-[#bfdbfe] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#bfdbfe] transition shadow-sm text-sm">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Upload File Arsip Pokja
-                </button>
+                </a>
                 <!-- Tombol Validasi Usulan Upload (Kuning) -->
-                <button class="flex items-center gap-2 bg-[#fef9c3] text-[#a16207] border border-[#fde047] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#fde047] transition shadow-sm text-sm">
+                <a href="{{ url('/ketua-pokja/validasi') }}" class="flex items-center gap-2 bg-[#fef9c3] text-[#a16207] border border-[#fde047] px-5 py-2.5 rounded-lg font-semibold hover:bg-[#fde047] transition shadow-sm text-sm">
                     <i class="fa-solid fa-circle-check"></i> Validasi Usulan Upload
-                </button>
+                </a>
             </div>
 
             <!-- Arsip Terbaru Pokja -->
@@ -142,27 +147,78 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-700 font-medium">Laporan Kelembagaan 2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-700 font-medium">Dokumentasi Rapat</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Vital</td>
-                            <td class="py-3.5 px-6 text-gray-500">32/10/2024</td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($arsipTerbaru as $arsip)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3.5 px-6 text-gray-700 font-medium">{{ $arsip->nama_arsip }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6">
+                                    @if ($arsip->file_path)
+                                        <a href="{{ asset('storage/' . $arsip->file_path) }}" target="_blank" rel="noopener" class="inline-block bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada arsip.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="#" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="{{ url('/ketua-pokja/history') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
+            </div>
+
+            <h3 class="text-lg font-bold mb-4 text-black">Peminjaman Terbaru</h3>
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-4">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Surat</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Pengaju</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Status</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 text-sm">
+                        @forelse ($peminjamanTerbaru as $peminjaman)
+                            @php
+                                $statusLabels = [
+                                    'menunggu_validasi' => 'Menunggu Validasi',
+                                    'disetujui' => 'Disetujui',
+                                    'ditolak' => 'Ditolak',
+                                    'selesai' => 'Selesai',
+                                ];
+                                $statusClasses = [
+                                    'menunggu_validasi' => 'text-amber-700 bg-amber-100',
+                                    'disetujui' => 'text-green-700 bg-green-100',
+                                    'ditolak' => 'text-red-700 bg-red-100',
+                                    'selesai' => 'text-gray-700 bg-gray-200',
+                                ];
+                                $status = $peminjaman->status;
+                            @endphp
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3.5 px-6 text-gray-700 font-medium">{{ $peminjaman->nama_surat }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->user?->name ?? '-' }}</td>
+                                <td class="py-3.5 px-6"><span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $statusClasses[$status] ?? 'text-gray-700 bg-gray-200' }}">{{ $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status)) }}</span></td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6"><div class="flex flex-wrap gap-2">
+                                    @if ($peminjaman->file_pengajuan || $peminjaman->arsip?->file_path)
+                                        <a href="{{ asset('storage/' . ($peminjaman->file_pengajuan ?: $peminjaman->arsip->file_path)) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700">Lihat File</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $peminjaman) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="approve"><button type="submit" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-600">Terima</button></form>
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $peminjaman) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="reject"><button type="submit" class="bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold hover:bg-red-700">Tolak</button></form>
+                                </div></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada pengajuan peminjaman yang perlu divalidasi.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

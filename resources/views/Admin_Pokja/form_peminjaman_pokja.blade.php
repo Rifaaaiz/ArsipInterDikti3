@@ -58,18 +58,25 @@
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
-        </div>
+         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas -->
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f4f4f5]">
+        <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
+            <div class="flex items-center gap-4">
+                <a href="/dashboard-pokja/ajukan" class="text-black hover:text-blue-600 text-lg transition">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <span class="text-sm font-bold text-gray-500">Input Peminjaman - admin Pokja</span>
+            </div>
             <div class="flex items-center gap-3">
                 <span class="text-base font-bold text-gray-900">admin Pokja Kelembagaan</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
@@ -80,131 +87,262 @@
         <div class="px-8 pb-10 max-w-5xl">
             <h2 class="text-3xl font-bold mb-8 text-black">Permohonan Peminjaman Formulir</h2>
 
-            <form action="#" method="POST">
-                <!-- Nama Surat -->
-                <div class="mb-5">
-                    <label class="block text-sm font-bold text-black mb-1.5">Nama Surat</label>
-                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                </div>
+            <form
+                    action="{{ route('peminjaman.store') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="w-full"
+                >
+                    @csrf
 
-                <!-- Grid 3 Kolom: Kategori, Tanggal Mulai, Tanggal Selesai -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
-                    
-                    <!-- Kategori (Custom Dropdown) -->
-                    <div class="relative">
-                        <label class="block text-sm font-bold text-black mb-1.5">Kategori</label>
-                        
-                        <!-- Trigger Dropdown -->
-                        <button type="button" onclick="toggleKategori()" class="w-full flex items-center justify-between border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm focus:outline-none group">
-                            <span id="kategori-text" class="text-gray-400">Kategori Surat</span>
-                            <i id="kategori-icon" class="fa-solid fa-arrow-right text-black transition-transform duration-300"></i>
+                    {{-- PESAN ERROR --}}
+                    @if ($errors->any())
+                        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            <ul class="list-disc pl-5">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    {{-- NAMA SURAT --}}
+                    <div class="mb-6">
+                        <label
+                            for="nama_surat"
+                            class="block text-sm font-bold text-black mb-2"
+                        >
+                            Nama Surat
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nama_surat"
+                            name="nama_surat"
+                            value="{{ old('nama_surat') }}"
+                            required
+                            placeholder="Masukkan nama surat"
+                            class="w-full h-12 border border-gray-400 bg-white rounded-md px-4 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                        >
+
+                        @error('nama_surat')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+
+                    {{-- KATEGORI --}}
+                    <div class="mb-6">
+                        <label
+                            for="kategori_id"
+                            class="block text-sm font-bold text-black mb-2"
+                        >
+                            Kategori
+                        </label>
+
+                        <select
+                            id="kategori_id"
+                            name="kategori_id"
+                            required
+                            class="w-full h-12 border border-gray-400 bg-white rounded-md px-4 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                        >
+                            <option value="">
+                                Pilih Kategori Surat
+                            </option>
+
+                            @foreach ($kategoris as $kategori)
+                                <option
+                                    value="{{ $kategori->id }}"
+                                    {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}
+                                >
+                                    {{ $kategori->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('kategori_id')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+
+                    {{-- TANGGAL --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+                        <div>
+                            <label
+                                for="tanggal_mulai"
+                                class="block text-sm font-bold text-black mb-2"
+                            >
+                                Tanggal Mulai
+                            </label>
+
+                            <input
+                                id="tanggal_mulai"
+                                type="date"
+                                name="tanggal_mulai"
+                                value="{{ old('tanggal_mulai') }}"
+                                required
+                                class="w-full h-12 border border-gray-400 bg-white rounded-md px-4 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                            >
+
+                            @error('tanggal_mulai')
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+
+                        <div>
+                            <label
+                                for="tanggal_selesai"
+                                class="block text-sm font-bold text-black mb-2"
+                            >
+                                Tanggal Selesai
+                            </label>
+
+                            <input
+                                id="tanggal_selesai"
+                                type="date"
+                                name="tanggal_selesai"
+                                value="{{ old('tanggal_selesai') }}"
+                                required
+                                class="w-full h-12 border border-gray-400 bg-white rounded-md px-4 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                            >
+
+                            @error('tanggal_selesai')
+                                <p class="mt-1 text-sm text-red-600">
+                                    {{ $message }}
+                                </p>
+                            @enderror
+                        </div>
+
+                    </div>
+
+
+                    {{-- KEPERLUAN --}}
+                    <div class="mb-6">
+                        <label
+                            for="keperluan"
+                            class="block text-sm font-bold text-black mb-2"
+                        >
+                            Keperluan
+                        </label>
+
+                        <textarea
+                            id="keperluan"
+                            name="keperluan"
+                            rows="6"
+                            required
+                            placeholder="Masukkan keperluan peminjaman"
+                            class="w-full border border-gray-400 bg-white rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none"
+                        >{{ old('keperluan') }}</textarea>
+
+                        @error('keperluan')
+                            <p class="mt-1 text-sm text-red-600">
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
+
+
+                    {{-- BUTTON FILE + SUBMIT --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        {{-- UPLOAD PDF --}}
+                        <label
+                            for="file_pengajuan"
+                            id="label_file"
+                            class="h-12 border-2 border-blue-600 text-blue-600 rounded-md flex items-center justify-center gap-2 font-bold cursor-pointer hover:bg-blue-50 transition"
+                        >
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span>Upload File PDF</span>
+                        </label>
+
+                        <input
+                            type="file"
+                            id="file_pengajuan"
+                            name="file_pengajuan"
+                            accept=".pdf,application/pdf"
+                            class="hidden"
+                        >
+
+
+                        {{-- SUBMIT --}}
+                        <button
+                            type="submit"
+                            class="h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold flex items-center justify-center gap-2 transition"
+                        >
+                            Submit Peminjaman
+                            <i class="fa-solid fa-arrow-right"></i>
                         </button>
-                        
-                        <!-- Menu Dropdown Gelap (Sesuai Gambar 2) -->
-                        <div id="kategori-menu" class="hidden absolute top-0 left-0 w-full bg-[#1c1c1c] text-gray-300 rounded-md shadow-xl border border-gray-700 z-20 overflow-hidden">
-                            <!-- Header Dropdown -->
-                            <div class="px-4 py-3 flex justify-between items-center cursor-pointer border-b border-gray-700 bg-[#222222]" onclick="toggleKategori()">
-                                <span class="font-medium text-gray-400">Kategori Surat</span>
-                                <i class="fa-solid fa-arrow-down text-black font-bold"></i>
-                            </div>
-                            <!-- Opsi Dropdown -->
-                            <div class="px-4 py-3 cursor-pointer hover:bg-gray-700 hover:text-white transition" onclick="selectKategori('Surat Peminjaman')">
-                                Surat Peminjaman
-                            </div>
-                        </div>
-                        
-                        <!-- Input Hidden untuk menampung nilai yang dipilih agar bisa di-submit -->
-                        <input type="hidden" name="kategori" id="kategori-input" value="">
+
                     </div>
 
-                    <!-- Tanggal Mulai -->
-                    <div>
-                        <label class="block text-sm font-bold text-black mb-1.5">Tanggal Mulai</label>
-                        <div class="relative">
-                            <input type="text" placeholder="Tanggal Mulai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                        </div>
-                    </div>
+                    @error('file_pengajuan')
+                        <p class="mt-2 text-sm text-red-600">
+                            {{ $message }}
+                        </p>
+                    @enderror
 
-                    <!-- Tanggal Selesai -->
-                    <div>
-                        <label class="block text-sm font-bold text-black mb-1.5">Tanggal Selesai</label>
-                        <div class="relative">
-                            <input type="text" placeholder="Tanggal Selesai" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Keterangan -->
-                <div class="mb-8">
-                    <label class="block text-sm font-bold text-black mb-1.5">Keterangan</label>
-                    <textarea rows="8" placeholder="Keterangan" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 resize-none"></textarea>
-                </div>
-
-                <!-- Tombol Aksi -->
-                <div class="flex gap-4">
-                    <button type="button" class="flex-1 py-3 rounded-md border border-blue-600 text-blue-600 font-bold bg-[#f4f4f5] hover:bg-blue-50 transition shadow-sm">
-                        Upload File
-                    </button>
-                    <button type="submit" class="flex-1 py-3 rounded-md bg-[#2563eb] text-white font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-sm">
-                        Submit Peminjaman <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </form>
-
+                </form>
         </div>
     </main>
 
     <!-- SCRIPT -->
     <script>
-        // Script Animasi Menu Sidebar
+        // =========================
+        // SIDEBAR ARSIP
+        // =========================
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
             const ikonPanah = document.getElementById('ikon-panah');
-            
+
             if (submenu.classList.contains('max-h-0')) {
+
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
+
+                ikonPanah.classList.remove('rotate-0');
                 ikonPanah.classList.add('rotate-180');
+
             } else {
+
                 submenu.classList.remove('max-h-40');
                 submenu.classList.add('max-h-0');
+
                 ikonPanah.classList.remove('rotate-180');
             }
         }
 
-        // Script Custom Dropdown Kategori
-        function toggleKategori() {
-            const menu = document.getElementById('kategori-menu');
-            
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-            } else {
-                menu.classList.add('hidden');
-            }
-        }
 
-        function selectKategori(value) {
-            // Ubah teks di tombol trigger
-            const textElement = document.getElementById('kategori-text');
-            textElement.textContent = value;
-            textElement.classList.remove('text-gray-400');
-            textElement.classList.add('text-black');
-            
-            // Simpan value ke input hidden
-            document.getElementById('kategori-input').value = value;
-            
-            // Tutup dropdown
-            document.getElementById('kategori-menu').classList.add('hidden');
-        }
+        // =========================
+        // UPLOAD FILE PDF
+        // =========================
+        const fileInput = document.getElementById('file_pengajuan');
+        const labelFile = document.getElementById('label_file');
 
-        // Menutup dropdown jika user klik di luar area dropdown
-        window.addEventListener('click', function(e) {
-            const menu = document.getElementById('kategori-menu');
-            const triggerBtn = document.querySelector('button[onclick="toggleKategori()"]');
-            
-            if (!menu.contains(e.target) && !triggerBtn.contains(e.target)) {
-                menu.classList.add('hidden');
+        fileInput.addEventListener('change', function () {
+
+            const file = this.files[0];
+
+            if (!file) {
+                labelFile.innerHTML = `
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Upload File PDF</span>
+                `;
+                return;
             }
+
+            labelFile.innerHTML = `
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>${file.name}</span>   
+            `;
         });
     </script>
 </body>

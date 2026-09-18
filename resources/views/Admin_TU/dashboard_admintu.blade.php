@@ -68,94 +68,90 @@
         <div class="px-8 pb-10 max-w-7xl">
             <h2 class="text-3xl font-bold mb-6 text-black">Dashboard Admin TU</h2>
 
+            @if (session('success'))
+                <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first() }}</div>
+            @endif
+
             <!-- 3 Kartu Statistik -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <!-- Kartu 1 -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <a href="{{ route('admin-tu.peminjaman.aktif') }}" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-blue-500 hover:shadow-md transition cursor-pointer">
                     <p class="text-gray-500 text-sm font-semibold mb-2">Peminjaman Aktif</p>
-                    <p class="text-4xl font-bold text-gray-900 mb-1">15</p>
+                    <p class="text-4xl font-bold text-gray-900 mb-1">{{ $totalPeminjamanAktif }}</p>
                     <p class="text-xs text-gray-400">Peminjaman</p>
-                </div>
+                </a>
                 <!-- Kartu 2 -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-blue-500 hover:shadow-md transition cursor-pointer">
                     <p class="text-gray-500 text-sm font-semibold mb-2">Menunggu Validasi</p>
-                    <p class="text-4xl font-bold text-gray-900 mb-1">8</p>
+                    <p class="text-4xl font-bold text-gray-900 mb-1">{{ $totalMenungguValidasi }}</p>
                     <p class="text-xs text-gray-400">Peminjaman</p>
-                </div>
+                </a>
                 <!-- Kartu 3 -->
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <a href="{{ route('admin-tu.laporan.arsip') }}" class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:border-blue-500 hover:shadow-md transition cursor-pointer">
                     <p class="text-gray-500 text-sm font-semibold mb-2">Total Arsip</p>
-                    <p class="text-4xl font-bold text-gray-900 mb-1">1909</p>
+                    <p class="text-4xl font-bold text-gray-900 mb-1">{{ $totalArsip }}</p>
                     <p class="text-xs text-gray-400">Dokumen</p>
-                </div>
+                </a>
             </div>
 
-            <!-- Bagian Peminjaman Menunggu Validasi -->
             <h3 class="text-xl font-bold mb-4 text-gray-900">Peminjaman Menunggu Validasi</h3>
-            
             <div class="bg-transparent overflow-hidden">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Nama Arsip</th>
+                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Nama Surat</th>
+                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Pengaju</th>
                             <th class="py-4 px-2 text-base font-bold text-indigo-900">Kategori</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Tanggal Upload</th>
+                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Tanggal Pengajuan</th>
                             <th class="py-4 px-2 text-base font-bold text-indigo-900">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-transparent">
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
+                        @forelse ($menungguValidasi as $peminjaman)
+                            @php
+                                $fileUrl = $peminjaman->file_pengajuan
+                                    ? asset('storage/' . $peminjaman->file_pengajuan)
+                                    : ($peminjaman->arsip?->file_path ? asset('storage/' . $peminjaman->arsip->file_path) : null);
+                                $roleLabel = $peminjaman->user?->role?->slug === 'ketua_pokja' ? 'Ketua Pokja' : 'Admin Pokja';
+                            @endphp
+                            <tr class="hover:bg-gray-100 transition">
+                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->nama_surat }}</td>
+                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->user?->name ?? $peminjaman->user?->username ?? '-' }} ({{ $roleLabel }})</td>
+                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->kategori?->name ?? '-' }}</td>
+                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3 px-2">
+                                    <div class="flex flex-wrap gap-2">
+                                        @if ($fileUrl)
+                                            <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat File</a>
+                                        @else
+                                            <span class="text-xs text-gray-400">File tidak tersedia.</span>
+                                        @endif
+                                        <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $peminjaman) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="decision" value="reject">
+                                            <button type="submit" class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $peminjaman) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="decision" value="approve">
+                                            <button type="submit" class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-8 px-2 text-center text-sm text-gray-500">Belum ada peminjaman yang menunggu validasi.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="mt-4">
-                    <a href="#" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
 

@@ -19,26 +19,22 @@
                 </div>
                 <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
-            
+
             <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <!-- Tautan ke Dashboard -->
                 <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
-                
+
                 <div class="pt-2">
                     <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 transition-colors focus:outline-none">
                         <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
                         <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300 rotate-90"></i>
                     </button>
-                    
-                    <!-- Sub-menu Terbuka -->
+
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <!-- Tautan ke Halaman Ajukan Peminjaman -->
                             <a href="/dashboard-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <!-- Tautan Aktif ke Halaman Upload File Arsip -->
                             <a href="/dashboard-pokja/upload" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Upload File Arsip</a>
                         </div>
                     </div>
@@ -55,11 +51,17 @@
                 </a>
             </nav>
         </div>
+         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
-        
+
         <!-- Navbar Atas -->
         <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
             <span class="text-sm font-semibold text-gray-700">Upload File Arsip Kelompok Kerja</span>
@@ -75,18 +77,25 @@
         <div class="p-8">
             <h2 class="text-3xl font-bold mb-6 text-gray-900">Upload File Arsip Kelompok Kerja</h2>
 
+            {{-- PESAN SUKSES --}}
+            @if (session('success'))
+                <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                    {{ session('success') }}
+                </div>
+            @endif
+
             <!-- Tombol Aksi (Download Template vs Upload File Arsip) -->
             <div class="flex gap-4 mb-10">
                 <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     Download Template <i class="fa-solid fa-arrow-down ml-1 text-xs"></i>
                 </button>
-                <a href="{{ url('/dashboard-pokja/form-upload-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
+                <a href="{{ route('arsip.form') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     Upload File Arsip <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
                 </a>
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Upload Arsip Terakhir</h3>
-            
+
             <!-- Tabel Riwayat Upload Arsip -->
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
                 <table class="w-full text-left border-collapse">
@@ -94,31 +103,36 @@
                         <tr>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Nama Arsip</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Kategori</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Dokumen</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Upload</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Laporan Kelembagaan 2024</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">19/09/2024</td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Dokumentasi Rapat</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">32/10/2024</td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($arsips as $arsip)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3 px-6 text-sm text-gray-600 font-medium">{{ $arsip->nama_arsip }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ optional($arsip->kategori)->name ?? '-' }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ optional($arsip->tanggal_dokumen)->format('d/m/Y') }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ $arsip->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="py-3 px-6">
+                                    <a href="{{ Storage::url($arsip->file_path) }}" target="_blank"
+                                        class="inline-block bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">
+                                        Lihat
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-6 px-6 text-sm text-gray-500 text-center">
+                                    Belum ada arsip yang diupload.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="/dashboard-pokja/riwayat-arsip-terakhir-pokja" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="{{ route('arsip.riwayat') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
         </div>
@@ -129,7 +143,7 @@
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
             const ikonPanah = document.getElementById('ikon-panah');
-            
+
             if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');

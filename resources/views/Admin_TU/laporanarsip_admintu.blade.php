@@ -35,7 +35,8 @@
                 </a>
                 
                 <!-- Menu Laporan Arsip (Aktif/Biru Solid) -->
-                <a href="/admin-tu/laporan" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
+                <a href="/admin-tu/laporan">
+                    <a href="{{ route('admin-tu.laporan.arsip') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
                     <i class="fa-regular fa-file"></i> Laporan Arsip
                 </a>
 
@@ -60,6 +61,7 @@
         <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f4f7f6]">
             <div class="flex items-center gap-3">
                 <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
+                    <span class="text-base font-bold text-gray-900">admin TU</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
             </div>
         </header>
@@ -69,68 +71,32 @@
             <h2 class="text-3xl font-bold mb-6 text-black">Laporan Arsip</h2>
 
             <!-- 2 Kartu Statistik di Atas -->
+                <!-- 2 Kartu Statistik di Atas -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 max-w-3xl">
                 <!-- Kartu 1 -->
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <p class="text-gray-400 text-sm font-bold mb-1">Total Arsip</p>
-                    <p class="text-5xl font-bold text-gray-900 mb-2">1909</p>
+                        <p class="text-5xl font-bold text-gray-900 mb-2">{{ $totalArsip }}</p>
                     <p class="text-sm text-gray-400 font-semibold">Dokumen</p>
                 </div>
                 <!-- Kartu 2 -->
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <p class="text-gray-400 text-sm font-bold mb-1">Total Arsip Kelompok Kerja</p>
-                    <p class="text-5xl font-bold text-gray-900 mb-2">250</p>
+                        <p class="text-5xl font-bold text-gray-900 mb-2">{{ $totalArsipPokja }}</p>
                     <p class="text-sm text-gray-400 font-semibold">Dokumen</p>
                 </div>
             </div>
 
             <!-- Form Filter Pencarian & Dropdown Interaktif -->
-            <div class="flex items-center gap-3 mb-6 relative">
-                <!-- Input Nama Surat -->
-                <input type="text" placeholder="Nama Surat" class="w-64 bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 outline-none focus:border-blue-500">
-                
-                <!-- Filter Tanggal Dokumen (Fungsi Date Picker Aktif) -->
-                <div class="relative w-48">
-                    <input type="date" class="w-full bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-500 outline-none focus:border-blue-500 cursor-pointer">
-                </div>
-                
-                <!-- Dropdown Kategori Surat -->
-                <div class="relative w-48">
-                    <button onclick="toggleDropdown('dropdown-kategori')" type="button" class="w-full bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 flex items-center justify-between focus:outline-none">
-                        <span id="label-kategori">Kategori Surat</span>
-                        <i id="icon-kategori" class="fa-solid fa-arrow-right text-black text-xs transition-transform duration-300"></i>
-                    </button>
-                    <!-- Opsi Dropdown Kategori Surat -->
-                    <div id="dropdown-kategori" class="hidden absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-30">
-                        <div onclick="selectOption('kategori', 'Surat Peminjaman')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Surat Peminjaman</div>
-                        <div onclick="selectOption('kategori', 'Surat Arsip')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Surat Arsip</div>
-                    </div>
-                </div>
-                
-                <!-- Dropdown Kelompok Kerja -->
-                <div class="relative w-48">
-                    <button onclick="toggleDropdown('dropdown-pokja')" type="button" class="w-full bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 flex items-center justify-between focus:outline-none">
-                        <span id="label-pokja">Kelompok Kerja</span>
-                        <i id="icon-pokja" class="fa-solid fa-arrow-right text-black text-xs transition-transform duration-300"></i>
-                    </button>
-                    <!-- Opsi Dropdown Kelompok Kerja -->
-                    <div id="dropdown-pokja" class="hidden absolute left-0 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg z-30 max-h-60 overflow-y-auto">
-                        <div onclick="selectOption('pokja', 'TUBMN')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">TUBMN</div>
-                        <div onclick="selectOption('pokja', 'BELMAWA')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">BELMAWA</div>
-                        <div onclick="selectOption('pokja', 'SDPT')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">SDPT</div>
-                        <div onclick="selectOption('pokja', 'Keuangan')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Keuangan</div>
-                        <div onclick="selectOption('pokja', 'HKT')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">HKT</div>
-                        <div onclick="selectOption('pokja', 'RPM')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">RPM</div>
-                        <div onclick="selectOption('pokja', 'Sistem Informasi')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Sistem Informasi</div>
-                        <div onclick="selectOption('pokja', 'Humas')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Humas</div>
-                        <div onclick="selectOption('pokja', 'Penjamin Mutu')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">Penjamin Mutu</div>
-                        <div onclick="selectOption('pokja', 'ADIA')" class="px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition">ADIA</div>
-                    </div>
-                </div>
-                
-                <!-- Tombol Filter -->
-                <button class="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Filter</button>
-            </div>
+                <form method="GET" action="{{ route('admin-tu.laporan.arsip') }}" class="flex flex-wrap items-center gap-3 mb-6">
+                    <select name="pokja_id" class="w-64 bg-[#f4f7f6] border border-gray-400 px-4 py-2 rounded-md text-sm text-gray-700 outline-none focus:border-blue-500">
+                        <option value="">Semua Kelompok Kerja</option>
+                        @foreach ($pokjas as $pokja)
+                            <option value="{{ $pokja->id }}" {{ (string) $pokjaId === (string) $pokja->id ? 'selected' : '' }}>{{ $pokja->name }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Filter</button>
+                </form>
 
             <!-- Tabel Data Laporan -->
             <div class="bg-transparent overflow-hidden">
@@ -145,63 +111,29 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-transparent">
-                        <!-- Baris 1 -->
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen SK</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Hukum, Kepegawaian, dan Tata Laksana</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Lihat</button>
-                            </td>
-                        </tr>
-                        <!-- Baris 2 -->
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">SK A.N Nanang</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen SK</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Pembelajaran dan Kemahasiswaan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Lihat</button>
-                            </td>
-                        </tr>
-                        <!-- Baris 3 -->
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen SK</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Keuangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Lihat</button>
-                            </td>
-                        </tr>
-                        <!-- Baris 4 -->
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">SK A.N Nanang</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen SK</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Sumber Daya Perguruan Tinggi</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <button class="bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Lihat</button>
-                            </td>
-                        </tr>
+                            @forelse ($arsips as $arsip)
+                                <tr class="hover:bg-gray-100 transition">
+                                    <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $arsip->nama_arsip }}</td>
+                                    <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                    <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $arsip->pokja?->name ?? '-' }}</td>
+                                    <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                    <td class="py-3 px-2">
+                                        @if ($arsip->file_path)
+                                            <a href="{{ asset('storage/' . $arsip->file_path) }}" target="_blank" rel="noopener" class="inline-block bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Lihat</a>
+                                        @else
+                                            <span class="text-sm text-gray-400">File tidak tersedia.</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="py-10 px-2 text-center text-sm text-gray-500">Belum ada arsip.</td></tr>
+                            @endforelse
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination (Navigasi Halaman) -->
-            <div class="flex justify-center items-center gap-4 mt-8">
-                <button class="text-gray-800 hover:text-black transition">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <div class="flex gap-2">
-                    <button class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-bold shadow-sm">1</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-200 rounded transition">2</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-200 rounded transition">3</button>
-                </div>
-                <button class="text-gray-800 hover:text-black transition">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
+                <div class="mt-8">{{ $arsips->links() }}</div>
             </div>
             
         </div>

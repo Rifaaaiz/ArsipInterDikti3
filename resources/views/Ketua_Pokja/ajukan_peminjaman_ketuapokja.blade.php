@@ -89,128 +89,63 @@
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Peminjaman Terakhir</h3>
-            
-            <!-- Tabel Riwayat Peminjaman -->
+
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Nama Arsip</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Nama Surat</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Kategori</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Upload</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Pengajuan</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Status</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Mobil</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">19/09/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-red-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-red-600"></span> Ditolak
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Ruangan</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">29/10/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Printer</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">18/12/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-red-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-red-600"></span> Ditolak
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Pulpen</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">29/01/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Mobil</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">19/09/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-red-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-red-600"></span> Ditolak
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Ruangan</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">29/10/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Printer</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Perjanjian</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">18/12/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-red-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-red-600"></span> Ditolak
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3 px-6 text-sm text-gray-600 font-medium">Peminjaman Pulpen</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">Dokumen Vital</td>
-                            <td class="py-3 px-6 text-sm text-gray-500">29/01/2024</td>
-                            <td class="py-3 px-6 text-sm">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($peminjamans as $peminjaman)
+                            @php
+                                $statusLabel = [
+                                    'menunggu_validasi' => 'Menunggu Validasi',
+                                    'disetujui' => 'Disetujui',
+                                    'ditolak' => 'Ditolak',
+                                    'aktif' => 'Aktif',
+                                    'selesai' => 'Selesai',
+                                ];
+                                $statusColor = [
+                                    'menunggu_validasi' => 'text-amber-600 bg-amber-100',
+                                    'disetujui' => 'text-green-600 bg-green-100',
+                                    'ditolak' => 'text-red-600 bg-red-100',
+                                    'aktif' => 'text-blue-600 bg-blue-100',
+                                    'selesai' => 'text-gray-600 bg-gray-200',
+                                ];
+                                $fileUrl = $peminjaman->file_pengajuan ? asset('storage/' . $peminjaman->file_pengajuan) : ($peminjaman->arsip?->file_path ? asset('storage/' . $peminjaman->arsip->file_path) : null);
+                            @endphp
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3 px-6 text-sm text-gray-600 font-medium">{{ $peminjaman->nama_surat }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ $peminjaman->kategori?->name ?? '-' }}</td>
+                                <td class="py-3 px-6 text-sm text-gray-500">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3 px-6 text-sm">
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium {{ $statusColor[$peminjaman->status] ?? 'text-gray-600 bg-gray-200' }}">
+                                        {{ $statusLabel[$peminjaman->status] ?? ucfirst(str_replace('_', ' ', $peminjaman->status)) }}
+                                    </span>
+                                </td>
+                                <td class="py-3 px-6">
+                                    @if ($fileUrl)
+                                        <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat PDF</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada riwayat peminjaman.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="/ketua-pokja/riwayat-peminjaman-terakhir" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                    <a href="{{ route('ketua.riwayat.peminjaman') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
         </div>

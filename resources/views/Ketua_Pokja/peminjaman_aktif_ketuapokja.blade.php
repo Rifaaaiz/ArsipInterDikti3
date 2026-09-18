@@ -127,7 +127,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Surat</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Kategori</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal Mulai</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal Selesai</th>
@@ -136,48 +136,30 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">Peminjaman Mobil</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Peminjaman</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">20/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">Peminjaman Ruangan</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Peminjaman</td>
-                            <td class="py-3.5 px-6 text-sm text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6 text-sm text-gray-500">21/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-3.5 px-6 text-gray-600 font-medium">Peminjaman Motor</td>
-                            <td class="py-3.5 px-6 text-gray-500">Dokumen Peminjaman</td>
-                            <td class="py-3.5 px-6 text-gray-500">19/09/2024</td>
-                            <td class="py-3.5 px-6 text-gray-500">22/09/2024</td>
-                            <td class="py-3.5 px-6">
-                                <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                    <span class="w-2 h-2 rounded-full bg-green-500"></span> Diterima
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-6">
-                                <button class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</button>
-                            </td>
-                        </tr>
+                        @forelse ($peminjamans as $peminjaman)
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="py-3.5 px-6 text-gray-600 font-medium">{{ $peminjaman->nama_surat }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->kategori?->name ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ optional($peminjaman->tanggal_mulai)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6 text-gray-500">{{ optional($peminjaman->tanggal_selesai)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-3.5 px-6">
+                                    <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
+                                        <span class="w-2 h-2 rounded-full bg-green-500"></span> Aktif
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-6">
+                                    @if ($peminjaman->file_pengajuan)
+                                        <a href="{{ asset('storage/' . $peminjaman->file_pengajuan) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada peminjaman aktif.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

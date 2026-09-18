@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validasi Usulan Upload - SIMARSIP</title>
+    <title>Validasi Peminjaman - SIMARSIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-[#f8f9fa] flex font-sans text-gray-800">
-
-    <!-- SIDEBAR KIRI -->
     <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
         <div>
             <!-- Logo -->
@@ -22,201 +20,104 @@
             
             <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <a href="/ketua-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                <!-- Dashboard -->
+                <a href="{{ url('/ketua-pokja') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-house"></i> Dashboard
                 </a>
                 
+                <!-- Arsip Pokja (Dropdown) -->
                 <div class="pt-2">
-                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 transition-colors focus:outline-none">
+                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition-colors focus:outline-none">
                         <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
-                        <!-- Panah menghadap ke bawah karena sub-menu sedang aktif dibuka -->
-                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300 rotate-90"></i>
+                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
                     
-                    <!-- Sub-menu Terbuka -->
-                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
+                    <!-- Sub-menu Tersembunyi (Default) -->
+                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <a href="/ketua-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <a href="/ketua-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                            <a href="{{ url('/ketua-pokja/ajukan') }}" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
+                            <a href="{{ url('/ketua-pokja/upload') }}" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Menu Validasi Upload (Aktif/Biru Solid) -->
-                <a href="/ketua-pokja/validasi" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
-                    <i class="fa-regular fa-circle-check border-white"></i> Validasi Upload
+                <!-- Validasi Peminjaman (Menu Aktif - Biru) -->
+                <a href="{{ url('/ketua-pokja/validasi') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
+                    <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
                 </a>
 
-                <a href="/ketua-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <!-- Profil -->
+                <a href="{{ url('/ketua-pokja/profil') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
-                <a href="/ketua-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                <!-- History -->
+                <a href="{{ url('/ketua-pokja/history') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                
+                <!-- Panduan Penggunaan -->
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
         </div>
 
-        <!-- Tombol Logout -->
+        <!-- Tombol Logout (Form Laravel Tetap Utuh) -->
         <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm w-full">
+                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
+                </button>
+            </form>
         </div>
     </aside>
 
-    <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
-        
-        <!-- Navbar Atas -->
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
-        </header>
-
-        <!-- KONTEN UTAMA VALIDASI -->
-        <div class="px-8 pb-10 max-w-7xl">
-            <!-- Judul Kotak Garis Putus-putus -->
-                <h2 class="text-3xl font-bold text-black">Validasi Usulan Upload</h2>
-
-            <!-- Tabel Validasi -->
-            <div class="bg-transparent overflow-hidden">
+    <main class="flex-1 ml-64 min-h-screen p-8">
+        <header class="flex justify-end mb-8"><span class="text-base font-bold text-gray-900">{{ auth()->user()->name }}</span><i class="fa-solid fa-circle-user text-2xl text-black ml-3"></i></header>
+        <h2 class="text-3xl font-bold text-black mb-5">Validasi Peminjaman Ketua Pokja</h2>
+        @if (session('success'))
+            <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
+        @endif
+        <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+            <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-800">Nama Arsip</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-800">Kategori</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-800">Tanggal Upload</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-800">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-transparent">
-                        <!-- Looping Data Baris (Total 8 Baris seperti di gambar) -->
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Mobil</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="hover:bg-gray-100 transition">
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Peminjaman Ruangan</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">Dokumen Perjanjian</td>
-                            <td class="py-3 px-2 text-sm text-gray-500 font-semibold">19/09/2024</td>
-                            <td class="py-3 px-2">
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-red-700 transition">Tolak</button>
-                                    <button class="bg-[#10b981] text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-green-600 transition">Terima</button>
-                                </div>
-                            </td>
-                        </tr>
+                    <thead class="bg-gray-50 border-b border-gray-200"><tr>
+                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Surat</th>
+                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Pengaju</th>
+                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Kategori</th>
+                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal</th>
+                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Aksi</th>
+                    </tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($pengajuan as $item)
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 px-6 text-sm font-semibold text-gray-700">{{ $item->nama_surat }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->kategori?->name ?? '-' }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->created_at?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-4 px-6"><div class="flex flex-wrap gap-2">
+                                    @if ($item->file_pengajuan || $item->arsip?->file_path)
+                                        <a href="{{ asset('storage/' . ($item->file_pengajuan ?: $item->arsip->file_path)) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700">Lihat File</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia.</span>
+                                    @endif
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="approve"><button type="submit" class="bg-emerald-500 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-600">Terima</button></form>
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="reject"><button type="submit" class="bg-red-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-red-700">Tolak</button></form>
+                                </div></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="py-10 px-6 text-center text-sm text-gray-500">Belum ada pengajuan peminjaman yang perlu divalidasi.</td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination (Navigasi Halaman) -->
-            <div class="flex justify-center items-center gap-4 mt-8">
-                <button class="text-gray-800 hover:text-black transition">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <div class="flex gap-2">
-                    <button class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-bold shadow-sm">1</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-200 rounded transition">2</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-800 font-bold hover:bg-gray-200 rounded transition">3</button>
-                </div>
-                <button class="text-gray-800 hover:text-black transition">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-            
         </div>
+        <div class="mt-6"><p class="mb-3 text-sm text-gray-500">Menampilkan {{ $pengajuan->firstItem() ?? 0 }}-{{ $pengajuan->lastItem() ?? 0 }} dari {{ $pengajuan->total() }} pengajuan</p>{{ $pengajuan->withQueryString()->links() }}</div>
     </main>
+</body>
 
-    <!-- SCRIPT ANIMASI MENU -->
     <script>
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
@@ -233,5 +134,4 @@
             }
         }
     </script>
-</body>
 </html>
