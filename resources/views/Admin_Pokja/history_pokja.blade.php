@@ -24,17 +24,21 @@
             <nav class="px-4 space-y-1">
                 <!-- Tautan ke Dashboard -->
                 <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                        <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg> 
+                        Dashboard
                 </a>
                 
                 <div class="pt-2">
                     <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 transition-colors focus:outline-none">
                         <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
-                        <i id="ikon-panah" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
                     
                     <!-- Sub-menu (Tampil tapi tidak aktif) -->
-                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
+                <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
                             <a href="/dashboard-pokja/ajukan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
                             <a href="/dashboard-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
@@ -102,10 +106,10 @@
                     @forelse ($history as $item)
                         @php
                             $statusLabels = [
-                                'menunggu_validasi' => 'Menunggu Validasi',
-                                'disetujui' => 'Disetujui',
+                                'menunggu_validasi' => 'Menunggu',
+                                'disetujui' => 'Menunggu',
                                 'ditolak' => 'Ditolak',
-                                'dikembalikan' => 'Dikembalikan',
+                                'dikembalikan' => 'Selesai',
                                 'selesai' => 'Selesai',
                             ];
                             $statusClasses = [
@@ -170,15 +174,20 @@
             const ikonPanah = document.getElementById('ikon-panah');
             
             if (submenu.classList.contains('max-h-0')) {
+                // Buka menu
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
+                // Putar ikon panah ke bawah (90 derajat dari posisi kanan)
                 ikonPanah.classList.add('rotate-90');
             } else {
+                // Tutup menu
                 submenu.classList.remove('max-h-40');
                 submenu.classList.add('max-h-0');
+                // Kembalikan ikon panah ke kanan
                 ikonPanah.classList.remove('rotate-90');
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

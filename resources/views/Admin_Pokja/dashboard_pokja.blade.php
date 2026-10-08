@@ -23,9 +23,13 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <!-- Dashboard (Active) -->
-                <a href="/dashboard-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
-                </a>
+                    <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold bg-blue-600 text-white rounded-lg transition shadow-sm">
+                        <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg> 
+                        Dashboard
+                    </a>
                 
                 <!-- Wrapper Menu Arsip Pokja -->
                 <div class="pt-2">
@@ -181,5 +185,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

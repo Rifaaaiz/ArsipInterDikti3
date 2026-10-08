@@ -8,52 +8,73 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-[#f4f7f6] flex font-sans text-gray-800">
+    <!-- SIDEBAR KIRI -->
+    <!-- SIDEBAR KIRI -->
     <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
         <div>
+            <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
                 </div>
                 <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
+            
+            <!-- Menu -->
             <nav class="px-4 space-y-1">
-                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                <!-- 
+                  UBAH DI SINI: 
+                  - Kalau lagi di halaman Dashboard, pakai class: bg-blue-600 text-white shadow-sm
+                  - Kalau lagi di halaman lain, ganti pakai class: text-gray-300 hover:text-white hover:bg-gray-800
+                -->
+                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-lg text-sm font-semibold transition shadow-sm mt-1">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
-                <div class="pt-2">
-                    <button type="button" onclick="toggleMenu('submenu-kelola')" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder-open"></i> Kelola Arsip</span>
-                        <i id="ikon-kelola" class="fa-solid fa-arrow-right text-xs transition-transform duration-300"></i>
+                
+                <!-- Dropdown Kelola Arsip dengan Animasi -->
+                <div class="pt-1">
+                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition-colors focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i> Kelola Arsip</span>
+                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
-                    <div id="submenu-kelola" class="overflow-hidden transition-all duration-300 max-h-40">
-                        <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <a href="/super-admin/penghapusan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Penghapusan Arsip</a>
-                            <a href="/super-admin/laporan" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Laporan Arsip</a>
+                    
+                    <!-- Sub-menu dengan animasi max-h (default tertutup max-h-0) -->
+                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
+                        <div class="flex flex-col gap-1 pt-1 pb-2">
+                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Penghapusan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Laporan Arsip</a>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
+
+                <a href="{{ route('superadmin.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                    <i class="fa-regular fa-circle-check w-5"></i> Validasi Peminjaman
                 </a>
-                <a href="/super-admin/kelola" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-solid fa-users"></i> Kelola User
+
+                <a href="{{ route('superadmin.users') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                    <i class="fa-solid fa-users w-5"></i> Kelola User
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                    <i class="fa-regular fa-file-lines w-5"></i> Panduan Penggunaan
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-solid fa-gear"></i> Pengaturan Sistem
+                
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                    <i class="fa-solid fa-gear w-5"></i> Pengaturan Sistem
                 </a>
             </nav>
         </div>
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}">
+
+        <!-- Logout -->
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                 @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                 </button>
             </form>
-        </div>
     </aside>
 
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
@@ -162,7 +183,7 @@
                                     <td class="py-4 px-6 text-sm text-gray-600">{{ $peminjaman->user?->name ?? $peminjaman->user?->username ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-600">{{ $peminjaman->user?->pokja?->name ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-600">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
-                                    <td class="py-4 px-6 text-sm text-gray-600">{{ $statusLabels[$peminjaman->status] ?? ucfirst(str_replace('_', ' ', $peminjaman->status)) }}</td>
+                                    <td class="py-4 px-6 text-sm text-gray-600">{{ $peminjaman->display_status }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada peminjaman.</td></tr>
@@ -176,13 +197,21 @@
     </main>
 
     <script>
-        function toggleMenu(id) {
-            const submenu = document.getElementById(id);
-            const icon = document.getElementById('ikon-kelola');
-            submenu.classList.toggle('max-h-40');
-            submenu.classList.toggle('max-h-0');
-            icon.classList.toggle('rotate-90');
+        function toggleMenuArsip() {
+            const submenu = document.getElementById('submenu-arsip');
+            const ikonPanah = document.getElementById('ikon-panah');
+            
+            if (submenu.classList.contains('max-h-0')) {
+                submenu.classList.remove('max-h-0');
+                submenu.classList.add('max-h-40');
+                ikonPanah.classList.add('rotate-90');
+            } else {
+                submenu.classList.remove('max-h-40');
+                submenu.classList.add('max-h-0');
+                ikonPanah.classList.remove('rotate-90');
+            }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

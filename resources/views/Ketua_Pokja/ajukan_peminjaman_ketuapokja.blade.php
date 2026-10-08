@@ -23,7 +23,10 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <a href="/ketua-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
                 <div class="pt-2">
@@ -57,7 +60,12 @@
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -111,13 +119,7 @@
                                     'aktif' => 'Aktif',
                                     'selesai' => 'Selesai',
                                 ];
-                                $statusColor = [
-                                    'menunggu_validasi' => 'text-amber-600 bg-amber-100',
-                                    'disetujui' => 'text-green-600 bg-green-100',
-                                    'ditolak' => 'text-red-600 bg-red-100',
-                                    'aktif' => 'text-blue-600 bg-blue-100',
-                                    'selesai' => 'text-gray-600 bg-gray-200',
-                                ];
+                                $statusColor = ['Menunggu' => 'text-amber-600 bg-amber-100', 'Aktif' => 'text-blue-600 bg-blue-100', 'Ditolak' => 'text-red-600 bg-red-100', 'Selesai' => 'text-gray-600 bg-gray-200'];
                                 $fileUrl = $peminjaman->file_pengajuan ? asset('storage/' . $peminjaman->file_pengajuan) : ($peminjaman->arsip?->file_path ? asset('storage/' . $peminjaman->arsip->file_path) : null);
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
@@ -125,8 +127,8 @@
                                 <td class="py-3 px-6 text-sm text-gray-500">{{ $peminjaman->kategori?->name ?? '-' }}</td>
                                 <td class="py-3 px-6 text-sm text-gray-500">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
                                 <td class="py-3 px-6 text-sm">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium {{ $statusColor[$peminjaman->status] ?? 'text-gray-600 bg-gray-200' }}">
-                                        {{ $statusLabel[$peminjaman->status] ?? ucfirst(str_replace('_', ' ', $peminjaman->status)) }}
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium {{ $statusColor[$peminjaman->display_status] ?? 'text-gray-600 bg-gray-200' }}">
+                                        {{ $peminjaman->display_status }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-6">
@@ -168,5 +170,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

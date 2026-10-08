@@ -10,7 +10,7 @@
 <body class="bg-gray-50 flex font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0">
+    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
         <div>
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
@@ -23,7 +23,11 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                        <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg> 
+                        Dashboard
                 </a>
                 
                 <div class="pt-2">
@@ -35,10 +39,10 @@
                     
                     <!-- Sub-menu Terbuka -->
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
-                        <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <!-- Menu Aktif (Biru Solid) dengan tautan yang tepat -->
-                            <a href="/dashboard-pokja/ajukan" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
-                            <a href="/dashboard-pokja/upload" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
+                        <div class="flex flex-col gap-1 pt-1 pb-2">
+                            <!-- Menu Aktif (Biru Solid) - Padding kiri pl-11 agar teks sejajar, tanpa margin luar -->
+                            <a href="/dashboard-pokja/ajukan" class="block pl-11 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
+                            <a href="/dashboard-pokja/upload" class="block pl-11 py-2 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
                         </div>
                     </div>
                 </div>
@@ -54,7 +58,7 @@
                 </a>
             </nav>
         </div>
-         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                     @csrf
                     <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
@@ -76,17 +80,18 @@
             </div>
         </header>
 
-        <!-- KONTEN UTAMA HALAMAN AJUKAN PEMINJAMAN -->
-        <div class="p-8">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">Ajukan Peminjaman</h2>
+        <!-- KONTEN UTAMA -->
+        <!-- Menggunakan p-8 agar membentang proporsional seperti screenshot -->
+        <div class="p-8 w-full">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Ajukan</h2>
 
-            <!-- Tombol Aksi (Outline vs Solid) -->
-            <div class="flex gap-4 mb-10">
+            <!-- Tombol Aksi (Stretching 50/50) -->
+            <div class="flex gap-4 mb-10 w-full">
                 <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
-                    Download Template <i class="fa-solid fa-arrow-down ml-1 text-xs"></i>
+                    Download Template <i class="fa-solid fa-arrow-down ml-1 text-sm"></i>
                 </button>
                 <a href="{{ url('/dashboard-pokja/form-peminjaman-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
-                    Ajukan Peminjaman <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                    Ajukan Peminjaman <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
                 </a>
             </div>
 
@@ -99,7 +104,7 @@
             @endif
             
             <!-- Tabel Riwayat Peminjaman -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 mb-6">
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
@@ -113,64 +118,53 @@
                     <tbody class="divide-y divide-gray-100">
 
                         @forelse ($dataPeminjaman as $peminjaman)
-
                             <tr class="hover:bg-gray-50 transition">
-
-                                {{-- NAMA SURAT --}}
-                                <td class="py-3 px-6 text-sm text-gray-800">
+                                <td class="py-4 px-6 text-sm text-gray-800">
                                     {{ $peminjaman->nama_surat }}
                                 </td>
-
-                                {{-- KATEGORI --}}
-                                <td class="py-3 px-6 text-sm text-gray-600">
+                                <td class="py-4 px-6 text-sm text-gray-600">
                                     {{ $peminjaman->kategori->name ?? '-' }}
                                 </td>
-
-                                {{-- TANGGAL --}}
-                                <td class="py-3 px-6 text-sm text-gray-600">
+                                <td class="py-4 px-6 text-sm text-gray-600">
                                     {{ $peminjaman->tanggal_mulai->format('d/m/Y') }}
                                 </td>
-
-                                {{-- STATUS --}}
-                                <td class="py-3 px-6 text-sm text-gray-600">
-                                    {{ $peminjaman->status }}
+                                <td class="py-4 px-6 text-sm text-gray-600">
+                                    {{ $peminjaman->display_status }}
                                 </td>
-
-                                {{-- FILE PDF --}}
-                                <td class="py-3 px-6 text-sm">
+                                <td class="py-4 px-6 text-sm">
                                     @if ($peminjaman->file_pengajuan)
-                                        <a
-                                            href="{{ asset('storage/' . $peminjaman->file_pengajuan) }}"
-                                            target="_blank"
-                                            class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-blue-700 transition"
-                                        >
+                                        <a href="{{ asset('storage/' . $peminjaman->file_pengajuan) }}" target="_blank" class="bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition inline-block">
                                             Lihat
                                         </a>
                                     @else
-                                        <span class="text-gray-400">
-                                            Tidak ada file
-                                        </span>
+                                        <span class="text-gray-400">Tidak ada file</span>
                                     @endif
                                 </td>
-
                             </tr>
-
                         @empty
-
                             <tr>
                                 <td colspan="5" class="py-8 text-center text-gray-500">
                                     Belum ada pengajuan peminjaman.
                                 </td>
                             </tr>
-
                         @endforelse
 
                     </tbody>
                 </table>
+                
+                <!-- Link Lihat Semua -->
                 <div class="p-4 border-t border-gray-100 text-center">
                     <a href="{{ route('peminjaman.riwayat') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
+
+            <!-- Pagination sekarang aman berada di dalam tag main -->
+            @if ($dataPeminjaman instanceof \Illuminate\Contracts\Pagination\Paginator)
+                <div class="pb-8 flex justify-end">
+                    {{ $dataPeminjaman->withQueryString()->links() }}
+                </div>
+            @endif
+
         </div>
     </main>
 
@@ -191,5 +185,7 @@
             }
         }
     </script>
+
+    <x-logout-confirmation />
 </body>
 </html>

@@ -167,6 +167,12 @@ use App\Http\Controllers\SuperadminDashboardController;
         Route::get('/', [PeminjamanApprovalController::class, 'tuDashboard'])
             ->name('admin-tu.dashboard');
 
+        Route::get('/arsip/tambah', [PeminjamanApprovalController::class, 'tuArchiveForm'])
+            ->name('admin-tu.arsip.form');
+
+        Route::post('/arsip/tambah', [PeminjamanApprovalController::class, 'storeTuArchive'])
+            ->name('admin-tu.arsip.store');
+
         // Route untuk halaman validasi upload arsip admin TU
         Route::get('/validasi', [PeminjamanApprovalController::class, 'tuIndex'])
             ->name('admin-tu.peminjaman.validasi');
@@ -192,8 +198,23 @@ use App\Http\Controllers\SuperadminDashboardController;
 // ==========================================
 
     Route::middleware(['auth', 'role:superadmin'])->prefix('super-admin')->group(function () {
-    Route::get('/', [SuperadminDashboardController::class, 'dashboard'])
-        ->name('superadmin.dashboard');
+        Route::get('/', [SuperadminDashboardController::class, 'dashboard'])
+            ->name('superadmin.dashboard');
+
+        Route::get('/arsip/tambah', [SuperadminDashboardController::class, 'createArchive'])
+            ->name('superadmin.arsip.form');
+
+        Route::post('/arsip/tambah', [SuperadminDashboardController::class, 'storeArchive'])
+            ->name('superadmin.arsip.store');
+
+        Route::get('/arsip/{arsip}/edit', [SuperadminDashboardController::class, 'editArchive'])
+            ->name('superadmin.arsip.edit');
+
+        Route::put('/arsip/{arsip}/edit', [SuperadminDashboardController::class, 'updateArchive'])
+            ->name('superadmin.arsip.update');
+
+        Route::delete('/arsip/{arsip}/file', [SuperadminDashboardController::class, 'deleteArchiveFile'])
+            ->name('superadmin.arsip.file.delete');
 
         Route::get('/laporan', [SuperadminDashboardController::class, 'archiveReport'])
             ->name('superadmin.arsip.laporan');
@@ -221,4 +242,4 @@ use App\Http\Controllers\SuperadminDashboardController;
 
         Route::get('/peminjaman-aktif', [SuperadminDashboardController::class, 'activeLoans'])
             ->name('superadmin.peminjaman.aktif');
-    });
+});

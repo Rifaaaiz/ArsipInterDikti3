@@ -17,8 +17,11 @@
                 <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
             <nav class="px-4 space-y-1">
-                <a href="{{ route('admin-tu.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                <a href="/admin-tu" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>  Dashboard
                 </a>
                 <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
                     <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
@@ -34,14 +37,12 @@
                 </a>
             </nav>
         </div>
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                 @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                 </button>
             </form>
-        </div>
     </aside>
 
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
@@ -153,5 +154,6 @@
             <div class="mt-6">{{ $pengajuan->withQueryString()->links() }}</div>
         </div>
     </main>
+    <x-logout-confirmation />
 </body>
 </html>

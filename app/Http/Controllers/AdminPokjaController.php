@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Arsip;
 use App\Models\Peminjaman;
 use App\Models\KategoriArsip;
+use App\Models\KlasifikasiArsip;
 
 class AdminPokjaController extends Controller
 {
@@ -63,7 +64,7 @@ class AdminPokjaController extends Controller
             ->where('pokja_id', $pokjaId)
             ->whereNotIn('status', ['dihapus'])
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view('Admin_Pokja.upload_arsip_pokja', compact('arsips'));
     }
@@ -115,7 +116,7 @@ class AdminPokjaController extends Controller
                 DB::raw('COALESCE(arsip_peminjaman.nama_arsip, peminjamans.nama_surat) as nama'),
                 DB::raw('COALESCE(kategori_peminjaman.name, kategori_arsip.name) as kategori'),
                 'peminjamans.created_at as tanggal',
-                'peminjamans.status',
+                DB::raw("CASE WHEN peminjamans.status = 'aktif' AND peminjamans.tanggal_selesai < CURRENT_DATE THEN 'selesai' ELSE peminjamans.status END as status"),
                 DB::raw('COALESCE(arsip_peminjaman.file_path, peminjamans.file_pengajuan) as file_path'),
             ])
             ->leftJoin('kategori_arsips as kategori_arsip', 'kategori_arsip.id', '=', 'arsip_peminjaman.kategori_arsip_id');
@@ -147,12 +148,18 @@ class AdminPokjaController extends Controller
     {
         $user = Auth::user();
         $kategoris = KategoriArsip::all();
+        $klasifikasis = KlasifikasiArsip::orderBy('bab_urutan')
+            ->orderBy('urutan')
+            ->orderBy('kode')
+            ->orderBy('nomor')
+            ->orderBy('id')
+            ->get();
 
         $view = $user && $user->role && $user->role->slug === 'ketua_pokja'
             ? 'Ketua_Pokja.form_upload_ketuapokja'
             : 'Admin_Pokja.form_upload_pokja';
 
-        return view($view, compact('kategoris'));
+        return view($view, compact('kategoris', 'klasifikasis'));
     }
 
     public function storeArsip(Request $request)
@@ -170,10 +177,11 @@ class AdminPokjaController extends Controller
             'nama_arsip' => 'required|string|max:255',
             'nomor_dokumen' => 'nullable|string|max:255',
             'kategori_arsip_id' => 'required|exists:kategori_arsips,id',
+            'klasifikasi_arsip_id' => 'nullable|exists:klasifikasi_arsips,id',
             'tanggal_dokumen' => 'required|date',
-            'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,zip,rar', 'max:10240'],
+            'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,zip,rar', 'max:5120'],
         ], [
-            'file_arsip.max' => 'Ukuran file maksimal 10 MB.',
+            'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
         ]);
 
         $file = $request->file('file_arsip');
@@ -187,6 +195,7 @@ class AdminPokjaController extends Controller
                     'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
+                    'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
                     'pokja_id' => $pokjaId,
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
                     'file_path' => $storedPath,
@@ -213,34 +222,86 @@ class AdminPokjaController extends Controller
             ->with('success', 'Arsip berhasil diupload.');
     }
 
-    public function riwayatPeminjamanTerakhir()
+    public function riwayatPeminjamanTerakhir(Request $request)
     {
+        $search = $this->normalizeSearch($request->query('search'));
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $kategoriId = $request->integer('kategori_id') ?: null;
+
         $riwayatPeminjaman = Peminjaman::with(['arsip', 'kategori'])
             ->where('user_id', Auth::id())
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(nama_surat) LIKE ?', [$pattern])
+                            ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]))
+                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]));
+                    });
+                }
+            })
+            ->when($kategoriId, fn ($query) => $query->where('kategori_id', $kategoriId))
             ->latest('created_at')
-            ->limit(5)
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'Admin_Pokja.riwayat_peminjaman_terakhir_pokja',
-            compact('riwayatPeminjaman')
+            [
+                'riwayatPeminjaman' => $riwayatPeminjaman,
+                'kategoris' => KategoriArsip::orderBy('name')->get(),
+                'search' => $search,
+                'kategoriId' => $kategoriId,
+            ]
         );
     }
 
-    public function riwayatArsipTerakhir()
+    public function riwayatArsipTerakhir(Request $request)
     {
         $user = Auth::user();
+        $search = $this->normalizeSearch($request->query('search'));
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $nomorDokumen = $this->normalizeSearch($request->query('nomor_dokumen'));
+        $documentPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($nomorDokumen));
+        $kategoriId = $request->integer('kategori_id') ?: null;
+        $tanggalDokumen = $request->query('tanggal_dokumen');
 
-        $riwayatArsip = Arsip::with('kategori')
+        $riwayatArsip = Arsip::with(['kategori', 'klasifikasiArsip'])
             ->where('pokja_id', $user->pokja_id)
             ->whereNotIn('status', ['dihapus'])
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern])
+                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
+                            ->orWhereHas('klasifikasiArsip', function ($klasifikasiQuery) use ($pattern) {
+                                $klasifikasiQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(judul) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(uraian) LIKE ?', [$pattern]);
+                            });
+                    });
+                }
+            })
+            ->when($documentPatterns !== [], function ($query) use ($documentPatterns) {
+                foreach ($documentPatterns as $pattern) {
+                    $query->whereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern]);
+                }
+            })
+            ->when($kategoriId, fn ($query) => $query->where('kategori_arsip_id', $kategoriId))
+            ->when($tanggalDokumen, fn ($query) => $query->whereDate('tanggal_dokumen', $tanggalDokumen))
             ->latest('created_at')
-            ->limit(5)
-            ->get();
+            ->paginate(10)
+            ->withQueryString();
 
         return view(
             'Admin_Pokja.riwayat_arsip_terakhir_pokja',
-            compact('riwayatArsip')
+            [
+                'riwayatArsip' => $riwayatArsip,
+                'kategoris' => KategoriArsip::orderBy('name')->get(),
+                'search' => $search,
+                'nomorDokumen' => $nomorDokumen,
+                'kategoriId' => $kategoriId,
+                'tanggalDokumen' => $tanggalDokumen,
+            ]
         );
     }
 
@@ -254,7 +315,7 @@ class AdminPokjaController extends Controller
             })
             ->activeNow()
             ->latest('tanggal_mulai')
-            ->get();
+            ->paginate(10);
 
         return view('Admin_Pokja.peminjaman_aktif_pokja', compact('peminjamans'));
     }
@@ -264,7 +325,7 @@ class AdminPokjaController extends Controller
         $dataPeminjaman = Peminjaman::with('kategori')
             ->where('user_id', Auth::id())
             ->latest()
-            ->get();
+            ->paginate(10);
 
         return view(
             'Admin_Pokja.ajukan_peminjaman',
@@ -302,9 +363,9 @@ class AdminPokjaController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'keperluan' => 'required|string',
-            'file_pengajuan' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'file_pengajuan' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
         ], [
-            'file_pengajuan.max' => 'Ukuran file maksimal 10 MB.',
+            'file_pengajuan.max' => 'Ukuran file maksimal 5 MB.',
         ]);
 
         $filePath = null;

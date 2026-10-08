@@ -22,21 +22,24 @@
             
             <!-- Menu Sidebar -->
             <nav class="px-4 space-y-1">
-                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>  Dashboard
                 </a>
                 
                 <!-- Dropdown Kelola Arsip -->
                 <div class="pt-1">
                     <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition-colors focus:outline-none">
                         <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i> Kelola Arsip</span>
-                        <i id="ikon-panah" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
                     
-                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
+                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
                         <div class="flex flex-col gap-1 pt-1 pb-2">
-                            <a href="#" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Pengapusan Arsip</a>
-                            <a href="#" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Laporan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Pengapusan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Laporan Arsip</a>
                         </div>
                     </div>
                 </div>
@@ -46,7 +49,7 @@
                     <i class="fa-regular fa-circle-check w-5"></i> Validasi Peminjaman
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                <a href="{{ route('superadmin.users') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-solid fa-users w-5"></i> Kelola User
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
@@ -59,15 +62,12 @@
         </div>
 
         <!-- Logout -->
-        <div class="p-6">
-            <form method="POST" action="#">
-                <!-- Dummy logout form as placeholder for UI -->
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                 @csrf
-                <button type="button" class="flex items-center gap-3 text-red-500 font-bold hover:text-red-400 transition text-sm w-full">
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                 </button>
             </form>
-        </div>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -97,7 +97,7 @@
                 
                 <!-- Search Text (Visual Match) -->
                 <div class="flex-1 min-w-[200px]">
-                    <input type="text" name="search" placeholder="Nama Surat" class="w-full border border-gray-300 bg-[#f4f7f6] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-500 focus:bg-white transition">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Nama surat, arsip, kategori, peminjam, atau Pokja" class="w-full border border-gray-300 bg-[#f4f7f6] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-500 focus:bg-white transition">
                 </div>
 
                 <!-- Select Kategori -->
@@ -133,6 +133,9 @@
                     </a>
                 </div>
             </form>
+            <p class="mb-4 text-sm text-slate-600" role="status" aria-live="polite">
+                {{ $pengajuan->total() > 0 ? 'Ditemukan ' . $pengajuan->total() . ' pengajuan yang sesuai.' : 'Tidak ditemukan pengajuan yang sesuai.' }}
+            </p>
 
             <!-- TABEL DATA -->
             <div class="bg-transparent overflow-hidden">
@@ -193,7 +196,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="py-12 px-4 text-center text-sm text-gray-500 bg-white/30 rounded-lg">
-                                        {{ $kategoriId || $pokjaId ? 'Tidak ada peminjaman yang sesuai dengan filter.' : 'Belum ada peminjaman yang perlu divalidasi.' }}
+                                        {{ $search !== '' || $kategoriId || $pokjaId ? 'Tidak ada peminjaman yang sesuai dengan pencarian/filter.' : 'Belum ada peminjaman yang perlu divalidasi.' }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -220,13 +223,14 @@
             if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
-                ikonPanah.classList.add('rotate-180');
+                ikonPanah.classList.add('rotate-90');
             } else {
                 submenu.classList.remove('max-h-40');
                 submenu.classList.add('max-h-0');
-                ikonPanah.classList.remove('rotate-180');
+                ikonPanah.classList.remove('rotate-90');
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

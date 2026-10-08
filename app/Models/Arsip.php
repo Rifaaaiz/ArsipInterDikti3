@@ -16,6 +16,7 @@ class Arsip extends Model
         'nomor_dokumen',
         'nama_arsip',
         'kategori_arsip_id',
+        'klasifikasi_arsip_id',
         'pokja_id',
         'tanggal_dokumen',
         'file_path',
@@ -37,6 +38,11 @@ class Arsip extends Model
             KategoriArsip::class,
             'kategori_arsip_id'
         );
+    }
+
+    public function klasifikasiArsip()
+    {
+        return $this->belongsTo(KlasifikasiArsip::class);
     }
 
     public function pokja()

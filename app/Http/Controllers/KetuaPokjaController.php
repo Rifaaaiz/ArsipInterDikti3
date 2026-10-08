@@ -133,7 +133,7 @@ class KetuaPokjaController extends Controller
                 DB::raw('COALESCE(arsip_peminjaman.nama_arsip, peminjamans.nama_surat) as nama'),
                 DB::raw('COALESCE(kategori_peminjaman.name, kategori_arsip.name) as kategori'),
                 'peminjamans.created_at as tanggal',
-                'peminjamans.status',
+                DB::raw("CASE WHEN peminjamans.status = 'aktif' AND peminjamans.tanggal_selesai < CURRENT_DATE THEN 'selesai' ELSE peminjamans.status END as status"),
                 DB::raw('COALESCE(arsip_peminjaman.file_path, peminjamans.file_pengajuan) as file_path'),
             ])
             ->leftJoin('kategori_arsips as kategori_arsip', 'kategori_arsip.id', '=', 'arsip_peminjaman.kategori_arsip_id');
@@ -153,31 +153,84 @@ class KetuaPokjaController extends Controller
         return view('Ketua_Pokja.history_ketuapokja', compact('history', 'filter'));
     }
 
-    public function riwayatPeminjamanTerakhir()
+    public function riwayatPeminjamanTerakhir(Request $request)
     {
         $user = Auth::user();
+        $search = $this->normalizeSearch($request->query('search'));
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $kategoriId = $request->integer('kategori_id') ?: null;
 
         $peminjamans = Peminjaman::with(['kategori', 'arsip', 'user'])
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('pokja_id', $user->pokja_id);
             })
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(nama_surat) LIKE ?', [$pattern])
+                            ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]))
+                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]));
+                    });
+                }
+            })
+            ->when($kategoriId, fn ($query) => $query->where('kategori_id', $kategoriId))
             ->latest('created_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('Ketua_Pokja.riwayat_peminjaman_terakhir_ketuapokja', compact('peminjamans'));
+        return view('Ketua_Pokja.riwayat_peminjaman_terakhir_ketuapokja', [
+            'peminjamans' => $peminjamans,
+            'kategoris' => \App\Models\KategoriArsip::orderBy('name')->get(),
+            'search' => $search,
+            'kategoriId' => $kategoriId,
+        ]);
     }
 
-    public function riwayatArsipTerakhir()
+    public function riwayatArsipTerakhir(Request $request)
     {
         $user = Auth::user();
+        $search = $this->normalizeSearch($request->query('search'));
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $nomorDokumen = $this->normalizeSearch($request->query('nomor_dokumen'));
+        $documentPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($nomorDokumen));
+        $kategoriId = $request->integer('kategori_id') ?: null;
+        $tanggalDokumen = $request->query('tanggal_dokumen');
 
-        $arsips = Arsip::with('kategori')
+        $arsips = Arsip::with(['kategori', 'klasifikasiArsip'])
             ->where('pokja_id', $user->pokja_id)
             ->whereNotIn('status', ['dihapus'])
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern])
+                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
+                            ->orWhereHas('klasifikasiArsip', function ($klasifikasiQuery) use ($pattern) {
+                                $klasifikasiQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(judul) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(uraian) LIKE ?', [$pattern]);
+                            });
+                    });
+                }
+            })
+            ->when($documentPatterns !== [], function ($query) use ($documentPatterns) {
+                foreach ($documentPatterns as $pattern) {
+                    $query->whereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern]);
+                }
+            })
+            ->when($kategoriId, fn ($query) => $query->where('kategori_arsip_id', $kategoriId))
+            ->when($tanggalDokumen, fn ($query) => $query->whereDate('tanggal_dokumen', $tanggalDokumen))
             ->latest('created_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('Ketua_Pokja.riwayat_arsip_terakhir_ketuapokja', compact('arsips'));
+        return view('Ketua_Pokja.riwayat_arsip_terakhir_ketuapokja', [
+            'arsips' => $arsips,
+            'kategoris' => \App\Models\KategoriArsip::orderBy('name')->get(),
+            'search' => $search,
+            'nomorDokumen' => $nomorDokumen,
+            'kategoriId' => $kategoriId,
+            'tanggalDokumen' => $tanggalDokumen,
+        ]);
     }
 
     public function peminjamanAktif()
@@ -191,7 +244,7 @@ class KetuaPokjaController extends Controller
             })
             ->activeNow()
             ->latest('tanggal_mulai')
-            ->get();
+            ->paginate(10);
 
         return view('Ketua_Pokja.peminjaman_aktif_ketuapokja', compact('peminjamans'));
     }

@@ -21,8 +21,11 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <!-- Dashboard -->
-                <a href="{{ url('/ketua-pokja') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                <a href="/ketua-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
                 <!-- Arsip Pokja (Dropdown) -->
@@ -63,15 +66,12 @@
             </nav>
         </div>
 
-        <!-- Tombol Logout (Form Laravel Tetap Utuh) -->
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm w-full">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-                </button>
-            </form>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <main class="flex-1 ml-64 min-h-screen p-8">
@@ -116,6 +116,7 @@
         </div>
         <div class="mt-6"><p class="mb-3 text-sm text-gray-500">Menampilkan {{ $pengajuan->firstItem() ?? 0 }}-{{ $pengajuan->lastItem() ?? 0 }} dari {{ $pengajuan->total() }} pengajuan</p>{{ $pengajuan->withQueryString()->links() }}</div>
     </main>
+    <x-logout-confirmation />
 </body>
 
     <script>

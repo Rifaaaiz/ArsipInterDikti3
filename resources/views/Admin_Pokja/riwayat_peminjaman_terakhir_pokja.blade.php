@@ -23,7 +23,11 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                        <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg> 
+                        Dashboard
                 </a>
                 
                 <div class="pt-2">
@@ -83,21 +87,16 @@
         <div class="px-8 pb-10 max-w-6xl">
             <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Peminjaman Terakhir</h2>
 
-            <!-- Baris Filter Pencarian -->
-            <div class="flex items-center gap-4 mb-6">
-                <div class="flex-1">
-                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                </div>
-                <div class="w-64 relative">
-                    <div class="w-full flex items-center justify-between border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-500 cursor-pointer">
-                        <span>Kategori Surat</span>
-                        <i class="fa-solid fa-arrow-right text-black text-xs"></i>
-                    </div>
-                </div>
-                <button class="bg-[#2563eb] text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
-                    Filter
-                </button>
-            </div>
+            <form method="GET" class="flex flex-col gap-3 mb-6 md:flex-row">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Nama surat, arsip, atau kategori" class="flex-1 border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
+                <select name="kategori_id" class="w-full md:w-64 border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
+                    <option value="">Semua kategori</option>
+                    @foreach ($kategoris as $kategori)
+                        <option value="{{ $kategori->id }}" @selected($kategoriId === $kategori->id)>{{ $kategori->name }}</option>
+                    @endforeach
+                </select>
+                <div class="flex gap-2"><button class="bg-[#2563eb] text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Filter</button><a href="{{ route('peminjaman.riwayat') }}" class="rounded-md border border-gray-300 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 transition">Reset</a></div>
+            </form>
 
             <!-- Tabel Riwayat Peminjaman -->
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
@@ -114,21 +113,9 @@
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse ($riwayatPeminjaman as $peminjaman)
                             @php
-                                $statusLabels = [
-                                    'menunggu_validasi' => 'Menunggu Validasi',
-                                    'disetujui' => 'Disetujui',
-                                    'ditolak' => 'Ditolak',
-                                    'dikembalikan' => 'Dikembalikan',
-                                    'selesai' => 'Selesai',
-                                ];
-                                $statusClasses = [
-                                    'menunggu_validasi' => 'text-amber-600 bg-amber-50',
-                                    'disetujui' => 'text-green-600 bg-green-50',
-                                    'ditolak' => 'text-red-600 bg-red-50',
-                                    'dikembalikan' => 'text-orange-600 bg-orange-50',
-                                    'selesai' => 'text-gray-600 bg-gray-100',
-                                ];
-                                $status = $peminjaman->status;
+                                $statusLabels = ['Menunggu' => 'Menunggu', 'Aktif' => 'Aktif', 'Ditolak' => 'Ditolak', 'Selesai' => 'Selesai'];
+                                $statusClasses = ['Menunggu' => 'text-amber-600 bg-amber-50', 'Aktif' => 'text-blue-600 bg-blue-50', 'Ditolak' => 'text-red-600 bg-red-50', 'Selesai' => 'text-gray-600 bg-gray-100'];
+                                $status = $peminjaman->display_status;
                                 $statusLabel = $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
                                 $statusClass = $statusClasses[$status] ?? 'text-gray-600 bg-gray-100';
                                 $filePath = $peminjaman->arsip?->file_path ?? $peminjaman->file_pengajuan;
@@ -170,20 +157,7 @@
                 </table>
             </div>
 
-            <!-- Navigasi Halaman (Pagination) -->
-            <div class="flex justify-center items-center gap-3">
-                <button class="text-gray-400 hover:text-black transition px-2 py-1">
-                    <i class="fa-solid fa-arrow-left text-sm"></i>
-                </button>
-                <div class="flex items-center gap-1.5">
-                    <button class="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded text-sm font-bold shadow-sm">1</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-700 rounded text-sm font-bold hover:bg-gray-200 transition">2</button>
-                    <button class="w-8 h-8 flex items-center justify-center text-gray-700 rounded text-sm font-bold hover:bg-gray-200 transition">3</button>
-                </div>
-                <button class="text-gray-700 hover:text-black transition px-2 py-1">
-                    <i class="fa-solid fa-arrow-right text-sm"></i>
-                </button>
-            </div>
+            <div class="mt-6">{{ $riwayatPeminjaman->withQueryString()->links() }}</div>
         </div>
     </main>
 
@@ -204,5 +178,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

@@ -18,8 +18,11 @@
             </div>
 
             <nav class="px-4 space-y-1">
-                <a href="{{ route('admin-tu.dashboard') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                <a href="/admin-tu" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>  Dashboard
                 </a>
                 <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
@@ -44,6 +47,12 @@
                 </button>
             </form>
         </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </button>
+            </form>
     </aside>
 
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
@@ -87,7 +96,22 @@
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->user?->pokja?->name ?? '-' }}</td>
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->tanggal_mulai?->format('d/m/Y') ?? '-' }}</td>
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->tanggal_selesai?->format('d/m/Y') ?? '-' }}</td>
-                                    <td class="py-3.5 px-6"><span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Aktif</span></td>
+                                    <td class="py-3.5 px-6">
+                                        @php
+                                            $status = $peminjaman->display_status;
+                                            $statusStyles = [
+                                                'Ditolak' => ['badge' => 'bg-red-100 text-red-700', 'dot' => 'bg-red-500'],
+                                                'Diterima' => ['badge' => 'bg-green-100 text-green-700', 'dot' => 'bg-green-500'],
+                                                'Menunggu' => ['badge' => 'bg-yellow-100 text-yellow-700', 'dot' => 'bg-yellow-500'],
+                                                'Aktif' => ['badge' => 'bg-blue-100 text-blue-700', 'dot' => 'bg-blue-500'],
+                                                'Selesai' => ['badge' => 'bg-gray-200 text-gray-700', 'dot' => 'bg-gray-500'],
+                                            ];
+                                            $statusStyle = $statusStyles[$status] ?? ['badge' => 'bg-gray-200 text-gray-700', 'dot' => 'bg-gray-500'];
+                                        @endphp
+                                        <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {{ $statusStyle['badge'] }}">
+                                            <span class="h-2 w-2 rounded-full {{ $statusStyle['dot'] }}"></span> {{ $status }}
+                                        </span>
+                                    </td>
                                     <td class="py-3.5 px-6">
                                         @if ($filePath)
                                             <a href="{{ asset('storage/' . $filePath) }}" target="_blank" rel="noopener" class="text-blue-600 font-semibold hover:underline">Lihat File</a>
@@ -107,5 +131,6 @@
             <div class="mt-6">{{ $peminjamans->links() }}</div>
         </div>
     </main>
+    <x-logout-confirmation />
 </body>
 </html>

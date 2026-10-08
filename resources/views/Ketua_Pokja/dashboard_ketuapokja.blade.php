@@ -24,7 +24,10 @@
             <nav class="px-4 space-y-1">
                 <!-- Dashboard (Active) -->
                 <a href="/ketua-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
                 <!-- Wrapper Menu Arsip Pokja -->
@@ -65,14 +68,12 @@
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-                </button>
-            </form>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -185,19 +186,9 @@
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse ($peminjamanTerbaru as $peminjaman)
                             @php
-                                $statusLabels = [
-                                    'menunggu_validasi' => 'Menunggu Validasi',
-                                    'disetujui' => 'Disetujui',
-                                    'ditolak' => 'Ditolak',
-                                    'selesai' => 'Selesai',
-                                ];
-                                $statusClasses = [
-                                    'menunggu_validasi' => 'text-amber-700 bg-amber-100',
-                                    'disetujui' => 'text-green-700 bg-green-100',
-                                    'ditolak' => 'text-red-700 bg-red-100',
-                                    'selesai' => 'text-gray-700 bg-gray-200',
-                                ];
-                                $status = $peminjaman->status;
+                                $statusLabels = ['Menunggu' => 'Menunggu', 'Aktif' => 'Aktif', 'Ditolak' => 'Ditolak', 'Selesai' => 'Selesai'];
+                                $statusClasses = ['Menunggu' => 'text-amber-700 bg-amber-100', 'Aktif' => 'text-blue-700 bg-blue-100', 'Ditolak' => 'text-red-700 bg-red-100', 'Selesai' => 'text-gray-700 bg-gray-200'];
+                                $status = $peminjaman->display_status;
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-3.5 px-6 text-gray-700 font-medium">{{ $peminjaman->nama_surat }}</td>
@@ -240,5 +231,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

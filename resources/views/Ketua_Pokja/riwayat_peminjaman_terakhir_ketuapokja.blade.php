@@ -23,7 +23,10 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <a href="/ketua-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
                 <div class="pt-2">
@@ -57,11 +60,12 @@
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -85,21 +89,14 @@
         <div class="px-8 pb-10 max-w-6xl">
             <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Peminjaman Terakhir</h2>
 
-            <!-- Baris Filter Pencarian -->
-            <div class="flex items-center gap-4 mb-6">
-                <div class="flex-1">
-                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                </div>
-                <div class="w-64 relative">
-                    <div class="w-full flex items-center justify-between border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-500 cursor-pointer">
-                        <span>Kategori Surat</span>
-                        <i class="fa-solid fa-arrow-right text-black text-xs"></i>
-                    </div>
-                </div>
-                <button class="bg-[#2563eb] text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
-                    Filter
-                </button>
-            </div>
+            <form method="GET" class="mb-6 flex flex-col gap-3 md:flex-row">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Nama surat, arsip, atau kategori" class="flex-1 rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none">
+                <select name="kategori_id" class="w-full rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none md:w-64">
+                    <option value="">Semua kategori</option>
+                    @foreach ($kategoris as $kategori)<option value="{{ $kategori->id }}" @selected($kategoriId === $kategori->id)>{{ $kategori->name }}</option>@endforeach
+                </select>
+                <div class="flex gap-2"><button class="rounded-md bg-[#2563eb] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button><a href="{{ route('ketua.riwayat.peminjaman') }}" class="rounded-md border border-gray-300 px-4 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100">Reset</a></div>
+            </form>
 
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
                 <table class="w-full text-left border-collapse">
@@ -122,13 +119,7 @@
                                     'aktif' => 'Aktif',
                                     'selesai' => 'Selesai',
                                 ];
-                                $statusColor = [
-                                    'menunggu_validasi' => 'text-amber-600 bg-amber-100',
-                                    'disetujui' => 'text-green-600 bg-green-100',
-                                    'ditolak' => 'text-red-600 bg-red-100',
-                                    'aktif' => 'text-blue-600 bg-blue-100',
-                                    'selesai' => 'text-gray-600 bg-gray-200',
-                                ];
+                                $statusColor = ['Menunggu' => 'text-amber-600 bg-amber-100', 'Aktif' => 'text-blue-600 bg-blue-100', 'Ditolak' => 'text-red-600 bg-red-100', 'Selesai' => 'text-gray-600 bg-gray-200'];
                                 $fileUrl = $peminjaman->file_pengajuan ? asset('storage/' . $peminjaman->file_pengajuan) : ($peminjaman->arsip?->file_path ? asset('storage/' . $peminjaman->arsip->file_path) : null);
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
@@ -136,13 +127,13 @@
                                 <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->kategori?->name ?? '-' }}</td>
                                 <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
                                 <td class="py-3.5 px-6">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium {{ $statusColor[$peminjaman->status] ?? 'text-gray-600 bg-gray-200' }}">
-                                        {{ $statusLabel[$peminjaman->status] ?? ucfirst(str_replace('_', ' ', $peminjaman->status)) }}
+                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 font-medium {{ $statusColor[$peminjaman->display_status] ?? 'text-gray-600 bg-gray-200' }}">
+                                        {{ $peminjaman->display_status }}
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-6">
                                     @if ($fileUrl)
-                                        <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat PDF</a>
+                                        <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">Lihat</a>
                                     @else
                                         <span class="text-xs text-gray-400">File tidak tersedia</span>
                                     @endif
@@ -150,7 +141,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada riwayat peminjaman.</td>
+                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">{{ $search !== '' || $kategoriId ? 'Tidak ada data yang sesuai dengan filter.' : 'Belum ada riwayat peminjaman.' }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -158,7 +149,7 @@
             </div>
 
             <div class="flex justify-center items-center gap-3">
-                {{ $peminjamans->links() }}
+                {{ $peminjamans->withQueryString()->links() }}
             </div>
         </div>
     </main>
@@ -180,5 +171,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

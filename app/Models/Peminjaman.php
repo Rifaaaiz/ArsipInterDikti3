@@ -86,9 +86,48 @@ class Peminjaman extends Model
 
     public function scopeActiveNow(Builder $query): Builder
     {
-        return $query->where('status', 'aktif')
+        return $query->where(function (Builder $subQuery) {
+                $subQuery->where('status', 'aktif')
+                    ->orWhere('status', 'disetujui');
+            })
             ->whereDate('tanggal_mulai', '<=', now()->toDateString())
             ->whereDate('tanggal_selesai', '>=', now()->toDateString());
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        $status = strtolower((string) ($this->status ?? ''));
+        $now = now();
+
+        if ($status === 'ditolak') {
+            return 'Ditolak';
+        }
+
+        if ($status === 'menunggu_validasi') {
+            return 'Menunggu';
+        }
+
+        if (in_array($status, ['selesai', 'dikembalikan'], true)) {
+            return 'Selesai';
+        }
+
+        if (! in_array($status, ['aktif', 'disetujui'], true)) {
+            return 'Menunggu';
+        }
+
+        if ($this->tanggal_selesai && $now->greaterThan($this->tanggal_selesai->endOfDay())) {
+            return 'Selesai';
+        }
+
+        if ($this->tanggal_mulai && $now->lessThan($this->tanggal_mulai->startOfDay())) {
+            return 'Diterima';
+        }
+
+        if ($this->tanggal_mulai && $this->tanggal_selesai && $now->between($this->tanggal_mulai->startOfDay(), $this->tanggal_selesai->endOfDay())) {
+            return 'Aktif';
+        }
+
+        return $this->tanggal_mulai && $now->lt($this->tanggal_mulai) ? 'Diterima' : 'Aktif';
     }
 
     public function scopeCompletedNow(Builder $query): Builder
@@ -96,7 +135,7 @@ class Peminjaman extends Model
         return $query->where(function (Builder $query) {
             $query->where('status', 'selesai')
                 ->orWhere(function (Builder $subQuery) {
-                    $subQuery->where('status', 'aktif')
+                    $subQuery->whereIn('status', ['aktif', 'disetujui'])
                         ->whereDate('tanggal_selesai', '<', now()->toDateString());
                 });
         });

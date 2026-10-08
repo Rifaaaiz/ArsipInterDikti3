@@ -20,37 +20,42 @@
                 <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
             
-            <!-- Menu -->
+            <!-- Menu Sidebar -->
             <nav class="px-4 space-y-1">
-                <!-- Dashboard (Aktif) -->
+                <!-- Dashboard (AKTIF - Biru Solid, Tanpa Hover Abu) -->
                 <a href="/admin-tu" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
-                <a href="/admin-tu/validasi" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
+                <!-- Menu Tidak Aktif (Punya Hover Abu-abu Gelap yang Normal) -->
+                <a href="/admin-tu/validasi" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
                 </a>
 
-                <a href="/admin-tu/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <a href="/admin-tu/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 
-                <a href="/admin-tu/laporan-arsip" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <a href="/admin-tu/laporan-arsip" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-file-lines"></i> Laporan Arsip
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-1">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
-        </div>
+            <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </button>
+            </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -158,5 +163,6 @@
         </div>
     </main>
 
+    <x-logout-confirmation />
 </body>
 </html>

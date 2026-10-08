@@ -22,8 +22,11 @@
             
             <!-- Menu Sidebar -->
             <nav class="px-4 space-y-1">
-                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house w-5"></i> Dashboard
+                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>  Dashboard
                 </a>
                 
                 <!-- Kelola Arsip Dropdown (Terbuka) -->
@@ -43,7 +46,7 @@
                 <a href="{{ route('superadmin.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-regular fa-circle-check w-5"></i> Validasi Peminjaman
                 </a>
-                <a href="/super-admin/kelola" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                <a href="{{ route('superadmin.users')}}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
                     <i class="fa-solid fa-users w-5"></i> Kelola User
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
@@ -56,14 +59,12 @@
         </div>
         
         <!-- Logout -->
-        <div class="p-6 border-t border-gray-800">
-            <form method="POST" action="{{ route('logout') }}">
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                 @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-500 font-bold text-sm hover:text-red-400 transition w-full">
+                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
                 </button>
             </form>
-        </div>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -111,15 +112,17 @@
             </div>
 
             <!-- PERINGATAN HAPUS ARSIP -->
-            <div class="mb-6 max-w-4xl border border-red-300 rounded-lg bg-transparent text-center py-2.5">
-                <p class="text-red-600 font-bold text-sm tracking-wide">Hapus Arsip</p>
+            <div class="mb-6 w-full">
+                <button id="delete-mode-toggle" type="button" class="w-full rounded-lg border border-red-300 bg-white py-3 text-sm font-bold tracking-wide text-red-600 shadow-sm transition hover:bg-red-50">
+                    Hapus Arsip
+                </button>
             </div>
 
             <!-- FILTER PENCARIAN -->
             <form method="GET" action="{{ route('superadmin.arsip.penghapusan') }}" class="mb-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div class="flex flex-col">
-                        <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Nama Surat" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                        <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Nama, nomor, klasifikasi, kategori, atau Pokja" class="w-full border border-gray-300 bg-white rounded-lg px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                     </div>
                     
                     <div class="flex flex-col relative">
@@ -170,11 +173,11 @@
             </form>
 
             <!-- TABEL PENGHAPUSAN -->
-            <div class="bg-transparent rounded-xl overflow-hidden">
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[900px] text-left border-collapse">
-                        <thead>
-                            <tr class="border-b-2 border-gray-200">
+                        <thead class="bg-slate-50">
+                            <tr class="border-b border-gray-200">
                                 <th class="py-4 px-4 text-sm font-bold text-[#445585]">Nama Arsip</th>
                                 <th class="py-4 px-4 text-sm font-bold text-[#445585]">Kategori</th>
                                 <th class="py-4 px-4 text-sm font-bold text-[#445585]">Kelompok Kerja</th>
@@ -182,9 +185,9 @@
                                 <th class="py-4 px-4 text-sm font-bold text-[#445585]">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100 bg-transparent">
+                        <tbody class="divide-y divide-gray-100 bg-white">
                             @forelse ($arsips as $arsip)
-                                <tr class="hover:bg-white/50 transition">
+                                <tr class="transition hover:bg-slate-50">
                                     <td class="py-4 px-4 text-sm font-bold text-gray-800">{{ $arsip->nama_arsip }}</td>
                                     <td class="py-4 px-4 text-sm text-gray-600 font-medium">{{ $arsip->kategori?->name ?? '-' }}</td>
                                     <td class="py-4 px-4 text-sm text-gray-600 font-medium">{{ $arsip->pokja?->name ?? '-' }}</td>
@@ -200,7 +203,7 @@
                                             @endif
                                             
                                             <!-- Logic Form Hapus Tetap Utuh -->
-                                            <form method="POST" action="{{ route('superadmin.arsip.delete', $arsip) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus arsip ini?');" class="inline-block">
+                                            <form method="POST" action="{{ route('superadmin.arsip.delete', $arsip) }}" class="delete-archive-form hidden">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="bg-red-600 text-white px-5 py-1.5 rounded text-xs font-bold hover:bg-red-700 transition shadow-sm">
@@ -212,7 +215,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-12 px-6 text-center text-sm text-gray-500 bg-white/50 rounded-lg">
+                                    <td colspan="5" class="bg-white py-12 px-6 text-center text-sm text-gray-500">
                                         {{ $filters['search'] || $filters['tanggal'] || $filters['kategoriId'] || $filters['pokjaId'] || $filters['source'] !== 'semua' ? 'Tidak ada arsip yang sesuai dengan filter.' : 'Belum ada data arsip.' }}
                                     </td>
                                 </tr>
@@ -229,5 +232,50 @@
             
         </div>
     </main>
+    <div id="delete-confirmation" class="fixed inset-0 z-[110] hidden items-center justify-center p-4" aria-hidden="true">
+        <div data-delete-overlay class="absolute inset-0 bg-slate-950/50 opacity-0 transition-opacity duration-200"></div>
+        <section data-delete-dialog class="relative w-full max-w-sm translate-y-2 scale-95 rounded-2xl bg-white p-6 opacity-0 shadow-2xl transition duration-200" role="dialog" aria-modal="true" aria-labelledby="delete-confirmation-title">
+            <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600"><i class="fa-solid fa-trash" aria-hidden="true"></i></div>
+            <h2 id="delete-confirmation-title" class="text-lg font-bold text-slate-900">Konfirmasi Hapus Arsip</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-600">Apakah Anda yakin ingin menghapus arsip ini?</p>
+            <div class="mt-6 flex justify-end gap-3"><button type="button" data-delete-cancel class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Batal</button><button type="button" data-delete-confirm class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700">Hapus</button></div>
+        </section>
+    </div>
+    <script>
+        (() => {
+            const toggle = document.getElementById('delete-mode-toggle');
+            const modal = document.getElementById('delete-confirmation');
+            const overlay = modal.querySelector('[data-delete-overlay]');
+            const dialog = modal.querySelector('[data-delete-dialog]');
+            let selectedForm = null;
+            const close = () => { overlay.classList.remove('opacity-100'); dialog.classList.remove('opacity-100', 'translate-y-0', 'scale-100'); setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200); };
+            toggle.addEventListener('click', () => {
+                const isActive = toggle.getAttribute('aria-pressed') === 'true';
+                toggle.setAttribute('aria-pressed', String(!isActive));
+                toggle.textContent = isActive ? 'Hapus Arsip' : 'Batalkan Mode Hapus';
+                document.querySelectorAll('.delete-archive-form').forEach((form) => form.classList.toggle('hidden', isActive));
+            });
+            document.querySelectorAll('.delete-archive-form').forEach((form) => form.addEventListener('submit', (event) => { event.preventDefault(); selectedForm = form; modal.classList.remove('hidden'); modal.classList.add('flex'); requestAnimationFrame(() => { overlay.classList.add('opacity-100'); dialog.classList.add('opacity-100', 'translate-y-0', 'scale-100'); }); }));
+            modal.querySelector('[data-delete-cancel]').addEventListener('click', close);
+            overlay.addEventListener('click', close);
+            modal.querySelector('[data-delete-confirm]').addEventListener('click', () => selectedForm?.submit());
+        })();
+
+        function toggleMenuArsip() {
+            const submenu = document.getElementById('submenu-arsip');
+            const ikonPanah = document.getElementById('ikon-panah');
+            
+            if (submenu.classList.contains('max-h-0')) {
+                submenu.classList.remove('max-h-0');
+                submenu.classList.add('max-h-40');
+                ikonPanah.classList.add('rotate-90');
+            } else {
+                submenu.classList.remove('max-h-40');
+                submenu.classList.add('max-h-0');
+                ikonPanah.classList.remove('rotate-90');
+            }
+        }
+    </script>
+    <x-logout-confirmation />
 </body>
 </html>

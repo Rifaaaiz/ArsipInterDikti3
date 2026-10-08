@@ -10,6 +10,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             KategoriArsipSeeder::class,
+            KlasifikasiArsipSeeder::class,
+            JraHierarchySeeder::class,
             AdminPokjaSeeder::class,
         ]);
     }

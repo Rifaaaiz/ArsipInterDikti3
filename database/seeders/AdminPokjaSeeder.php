@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Pokja;
@@ -12,44 +13,51 @@ class AdminPokjaSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat role Admin Pokja
         $role = Role::updateOrCreate(
             ['slug' => 'admin_pokja'],
-            [
-                'name' => 'Admin Pokja',
-            ]
+            ['name' => 'Admin Pokja']
         );
 
-        Role::updateOrCreate(
+        $ketuaRole = Role::updateOrCreate(
             ['slug' => 'ketua_pokja'],
-            [
-                'name' => 'Ketua Pokja',
-            ]
+            ['name' => 'Ketua Pokja']
         );
 
         $adminTuRole = Role::updateOrCreate(
             ['slug' => 'admin_tu'],
-            [
-                'name' => 'Admin TU',
-            ]
+            ['name' => 'Admin TU']
         );
 
         $superadminRole = Role::updateOrCreate(
             ['slug' => 'superadmin'],
-            [
-                'name' => 'Super Admin',
-            ]
+            ['name' => 'Super Admin']
         );
 
-        // 2. Buat Pokja Kelembagaan
-        $pokja = Pokja::updateOrCreate(
-            ['slug' => 'kelembagaan'],
-            [
-                'name' => 'Kelembagaan',
-            ]
-        );
+        $pokjaNames = [
+            'Kelembagaan dan Kemitraan',
+            'Penjaminan Mutu',
+            'Anti Dosa Pendidikan dan Integritas Akademik',
+            'Sumber Daya',
+            'Pembelajaran, Kemahasiswaan, dan Prestasi',
+            'Sistem Informasi dan PDDikti',
+            'Riset dan Pengabdian Masyarakat',
+            'Perencanaan dan Keuangan',
+            'Hukum, Kepegawaian, dan Tata Laksana',
+            'Tata Usaha dan Barang Milik Negara',
+            'Hubungan Masyarakat dan Kerja Sama',
+        ];
 
-        // 3. Buat user Admin Pokja
+        $pokjaMap = [];
+        foreach ($pokjaNames as $pokjaName) {
+            $pokja = Pokja::updateOrCreate(
+                ['slug' => Str::slug($pokjaName)],
+                ['name' => $pokjaName]
+            );
+            $pokjaMap[$pokjaName] = $pokja;
+        }
+
+        $defaultPokja = $pokjaMap['Kelembagaan dan Kemitraan'];
+
         User::updateOrCreate(
             ['username' => 'adminpokja'],
             [
@@ -57,12 +65,10 @@ class AdminPokjaSeeder extends Seeder
                 'email' => 'adminpokja@simarsip.test',
                 'password' => Hash::make('12345678'),
                 'role_id' => $role->id,
-                'pokja_id' => $pokja->id,
+                'pokja_id' => $defaultPokja->id,
                 'status' => 'active',
             ]
         );
-
-        $ketuaRole = Role::where('slug', 'ketua_pokja')->firstOrFail();
 
         User::updateOrCreate(
             ['username' => 'ketuapokja'],
@@ -71,7 +77,7 @@ class AdminPokjaSeeder extends Seeder
                 'email' => 'ketuapokja@simarsip.test',
                 'password' => Hash::make('12345678'),
                 'role_id' => $ketuaRole->id,
-                'pokja_id' => $pokja->id,
+                'pokja_id' => $defaultPokja->id,
                 'status' => 'active',
             ]
         );

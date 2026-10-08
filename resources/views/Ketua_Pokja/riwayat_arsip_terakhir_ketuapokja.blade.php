@@ -31,7 +31,10 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <a href="/ketua-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg> Dashboard
                 </a>
                 
                 <div class="pt-2">
@@ -66,11 +69,12 @@
         </div>
 
         <!-- Tombol Logout -->
-        <div class="p-6">
-            <a href="#" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-            </a>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -93,44 +97,16 @@
         <div class="px-8 pb-10 max-w-7xl">
             <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Arsip Terakhir</h2>
 
-            <!-- Baris Filter Pencarian Atas (Menggunakan grid 5 kolom agar tidak bergerak/berubah posisi) -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6 items-center">
-                <!-- 1. Nama Surat -->
-                <div>
-                    <input type="text" placeholder="Nama Surat" class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                </div>
-                
-                <!-- 2. No Surat -->
-                <div>
-                    <input type="text" placeholder="No Surat" class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                </div>
-                
-                <!-- 3. Dropdown Kategori (Sesuai Referensi Gambar) -->
-                <div class="relative">
-                    <select class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-500 focus:outline-none focus:border-blue-600 cursor-pointer pr-10">
-                        <option value="" disabled selected>Kategori Surat</option>
-                        <option value="keterangan" class="text-gray-800">Surat Keterangan</option>
-                        <option value="pengangkatan" class="text-gray-800">Surat Pengangkatan Angka Kredit</option>
-                        <option value="vital" class="text-gray-800">Surat Vital</option>
-                    </select>
-                    <!-- Ikon panah bawah kustom agar tidak bergeser -->
-                    <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-black">
-                        <i class="fa-solid fa-arrow-down text-xs"></i>
-                    </div>
-                </div>
-
-                <!-- 4. Tanggal Dokumen -->
-                <div class="relative">
-                    <input type="text" placeholder="Tanggal Dokumen" onfocus="(this.type='date')" onblur="(this.type='text')" class="w-full border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-500 focus:outline-none focus:border-blue-600">
-                </div>
-
-                <!-- 5. Tombol Filter -->
-                <div>
-                    <button class="w-full bg-[#2563eb] text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
-                        Filter
-                    </button>
-                </div>
-            </div>
+            <form method="GET" class="mb-6 grid grid-cols-1 items-center gap-3 md:grid-cols-5">
+                <input type="text" name="search" value="{{ $search }}" placeholder="Nama, nomor, kategori, atau klasifikasi" class="w-full rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none">
+                <input type="text" name="nomor_dokumen" value="{{ $nomorDokumen }}" placeholder="No Dokumen" class="w-full rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none">
+                <select name="kategori_id" class="w-full rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none">
+                    <option value="">Semua kategori</option>
+                    @foreach ($kategoris as $kategori)<option value="{{ $kategori->id }}" @selected($kategoriId === $kategori->id)>{{ $kategori->name }}</option>@endforeach
+                </select>
+                <input type="date" name="tanggal_dokumen" value="{{ $tanggalDokumen }}" class="w-full rounded-md border border-gray-400 bg-white px-4 py-2.5 text-sm text-gray-700 focus:border-blue-600 focus:outline-none">
+                <div class="flex gap-2"><button class="flex-1 rounded-md bg-[#2563eb] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button><a href="{{ route('ketua.riwayat.arsip') }}" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm text-gray-600 transition hover:bg-gray-100">Reset</a></div>
+            </form>
 
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
                 <table class="w-full text-left border-collapse">
@@ -160,7 +136,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada arsip terbaru.</td>
+                                <td colspan="5" class="py-8 px-6 text-center text-sm text-gray-500">{{ $search !== '' || $nomorDokumen !== '' || $kategoriId || $tanggalDokumen ? 'Tidak ada data yang sesuai dengan filter.' : 'Belum ada riwayat arsip.' }}</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -168,7 +144,7 @@
             </div>
 
             <div class="flex justify-center items-center gap-3">
-                {{ $arsips->links() }}
+                {{ $arsips->withQueryString()->links() }}
             </div>
         </div>
     </main>
@@ -190,5 +166,6 @@
             }
         }
     </script>
+    <x-logout-confirmation />
 </body>
 </html>

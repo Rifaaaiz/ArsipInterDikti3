@@ -30,8 +30,12 @@
             <!-- Menu -->
             <nav class="px-4 space-y-1">
                 <!-- Dashboard (Active) -->
-                <a href="/dashboard-pokja" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition">
-                    <i class="fa-solid fa-house"></i> Dashboard
+                <a href="/dashboard-pokja" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
+                        <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                            <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
+                        </svg> 
+                        Dashboard
                 </a>
                 
                 <!-- Wrapper Menu Arsip Pokja -->
@@ -145,8 +149,19 @@
                                 <td class="py-3.5 px-6 text-gray-500">{{ optional($peminjaman->tanggal_mulai)->format('d/m/Y') ?? '-' }}</td>
                                 <td class="py-3.5 px-6 text-gray-500">{{ optional($peminjaman->tanggal_selesai)->format('d/m/Y') ?? '-' }}</td>
                                 <td class="py-3.5 px-6">
-                                    <span class="inline-flex items-center gap-1.5 text-green-600 font-medium">
-                                        <span class="w-2 h-2 rounded-full bg-green-500"></span> Aktif
+                                    @php
+                                        $status = $peminjaman->display_status;
+                                        $statusStyles = [
+                                            'Ditolak' => ['text' => 'text-red-600', 'dot' => 'bg-red-500'],
+                                            'Diterima' => ['text' => 'text-green-600', 'dot' => 'bg-green-500'],
+                                            'Menunggu' => ['text' => 'text-yellow-600', 'dot' => 'bg-yellow-500'],
+                                            'Aktif' => ['text' => 'text-blue-600', 'dot' => 'bg-blue-500'],
+                                            'Selesai' => ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'],
+                                        ];
+                                        $statusStyle = $statusStyles[$status] ?? ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'];
+                                    @endphp
+                                    <span class="inline-flex items-center gap-1.5 font-medium {{ $statusStyle['text'] }}">
+                                        <span class="w-2 h-2 rounded-full {{ $statusStyle['dot'] }}"></span> {{ $status }}
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-6">
@@ -200,5 +215,9 @@
             }
         }
     </script>
+    @if ($peminjamans instanceof \Illuminate\Contracts\Pagination\Paginator)
+        <div class="ml-64 px-8 pb-8">{{ $peminjamans->withQueryString()->links() }}</div>
+    @endif
+    <x-logout-confirmation />
 </body>
 </html>
