@@ -6,6 +6,9 @@ use App\Http\Controllers\KetuaPokjaController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeminjamanApprovalController;
 use App\Http\Controllers\SuperadminDashboardController;
+use App\Http\Controllers\SuperadminPeminjamanController;
+use App\Http\Controllers\SuperadminSuratMasukController;
+use App\Http\Controllers\SuperadminSuratKeluarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +105,16 @@ use App\Http\Controllers\SuperadminDashboardController;
         // Route untuk Peminjaman Aktif
         Route::get('/dashboard-pokja/peminjaman-aktif', [AdminPokjaController::class, 'peminjamanAktif'])
             ->name('pokja.peminjaman.aktif');
+        Route::get('/dashboard-pokja/peminjaman-aktif/{peminjaman}', [AdminPokjaController::class, 'detailPeminjamanAktif'])
+            ->name('pokja.peminjaman.aktif.detail');
+        Route::get('/dashboard-pokja/peminjaman-aktif/{peminjaman}/balasan/file', [AdminPokjaController::class, 'showPeminjamanReplyFile'])
+            ->name('pokja.peminjaman.aktif.balasan.file');
+
+        Route::get('/dashboard-pokja/surat-masuk', [AdminPokjaController::class, 'suratMasuk'])
+            ->name('pokja.surat-masuk');
+
+        Route::get('/dashboard-pokja/surat-keluar', [AdminPokjaController::class, 'suratKeluar'])
+            ->name('pokja.surat-keluar');
 
     });
 
@@ -126,6 +139,9 @@ use App\Http\Controllers\SuperadminDashboardController;
 
         Route::get('/validasi', [PeminjamanApprovalController::class, 'ketuaIndex'])
             ->name('ketua.peminjaman.validasi');
+
+        Route::post('/validasi/terima-semua', [PeminjamanApprovalController::class, 'ketuaApproveAll'])
+            ->name('ketua.peminjaman.approve-all');
 
         Route::patch('/validasi/{peminjaman}', [PeminjamanApprovalController::class, 'ketuaDecision'])
             ->name('ketua.peminjaman.decision');
@@ -207,6 +223,45 @@ use App\Http\Controllers\SuperadminDashboardController;
         Route::post('/arsip/tambah', [SuperadminDashboardController::class, 'storeArchive'])
             ->name('superadmin.arsip.store');
 
+        Route::get('/peminjaman/buat', [SuperadminPeminjamanController::class, 'create'])
+            ->name('superadmin.peminjaman.create');
+
+        Route::post('/peminjaman/buat', [SuperadminPeminjamanController::class, 'store'])
+            ->name('superadmin.peminjaman.store');
+
+        Route::get('/pokja/{pokjaSlug}/surat-keluar', [SuperadminSuratKeluarController::class, 'index'])
+            ->name('superadmin.surat-keluar');
+
+        Route::get('/pokja/adia/surat-masuk', [SuperadminSuratMasukController::class, 'indexAdia'])
+            ->name('superadmin.surat-masuk.adia');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk', [SuperadminSuratMasukController::class, 'index'])
+            ->name('superadmin.surat-masuk');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/peminjaman/{peminjaman}/file', [SuperadminSuratMasukController::class, 'showPeminjamanFile'])
+            ->name('superadmin.surat-masuk.peminjaman.file');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/peminjaman/{peminjaman}/balas', [SuperadminSuratMasukController::class, 'replyPeminjamanForm'])
+            ->name('superadmin.surat-masuk.peminjaman.balas');
+
+        Route::post('/pokja/{pokjaSlug}/surat-masuk/peminjaman/{peminjaman}/balas', [SuperadminSuratMasukController::class, 'storePeminjamanReply'])
+            ->name('superadmin.surat-masuk.peminjaman.balas.store');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/peminjaman/{peminjaman}', [SuperadminSuratMasukController::class, 'showPeminjaman'])
+            ->name('superadmin.surat-masuk.peminjaman.detail');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/{arsip}/balas', [SuperadminSuratMasukController::class, 'replyForm'])
+            ->name('superadmin.surat-masuk.balas');
+
+        Route::post('/pokja/{pokjaSlug}/surat-masuk/{arsip}/balas', [SuperadminSuratMasukController::class, 'storeReply'])
+            ->name('superadmin.surat-masuk.balas.store');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/{arsip}', [SuperadminSuratMasukController::class, 'show'])
+            ->name('superadmin.surat-masuk.detail');
+
+        Route::get('/pokja/{pokjaSlug}/surat-masuk/{arsip}/file', [SuperadminSuratMasukController::class, 'showFile'])
+            ->name('superadmin.surat-masuk.file');
+
         Route::get('/arsip/{arsip}/edit', [SuperadminDashboardController::class, 'editArchive'])
             ->name('superadmin.arsip.edit');
 
@@ -242,4 +297,7 @@ use App\Http\Controllers\SuperadminDashboardController;
 
         Route::get('/peminjaman-aktif', [SuperadminDashboardController::class, 'activeLoans'])
             ->name('superadmin.peminjaman.aktif');
+
+        Route::post('/peminjaman-aktif/{peminjaman}/balasan', [SuperadminPeminjamanController::class, 'storeReply'])
+            ->name('superadmin.peminjaman.balasan.store');
 });

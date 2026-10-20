@@ -17,10 +17,10 @@ class KategoriArsipSeeder extends Seeder
     public function run(): void
     {
         $kategoris = [
-            'Surat Vital',
-            'Surat Penting',
-            'Surat Biasa',
-            'Surat Rahasia',
+            'Surat Keluar Bersifat Rahasia',
+            'Surat Keluar',
+            'Surat Masuk',
+            'Non-Naskah Dinas',
         ];
 
         foreach ($kategoris as $nama) {

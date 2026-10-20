@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validasi Peminjaman - SIMARSIP</title>
+    <title>Validasi Usulan Upload - SIMARSIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -27,26 +27,10 @@
                         <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
                     </svg> Dashboard
                 </a>
-                
-                <!-- Arsip Pokja (Dropdown) -->
-                <div class="pt-2">
-                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder"></i> Arsip Pokja</span>
-                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
-                    </button>
-                    
-                    <!-- Sub-menu Tersembunyi (Default) -->
-                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
-                        <div class="flex flex-col gap-2 pt-1 pb-2">
-                            <a href="{{ url('/ketua-pokja/ajukan') }}" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Ajukan Peminjaman</a>
-                            <a href="{{ url('/ketua-pokja/upload') }}" class="block pl-11 py-1.5 text-sm font-medium text-gray-300 hover:text-white transition">Upload File Arsip</a>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Validasi Peminjaman (Menu Aktif - Biru) -->
+                <!-- Validasi Usulan (Menu Aktif - Biru) -->
                 <a href="{{ url('/ketua-pokja/validasi') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
-                    <i class="fa-regular fa-circle-check"></i> Validasi Peminjaman
+                    <i class="fa-regular fa-circle-check"></i> Validasi Upload
                 </a>
 
                 <!-- Profil -->
@@ -74,51 +58,111 @@
                 </form>
     </aside>
 
-    <main class="flex-1 ml-64 min-h-screen p-8">
-        <header class="flex justify-end mb-8"><span class="text-base font-bold text-gray-900">{{ auth()->user()->name }}</span><i class="fa-solid fa-circle-user text-2xl text-black ml-3"></i></header>
-        <h2 class="text-3xl font-bold text-black mb-5">Validasi Peminjaman Ketua Pokja</h2>
+    <main class="ml-64 flex min-h-screen flex-1 flex-col bg-[#f4f4f5] p-5 sm:p-8">
+        <header class="mb-8 flex justify-end">
+            <div class="flex items-center gap-3">
+                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
+            </div>
+        </header>
+        <h2 class="mb-5 text-3xl font-bold text-black">Validasi Usulan Upload</h2>
         @if (session('success'))
-            <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
+            <div data-flash-success="{{ session('success') }}" class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
         @endif
-        <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200">
+        @if (session('info'))
+            <div data-flash-info="{{ session('info') }}" class="mb-5 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">{{ session('info') }}</div>
+        @endif
+
+        <form id="approve-all-form" method="POST" action="{{ route('ketua.peminjaman.approve-all') }}" class="mb-5">
+            @csrf
+            <button type="submit" class="w-full rounded-lg bg-blue-600 px-6 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Terima Semua
+            </button>
+        </form>
+
+        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 border-b border-gray-200"><tr>
-                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Surat</th>
-                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Pengaju</th>
-                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Kategori</th>
-                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal</th>
-                        <th class="py-4 px-6 text-sm font-bold text-gray-700">Aksi</th>
+                <table class="min-w-[1050px] w-full border-collapse text-left">
+                    <thead class="border-b border-gray-200 bg-gray-50"><tr>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Jenis Surat</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Tanggal Mulai</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Tanggal Selesai</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Status</th>
+                        <th class="px-6 py-4 text-sm font-bold text-gray-700">Aksi</th>
                     </tr></thead>
-                    <tbody class="divide-y divide-gray-100">
+                    <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse ($pengajuan as $item)
-                            <tr class="hover:bg-gray-50">
-                                <td class="py-4 px-6 text-sm font-semibold text-gray-700">{{ $item->nama_surat }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->user?->name ?? '-' }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->kategori?->name ?? '-' }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-500">{{ $item->created_at?->format('d/m/Y') ?? '-' }}</td>
-                                <td class="py-4 px-6"><div class="flex flex-wrap gap-2">
-                                    @if ($item->file_pengajuan || $item->arsip?->file_path)
-                                        <a href="{{ asset('storage/' . ($item->file_pengajuan ?: $item->arsip->file_path)) }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700">Lihat File</a>
+                            @php
+                                $filePath = $item->file_pengajuan ?: $item->arsip?->file_path;
+                                $jenisSurat = $item->kategori?->name ?? $item->arsip?->kategori?->name;
+                                $kodeKlasifikasi = $item->klasifikasiArsip?->kode ?? $item->arsip?->klasifikasiArsip?->kode;
+                            @endphp
+                            <tr class="transition hover:bg-gray-50">
+                                <td class="px-6 py-4 font-semibold text-gray-700">{{ $item->arsip?->nama_arsip ?? $item->nama_surat ?? '-' }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $jenisSurat ?? '-' }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $kodeKlasifikasi ?? '-' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-gray-500">{{ $item->tanggal_mulai?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 text-gray-500">{{ $item->tanggal_selesai?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4">
+                                    <span class="inline-flex items-center gap-1.5 font-semibold text-amber-700">
+                                        <span class="h-2 w-2 rounded-full bg-amber-500"></span>Menunggu Validasi
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                    @if ($filePath)
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($filePath) }}" target="_blank" rel="noopener noreferrer" class="rounded-md bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">Lihat</a>
                                     @else
-                                        <span class="text-xs text-gray-400">File tidak tersedia.</span>
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
                                     @endif
-                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="approve"><button type="submit" class="bg-emerald-500 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-emerald-600">Terima</button></form>
-                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}">@csrf @method('PATCH')<input type="hidden" name="decision" value="reject"><button type="submit" class="bg-red-600 text-white px-4 py-1.5 rounded-md text-xs font-semibold hover:bg-red-700">Tolak</button></form>
-                                </div></td>
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}" data-confirm-title="Apakah anda yakin untuk menvalidasi surat ini?" data-confirm-button="Ya, Terima" data-confirm-color="#16a34a">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="decision" value="approve">
+                                        <button type="submit" class="rounded-md bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-green-700">Terima</button>
+                                    </form>
+                                    <form method="POST" action="{{ route('ketua.peminjaman.decision', $item) }}" data-confirm-title="Apakah anda yakin untuk menolak surat ini?" data-confirm-button="Ya, Tolak" data-confirm-color="#dc2626">
+                                        @csrf @method('PATCH')
+                                        <input type="hidden" name="decision" value="reject">
+                                        <button type="submit" class="rounded-md bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700">Tolak</button>
+                                    </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="py-10 px-6 text-center text-sm text-gray-500">Belum ada pengajuan peminjaman yang perlu divalidasi.</td></tr>
+                            <tr><td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">Belum ada usulan yang perlu divalidasi.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="mt-6"><p class="mb-3 text-sm text-gray-500">Menampilkan {{ $pengajuan->firstItem() ?? 0 }}-{{ $pengajuan->lastItem() ?? 0 }} dari {{ $pengajuan->total() }} pengajuan</p>{{ $pengajuan->withQueryString()->links() }}</div>
+
+        <div class="mt-5 flex flex-col items-center gap-3">
+            <p class="text-sm text-gray-500">Menampilkan {{ $pengajuan->firstItem() ?? 0 }}-{{ $pengajuan->lastItem() ?? 0 }} dari {{ $pengajuan->total() }} usulan</p>
+            @if ($pengajuan->hasPages())
+                <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+                    @if ($pengajuan->previousPageUrl())
+                        <a href="{{ $pengajuan->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-left"></i></a>
+                    @else
+                        <span class="flex h-9 w-9 items-center justify-center text-gray-400"><i class="fa-solid fa-arrow-left"></i></span>
+                    @endif
+                    @foreach ($pengajuan->getUrlRange(max(1, $pengajuan->currentPage() - 2), min($pengajuan->lastPage(), $pengajuan->currentPage() + 2)) as $page => $url)
+                        <a href="{{ $url }}" @class(['flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-sm font-semibold transition', 'bg-blue-600 text-white' => $page === $pengajuan->currentPage(), 'text-gray-800 hover:bg-gray-200' => $page !== $pengajuan->currentPage()]) @if ($page === $pengajuan->currentPage()) aria-current="page" @endif>{{ $page }}</a>
+                    @endforeach
+                    @if ($pengajuan->nextPageUrl())
+                        <a href="{{ $pengajuan->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-right"></i></a>
+                    @else
+                        <span class="flex h-9 w-9 items-center justify-center text-gray-400"><i class="fa-solid fa-arrow-right"></i></span>
+                    @endif
+                </nav>
+            @endif
+        </div>
     </main>
     <x-logout-confirmation />
 </body>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
@@ -134,5 +178,45 @@
                 ikonPanah.classList.remove('rotate-90');
             }
         }
+
+        const askConfirmation = (form, title, confirmButtonText, confirmColor) => {
+            Swal.fire({
+                title,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText,
+                cancelButtonText: 'Batal',
+                confirmButtonColor: confirmColor,
+                cancelButtonColor: '#6b7280',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        };
+
+        document.getElementById('approve-all-form')?.addEventListener('submit', (event) => {
+            event.preventDefault();
+            askConfirmation(event.currentTarget, 'Apakah anda yakin untuk terima semua surat ini?', 'Ya, Terima Semua', '#2563eb');
+        });
+
+        document.querySelectorAll('form[data-confirm-title]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                askConfirmation(
+                    event.currentTarget,
+                    event.currentTarget.dataset.confirmTitle,
+                    event.currentTarget.dataset.confirmButton,
+                    event.currentTarget.dataset.confirmColor
+                );
+            });
+        });
+
+        @if (session('success'))
+            Swal.fire({ icon: 'success', title: @json(session('success')), confirmButtonColor: '#2563eb' });
+        @elseif (session('info'))
+            Swal.fire({ icon: 'info', title: @json(session('info')), confirmButtonColor: '#2563eb' });
+        @endif
     </script>
 </html>

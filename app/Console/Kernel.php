@@ -12,7 +12,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('peminjaman:complete-expired')
+            ->dailyAt('00:05')
+            ->timezone(config('app.timezone'))
+            ->withoutOverlapping();
     }
 
     /**

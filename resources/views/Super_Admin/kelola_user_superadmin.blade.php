@@ -6,83 +6,111 @@
     <title>Kelola User - Super Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --sidebar-width: 256px; }
+        #superadmin-sidebar { width: var(--sidebar-width); transition: width 200ms ease-out, transform 200ms ease-out; }
+        #superadmin-main { margin-left: var(--sidebar-width); transition: margin-left 200ms ease-out; }
+        .sidebar-collapsed { --sidebar-width: 76px; }
+        .sidebar-collapsed [data-sidebar-label],
+        .sidebar-collapsed [data-sidebar-heading] { display: none; }
+        .sidebar-collapsed #sidebar-logo { justify-content: center; padding-left: 0; padding-right: 0; }
+        .sidebar-collapsed #superadmin-sidebar nav > a,
+        .sidebar-collapsed #superadmin-sidebar nav > div > button { justify-content: center; padding-left: 0.5rem; padding-right: 0.5rem; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > button > span { justify-content: center; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > button > i { display: none; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > div { display: none; }
+        .sidebar-collapsed #superadmin-sidebar form button { justify-content: center; }
+        @media (max-width: 767px) {
+            #superadmin-sidebar { width: 256px; transform: translateX(-100%); }
+            #superadmin-main { margin-left: 0; }
+            .sidebar-mobile-open #superadmin-sidebar { transform: translateX(0); }
+            .sidebar-collapsed { --sidebar-width: 0px; }
+            #sidebar-resize-handle { display: none; }
+        }
+    </style>
 </head>
 <body class="bg-[#f4f7f6] flex font-sans text-gray-800">
-    <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
-        <div>
-            <!-- Logo -->
-            <div class="flex items-center gap-3 px-6 py-6 mb-2">
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+    <aside id="superadmin-sidebar" class="fixed left-0 top-0 z-30 flex h-screen flex-col bg-[#0a1120] text-white">
+        <div class="min-h-0 flex-1 overflow-y-auto">
+            <div id="sidebar-logo" class="mb-2 flex items-center gap-3 px-6 py-6">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                     <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
                 </div>
-                <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
+                <h1 data-sidebar-label class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
-            
-            <!-- Menu Sidebar -->
-            <nav class="px-4 space-y-1">
-                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <nav class="space-y-1 px-4 pb-4">
+                <a href="{{ route('superadmin.dashboard') }}" title="Dashboard" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-gray-200 transition hover:bg-gray-800 hover:text-white">
+                    <svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg>  Dashboard
+                    </svg><span data-sidebar-label>Dashboard</span>
                 </a>
-                
-                <!-- Dropdown Kelola Arsip -->
                 <div class="pt-1">
-                    <!-- Tambahin onclick sama id ikon-panah di sini -->
-                    <button onclick="toggleMenuArsip()" class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i> Kelola Arsip</span>
-                        <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
+                    <button type="button" onclick="toggleSidebarMenu('submenu-arsip', 'ikon-panah-arsip')" aria-expanded="false" class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-800 hover:text-white focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i><span data-sidebar-label>Kelola Arsip</span></span>
+                        <i id="ikon-panah-arsip" class="fa-solid fa-chevron-right text-xs transition-transform duration-300"></i>
                     </button>
-                    
-                    <!-- Tambahin id submenu-arsip sama class max-h-0 overflow-hidden di sini -->
-                    <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-0">
+                    <div id="submenu-arsip" class="max-h-0 overflow-hidden transition-all duration-300">
                         <div class="flex flex-col gap-1 pt-1 pb-2">
-                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Pengapusan Arsip</a>
-                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Laporan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Penghapusan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Laporan Arsip</a>
                         </div>
                     </div>
                 </div>
-
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-regular fa-circle-check w-5"></i> Validasi Peminjaman
+                <a href="{{ route('superadmin.peminjaman.validasi') }}" title="Validasi Peminjaman" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-regular fa-circle-check w-5"></i><span data-sidebar-label>Validasi Peminjaman</span>
                 </a>
-
-                <!-- Menu Kelola User (Aktif / Biru Solid) -->
-                <a href="{{ route('superadmin.users') }}" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-1">
-                    <i class="fa-solid fa-users w-5"></i> Kelola User
+                <a href="{{ route('superadmin.users') }}" aria-current="page" title="Kelola User" class="mt-1 flex items-center gap-3 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm">
+                    <i class="fa-solid fa-users w-5"></i><span data-sidebar-label>Kelola User</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-regular fa-file-lines w-5"></i> Panduan Penggunaan
+                <p data-sidebar-heading class="px-4 pb-1 pt-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tim Pokja</p>
+                @foreach ($pokjas as $pokja)
+                    <div>
+                        <button type="button" onclick="toggleSidebarMenu('submenu-pokja-{{ $pokja->id }}', 'ikon-panah-pokja-{{ $pokja->id }}')" aria-expanded="false" class="flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                            <span class="flex min-w-0 items-center gap-3"><i class="fa-solid fa-people-group w-5 shrink-0"></i><span data-sidebar-label class="truncate">{{ $pokja->name }}</span></span>
+                            <i id="ikon-panah-pokja-{{ $pokja->id }}" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div id="submenu-pokja-{{ $pokja->id }}" class="max-h-0 overflow-hidden transition-all duration-300">
+                            <div class="flex flex-col gap-1 py-1">
+                                <a href="{{ route('superadmin.surat-masuk', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Masuk</a>
+                                <a href="{{ route('superadmin.surat-keluar', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Keluar</a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+                <a href="#" title="Panduan Penggunaan" class="mt-3 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-regular fa-file-lines w-5"></i><span data-sidebar-label>Panduan Penggunaan</span>
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
-                    <i class="fa-solid fa-gear w-5"></i> Pengaturan Sistem
+                <a href="#" title="Pengaturan Sistem" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-solid fa-gear w-5"></i><span data-sidebar-label>Pengaturan Sistem</span>
                 </a>
             </nav>
         </div>
-
-        <!-- Logout -->
-        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
-                @csrf
-                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-                </button>
-            </form>
+        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-800 p-4">
+            @csrf
+            <button type="submit" title="Logout" class="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-red-500 transition hover:bg-red-950 hover:text-red-400">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span data-sidebar-label>Logout</span>
+            </button>
+        </form>
+        <button id="sidebar-resize-handle" type="button" aria-label="Ubah lebar sidebar" title="Tarik untuk mengubah lebar sidebar" class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize bg-transparent transition hover:bg-blue-500/60"></button>
     </aside>
 
-    <main class="flex-1 ml-64 min-h-screen">
-        <header class="px-8 py-6 flex justify-end font-bold">
-            <span class="mr-3">{{ auth()->user()->name }}</span>
-            <i class="fa-solid fa-circle-user text-2xl ml-1"></i>
+    <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
+    <main id="superadmin-main" class="flex min-h-screen w-full min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f6] px-5 py-5 sm:px-8">
+            <button id="sidebar-toggle" type="button" aria-label="Ciutkan atau buka sidebar" aria-expanded="true" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-gray-900">Super Admin</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
+            </div>
         </header>
 
-        <div class="px-8 pb-10 max-w-7xl w-full">
-            <div class="flex items-center justify-between mb-6">
+        <div class="w-full min-w-0 flex-1 px-5 pb-10 sm:px-8">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-4">
                 <h2 class="text-3xl font-bold text-black">Kelola User</h2>
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     <a href="{{ route('superadmin.users', array_merge(request()->query(), ['delete_mode' => $deleteMode ? 0 : 1])) }}" class="rounded-lg {{ $deleteMode ? 'bg-red-600 text-white' : 'bg-[#e9edf7] text-gray-700' }} px-5 py-2.5 text-sm font-bold shadow-sm hover:opacity-95 transition">
                         {{ $deleteMode ? 'Batal Hapus' : 'Hapus User' }}
                     </a>
@@ -113,7 +141,7 @@
                 @endif
             </form>
 
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[860px] text-left">
                         <thead class="bg-gray-50">
@@ -275,19 +303,106 @@
     </div>
 
     <script>
+        (() => {
+            const pageBody = document.body;
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+            const resizeHandle = document.getElementById('sidebar-resize-handle');
+            const desktopQuery = window.matchMedia('(min-width: 768px)');
+
+            const setSidebarWidth = (width) => {
+                const boundedWidth = Math.min(380, Math.max(220, width));
+                document.documentElement.style.setProperty('--sidebar-width', `${boundedWidth}px`);
+                localStorage.setItem('superadmin-sidebar-width', String(boundedWidth));
+            };
+
+            const setCollapsed = (collapsed) => {
+                pageBody.classList.toggle('sidebar-collapsed', collapsed);
+                sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+                localStorage.setItem('superadmin-sidebar-collapsed', String(collapsed));
+            };
+
+            const closeMobileSidebar = () => {
+                pageBody.classList.remove('sidebar-mobile-open');
+                sidebarBackdrop.classList.add('hidden');
+                sidebarToggle.setAttribute('aria-expanded', 'false');
+            };
+
+            if (desktopQuery.matches) {
+                const savedWidth = Number(localStorage.getItem('superadmin-sidebar-width'));
+                if (savedWidth >= 220 && savedWidth <= 380) {
+                    document.documentElement.style.setProperty('--sidebar-width', `${savedWidth}px`);
+                }
+                setCollapsed(localStorage.getItem('superadmin-sidebar-collapsed') === 'true');
+            }
+
+            sidebarToggle.addEventListener('click', () => {
+                if (desktopQuery.matches) {
+                    setCollapsed(!pageBody.classList.contains('sidebar-collapsed'));
+                    return;
+                }
+                pageBody.classList.add('sidebar-mobile-open');
+                sidebarBackdrop.classList.remove('hidden');
+                sidebarToggle.setAttribute('aria-expanded', 'true');
+            });
+
+            sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+            window.addEventListener('resize', () => {
+                if (desktopQuery.matches) {
+                    closeMobileSidebar();
+                    const savedWidth = Number(localStorage.getItem('superadmin-sidebar-width'));
+                    if (savedWidth >= 220 && savedWidth <= 380) {
+                        document.documentElement.style.setProperty('--sidebar-width', `${savedWidth}px`);
+                    }
+                    pageBody.classList.toggle('sidebar-collapsed', localStorage.getItem('superadmin-sidebar-collapsed') === 'true');
+                } else {
+                    pageBody.classList.remove('sidebar-collapsed');
+                    closeMobileSidebar();
+                }
+            });
+
+            resizeHandle.addEventListener('pointerdown', (event) => {
+                if (!desktopQuery.matches || pageBody.classList.contains('sidebar-collapsed')) {
+                    return;
+                }
+                event.preventDefault();
+                resizeHandle.setPointerCapture(event.pointerId);
+                const updateWidth = (pointerEvent) => setSidebarWidth(pointerEvent.clientX);
+                const stopResize = () => {
+                    resizeHandle.removeEventListener('pointermove', updateWidth);
+                    resizeHandle.removeEventListener('pointerup', stopResize);
+                    resizeHandle.removeEventListener('pointercancel', stopResize);
+                };
+                resizeHandle.addEventListener('pointermove', updateWidth);
+                resizeHandle.addEventListener('pointerup', stopResize);
+                resizeHandle.addEventListener('pointercancel', stopResize);
+            });
+        })();
+
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
-            const ikonPanah = document.getElementById('ikon-panah');
+            const ikonPanah = document.getElementById('ikon-panah-arsip');
 
             if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
-                submenu.classList.add('max-h-40');
+                submenu.classList.add('max-h-96');
                 ikonPanah.classList.add('rotate-90');
             } else {
-                submenu.classList.remove('max-h-40');
+                submenu.classList.remove('max-h-96');
                 submenu.classList.add('max-h-0');
                 ikonPanah.classList.remove('rotate-90');
             }
+        }
+
+        function toggleSidebarMenu(submenuId, iconId) {
+            const submenu = document.getElementById(submenuId);
+            const icon = document.getElementById(iconId);
+            const button = icon.closest('button');
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            submenu.classList.toggle('max-h-0', expanded);
+            submenu.classList.toggle('max-h-96', !expanded);
+            icon.classList.toggle('rotate-90', !expanded);
+            button.setAttribute('aria-expanded', String(!expanded));
         }
 
         function setCustomSelectState(selectWrapper, open) {

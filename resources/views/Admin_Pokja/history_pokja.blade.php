@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#f8f9fa] flex font-sans text-gray-800">
+<body class="flex min-h-screen bg-[#f4f4f5] font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0">
+    <aside class="fixed left-0 top-0 z-20 flex min-h-screen w-64 flex-col justify-between bg-[#0a1120] text-white">
         <div>
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
@@ -69,102 +69,178 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen p-8">
-        
-        <h2 class="text-3xl font-bold mb-6 text-gray-900 mt-4">History Surat Pokja</h2>
-
-        <form method="GET" action="{{ route('pokja.history') }}" class="mb-8">
-            <div class="w-full max-w-2xl">
-                <label for="filter" class="block text-sm font-bold text-black mb-2">Kategori</label>
-                <div class="relative">
-                    <select id="filter" name="filter" onchange="this.form.submit()" class="w-full border border-gray-400 bg-white rounded-md px-4 py-3 pr-10 text-sm text-gray-700 focus:outline-none focus:border-blue-600 transition appearance-none cursor-pointer">
-                        <option value="semua" {{ $filter === 'semua' ? 'selected' : '' }}>Semua Surat</option>
-                        <option value="arsip" {{ $filter === 'arsip' ? 'selected' : '' }}>Arsip</option>
-                        <option value="peminjaman" {{ $filter === 'peminjaman' ? 'selected' : '' }}>Peminjaman</option>
-                    </select>
-                    <!-- Ikon panah custom -->
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
-                        <i class="fa-solid fa-chevron-down text-sm"></i>
-                    </div>
-                </div>
+    <main class="ml-64 flex min-h-screen flex-1 flex-col">
+        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
+            <div class="flex items-center gap-2 text-sm font-bold text-gray-900">
+                <span>admin Pokja Kelembagaan</span>
+                <i class="fa-solid fa-circle-user text-lg" aria-hidden="true"></i>
             </div>
-        </form>
+        </header>
 
-        <div class="bg-[#f8f9fa] rounded-xl overflow-hidden shadow-sm border border-gray-200">
-            <table class="w-full text-left border-collapse">
-                <thead class="border-b border-gray-200">
-                    <tr>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Nama Surat</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Jenis</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Kategori</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Tanggal</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Status</th>
-                        <th class="py-4 px-6 text-base font-bold text-indigo-800">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($history as $item)
-                        @php
-                            $statusLabels = [
-                                'menunggu_validasi' => 'Menunggu',
-                                'disetujui' => 'Menunggu',
-                                'ditolak' => 'Ditolak',
-                                'dikembalikan' => 'Selesai',
-                                'selesai' => 'Selesai',
-                            ];
-                            $statusClasses = [
-                                'menunggu_validasi' => 'text-amber-700 bg-amber-100',
-                                'disetujui' => 'text-green-700 bg-green-100',
-                                'ditolak' => 'text-red-700 bg-red-100',
-                                'dikembalikan' => 'text-orange-700 bg-orange-100',
-                                'selesai' => 'text-gray-700 bg-gray-200',
-                            ];
-                            $status = $item->status ?? 'tidak_diketahui';
-                            $statusLabel = $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
-                            $statusClass = $statusClasses[$status] ?? 'text-gray-700 bg-gray-200';
-                        @endphp
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->nama }}</td>
-                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ ucfirst($item->jenis) }}</td>
-                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->kategori ?? '-' }}</td>
-                            <td class="py-4 px-6 text-sm text-gray-500 font-semibold">{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') : '-' }}</td>
-                            <td class="py-4 px-6">
-                                <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">
-                                    <span class="h-2 w-2 rounded-full bg-current"></span>{{ $statusLabel }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-6">
-                                @if ($item->file_path)
-                                    <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" rel="noopener" class="inline-block bg-blue-600 text-white px-6 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat</a>
-                                @else
-                                    <span class="text-sm text-gray-400">File tidak tersedia</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
+        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
+            <h2 class="mb-6 text-3xl font-bold text-black">History Arsip Pokja</h2>
+
+            @php
+                $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
+                $hasHistoryFilters = $search !== ''
+                    || ($filters['filter'] ?? '')
+                    || ($filters['jenis_surat_id'] ?? '')
+                    || ($filters['sifat_surat_id'] ?? '')
+                    || ($filters['tanggal_dokumen'] ?? '')
+                    || ($filters['klasifikasi_arsip_id'] ?? '');
+            @endphp
+            <form method="GET" action="{{ route('pokja.history') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Cari nama surat"
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+                    <div class="relative w-full">
+                        <select name="jenis_surat_id" aria-label="Jenis Surat"
+                            class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Jenis Surat</option>
+                            @foreach ($jenisSurats as $jenis)
+                                <option value="{{ $jenis->id }}" @selected(($filters['jenis_surat_id'] ?? null) == $jenis->id)>{{ $jenis->name }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-arrow-right pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-800" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="relative w-full">
+                        <select name="sifat_surat_id" aria-label="Sifat Surat"
+                            class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Sifat Surat</option>
+                            @foreach ($sifatSurats as $sifat)
+                                <option value="{{ $sifat->id }}" @selected(($filters['sifat_surat_id'] ?? null) == $sifat->id)>{{ $sifat->name }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-arrow-right pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-800" aria-hidden="true"></i>
+                    </div>
+
+                    <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                        Filter
+                    </button>
+
+                    <div class="relative w-full">
+                        <select name="filter" aria-label="Kategori"
+                            class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="" @selected($filter === 'semua')>Kategori</option>
+                            <option value="arsip" @selected($filter === 'arsip')>Arsip</option>
+                            <option value="peminjaman" @selected($filter === 'peminjaman')>Peminjaman</option>
+                        </select>
+                        <i class="fa-solid fa-arrow-right pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-800" aria-hidden="true"></i>
+                    </div>
+
+                    <div class="relative w-full">
+                        <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen"
+                            class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    </div>
+
+                    <div class="relative w-full" data-klasifikasi-root="history-klasifikasi">
+                        <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasi_arsip_id'] ?? '' }}" data-klasifikasi-value>
+                        <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? ($selectedKlasifikasi->kode . ' — ' . ($selectedKlasifikasi->judul ?? '')) : 'Kode Klasifikasi' }}</span>
+                            <i class="fa-solid fa-arrow-right text-sm text-gray-800 transition-transform" aria-hidden="true"></i>
+                        </button>
+
+                        <div class="fixed inset-0 z-[100] hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
+                            <button type="button" class="fixed inset-0 cursor-default bg-slate-950/45" data-klasifikasi-close aria-label="Tutup pemilih kode klasifikasi"></button>
+                            <section class="relative mx-auto flex max-h-[88vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
+                                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pb-3 pt-5 sm:px-6">
+                                    <div class="flex flex-col gap-3 sm:flex-row">
+                                        <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" class="h-[42px] w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                        <button type="button" data-klasifikasi-search-button class="h-[42px] rounded-md bg-[#1d4ed8] px-5 text-sm font-semibold text-white hover:bg-[#1e40af] sm:w-[110px]">Cari</button>
+                                        <button type="button" data-klasifikasi-reset class="h-[42px] rounded-md border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-[110px]">Reset</button>
+                                    </div>
+                                </div>
+                                <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+                                    <div class="grid gap-3 md:grid-cols-2">
+                                        @foreach ($klasifikasis as $klasifikasi)
+                                            <label class="klasifikasi-option flex cursor-pointer gap-3 rounded-lg border border-slate-200 p-3 text-sm hover:border-blue-300 hover:bg-blue-50" data-search="{{ strtolower($klasifikasi->kode . ' ' . $klasifikasi->judul . ' ' . $klasifikasi->uraian) }}">
+                                                <input type="radio" name="filter-klasifikasi-picker" value="{{ $klasifikasi->id }}" data-code="{{ $klasifikasi->kode }}" data-label="{{ $klasifikasi->kode }} — {{ $klasifikasi->judul }}" class="mt-1 accent-blue-600" @checked(($filters['klasifikasi_arsip_id'] ?? null) == $klasifikasi->id)>
+                                                <span class="flex-1">
+                                                    <b class="text-slate-900">{{ $klasifikasi->kode }}</b><br>
+                                                    <span class="text-slate-600">{{ $klasifikasi->judul }}</span>
+                                                    @if ($klasifikasi->uraian)
+                                                        <br><small class="text-slate-500">{{ $klasifikasi->uraian }}</small>
+                                                    @endif
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="hidden py-8 text-center text-sm text-slate-500" data-klasifikasi-empty>Kode klasifikasi tidak ditemukan.</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('pokja.history') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-400 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
+            <div class="mb-8 overflow-x-auto rounded-xl border border-gray-300 bg-white/40">
+                <table class="min-w-[900px] w-full border-collapse text-left">
+                    <thead class="border-b border-gray-200">
                         <tr>
-                            <td colspan="6" class="py-10 px-6 text-center text-sm text-gray-500">
-                                @if ($filter === 'arsip')
-                                    Belum ada surat arsip.
-                                @elseif ($filter === 'peminjaman')
-                                    Belum ada surat peminjaman.
-                                @else
-                                    Belum ada riwayat surat.
-                                @endif
-                            </td>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Nama Arsip</th>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Jenis Surat</th>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Sifat Surat</th>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Kode Klasifikasi</th>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Tanggal Riwayat</th>
+                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Aksi</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @forelse ($history as $item)
+                            <tr class="transition hover:bg-white/70">
+                                <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->nama ?? '-' }}</td>
+                                <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->jenis_surat ?? '-' }}</td>
+                                <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->sifat_surat ?? '-' }}</td>
+                                <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->kode_klasifikasi ?? '-' }}</td>
+                                <td class="whitespace-nowrap px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->tanggal_upload ? \Illuminate\Support\Carbon::parse($item->tanggal_upload)->format('d/m/Y') : '-' }}</td>
+                                <td class="px-5 py-3">
+                                    @if ($item->file_path)
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->file_path) }}" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-md bg-blue-600 px-5 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">Lihat</a>
+                                    @else
+                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                    {{ $hasHistoryFilters ? 'Tidak ada riwayat yang sesuai dengan filter.' : 'Belum ada riwayat arsip.' }}
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-        <div class="mt-6">
-            <p class="mb-3 text-sm text-gray-500">
-                Menampilkan {{ $history->firstItem() ?? 0 }}-{{ $history->lastItem() ?? 0 }} dari {{ $history->total() }} surat
-            </p>
-            {{ $history->withQueryString()->links() }}
+            <div class="mt-6">
+                <p class="mb-3 text-sm text-gray-500">
+                    Menampilkan {{ $history->firstItem() ?? 0 }}-{{ $history->lastItem() ?? 0 }} dari {{ $history->total() }} data
+                </p>
+                @if ($history->hasPages())
+                    <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+                        @if ($history->previousPageUrl())
+                            <a href="{{ $history->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-left"></i></a>
+                        @else
+                            <span class="flex h-9 w-9 items-center justify-center text-gray-400" aria-hidden="true"><i class="fa-solid fa-arrow-left"></i></span>
+                        @endif
+                        @foreach ($history->getUrlRange(max(1, $history->currentPage() - 2), min($history->lastPage(), $history->currentPage() + 2)) as $page => $url)
+                            <a href="{{ $url }}" @class(['flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-sm font-semibold transition', 'bg-blue-600 text-white' => $page === $history->currentPage(), 'text-gray-800 hover:bg-gray-200' => $page !== $history->currentPage()]) @if ($page === $history->currentPage()) aria-current="page" @endif>{{ $page }}</a>
+                        @endforeach
+                        @if ($history->nextPageUrl())
+                            <a href="{{ $history->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-right"></i></a>
+                        @else
+                            <span class="flex h-9 w-9 items-center justify-center text-gray-400" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                        @endif
+                    </nav>
+                @endif
+            </div>
         </div>
-        
     </main>
 
     <!-- SCRIPT ANIMASI MENU -->
@@ -187,6 +263,89 @@
                 ikonPanah.classList.remove('rotate-90');
             }
         }
+
+        const klasifikasiRoot = document.querySelector('[data-klasifikasi-root]');
+        const klasifikasiModal = klasifikasiRoot?.querySelector('[data-klasifikasi-modal]');
+        const klasifikasiTrigger = klasifikasiRoot?.querySelector('[data-klasifikasi-trigger]');
+        const klasifikasiClose = klasifikasiRoot?.querySelector('[data-klasifikasi-close]');
+        const klasifikasiSearch = klasifikasiRoot?.querySelector('[data-klasifikasi-search]');
+        const klasifikasiSearchButton = klasifikasiRoot?.querySelector('[data-klasifikasi-search-button]');
+        const klasifikasiReset = klasifikasiRoot?.querySelector('[data-klasifikasi-reset]');
+        const klasifikasiValue = klasifikasiRoot?.querySelector('[data-klasifikasi-value]');
+        const klasifikasiLabel = klasifikasiRoot?.querySelector('[data-klasifikasi-label]');
+        const klasifikasiEmpty = klasifikasiRoot?.querySelector('[data-klasifikasi-empty]');
+
+        function closeKlasifikasiModal(restoreFocus = false) {
+            if (!klasifikasiModal || !klasifikasiTrigger) return;
+            klasifikasiModal.classList.add('hidden');
+            klasifikasiTrigger.setAttribute('aria-expanded', 'false');
+            if (restoreFocus) klasifikasiTrigger.focus();
+        }
+
+        function openKlasifikasiModal() {
+            if (!klasifikasiModal || !klasifikasiTrigger) return;
+            klasifikasiModal.classList.remove('hidden');
+            klasifikasiTrigger.setAttribute('aria-expanded', 'true');
+            setTimeout(() => klasifikasiSearch?.focus(), 50);
+        }
+
+        klasifikasiTrigger?.addEventListener('click', function () {
+            if (klasifikasiModal.classList.contains('hidden')) {
+                openKlasifikasiModal();
+            } else {
+                closeKlasifikasiModal();
+            }
+        });
+
+        klasifikasiClose?.addEventListener('click', () => closeKlasifikasiModal(true));
+
+        function applyKlasifikasiFilter() {
+            const query = (klasifikasiSearch?.value || '').toLowerCase().trim();
+            let visible = 0;
+
+            klasifikasiRoot?.querySelectorAll('.klasifikasi-option').forEach((option) => {
+                const matches = (option.dataset.search || '').toLowerCase().includes(query);
+                option.classList.toggle('hidden', !matches);
+                if (matches) visible++;
+            });
+
+            klasifikasiEmpty?.classList.toggle('hidden', visible > 0);
+        }
+
+        klasifikasiSearch?.addEventListener('input', applyKlasifikasiFilter);
+        klasifikasiSearchButton?.addEventListener('click', applyKlasifikasiFilter);
+
+        klasifikasiReset?.addEventListener('click', function () {
+            if (!klasifikasiSearch || !klasifikasiValue || !klasifikasiLabel) return;
+            klasifikasiSearch.value = '';
+            klasifikasiValue.value = '';
+            klasifikasiLabel.textContent = 'Kode Klasifikasi';
+            klasifikasiRoot.querySelectorAll('.klasifikasi-option').forEach((option) => option.classList.remove('hidden'));
+            klasifikasiRoot.querySelectorAll('input[name="filter-klasifikasi-picker"]').forEach((radio) => (radio.checked = false));
+            klasifikasiEmpty?.classList.add('hidden');
+            klasifikasiSearch.focus();
+        });
+
+        klasifikasiRoot?.querySelectorAll('input[name="filter-klasifikasi-picker"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                if (!klasifikasiValue || !klasifikasiLabel) return;
+                klasifikasiValue.value = this.value;
+                klasifikasiLabel.textContent = this.dataset.label || 'Kode Klasifikasi';
+                closeKlasifikasiModal(true);
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (klasifikasiRoot && klasifikasiModal && !klasifikasiRoot.contains(event.target)) {
+                closeKlasifikasiModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && klasifikasiModal && !klasifikasiModal.classList.contains('hidden')) {
+                closeKlasifikasiModal(true);
+            }
+        });
     </script>
     <x-logout-confirmation />
 </body>

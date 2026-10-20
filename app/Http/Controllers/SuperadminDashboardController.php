@@ -8,10 +8,13 @@ use App\Models\Pokja;
 use App\Models\User;
 use App\Models\KategoriArsip;
 use App\Models\KlasifikasiArsip;
+use App\Models\SifatSurat;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class SuperadminDashboardController extends Controller
 {
@@ -102,7 +105,10 @@ class SuperadminDashboardController extends Controller
             return back()->with('error', 'Anda tidak dapat menghapus akun yang sedang digunakan.');
         }
 
-        if ($user->peminjamans()->exists() || $user->arsips()->exists() || $user->validations()->exists()) {
+        if ($user->peminjamans()->exists()
+            || $user->arsips()->exists()
+            || $user->validations()->exists()
+            || $user->suratMasukBalasans()->exists()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Gagal menghapus user. User masih memiliki data terkait dan tidak dapat dihapus.'], 422);
             }
@@ -121,51 +127,108 @@ class SuperadminDashboardController extends Controller
 
     public function activeLoans(Request $request)
     {
-        $search = $this->normalizeSearch($request->query('search'));
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'pokja_id' => ['nullable', 'integer', 'exists:pokjas,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+        ]);
+        $search = $this->normalizeSearch($filters['search'] ?? null);
         $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $jenisSuratId = $filters['jenis_surat_id'] ?? null;
+        $sifatSuratId = $filters['sifat_surat_id'] ?? null;
+        $pokjaId = $filters['pokja_id'] ?? null;
+        $tanggalDokumen = $filters['tanggal_dokumen'] ?? null;
+        $klasifikasiId = $filters['klasifikasi_arsip_id'] ?? null;
 
-        $peminjamans = Peminjaman::with(['user.role', 'user.pokja', 'kategori', 'arsip'])
+        $peminjamans = Peminjaman::with([
+                'user.role',
+                'user.pokja',
+                'kategori',
+                'sifatSurat',
+                'klasifikasiArsip',
+                'balasans.user',
+                'arsip.kategori',
+                'arsip.sifatSurat',
+                'arsip.klasifikasiArsip',
+            ])
             ->activeNow()
+            ->when($pokjaId, fn ($query) => $query->whereHas('user', fn ($userQuery) => $userQuery->where('pokja_id', $pokjaId)))
             ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
                 foreach ($searchPatterns as $pattern) {
                     $query->where(function ($searchQuery) use ($pattern) {
                         $searchQuery->whereRaw('LOWER(nama_surat) LIKE ?', [$pattern])
-                            ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]))
-                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
-                            ->orWhereHas('user', function ($userQuery) use ($pattern) {
-                                $userQuery->whereRaw('LOWER(name) LIKE ?', [$pattern])
-                                    ->orWhereRaw('LOWER(username) LIKE ?', [$pattern])
-                                    ->orWhereHas('pokja', fn ($pokjaQuery) => $pokjaQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]));
-                            });
+                            ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]));
                     });
                 }
             })
-            ->latest('tanggal_mulai')
+            ->when($jenisSuratId, fn ($query) => $query->where(function ($jenisQuery) use ($jenisSuratId) {
+                $jenisQuery->where('peminjamans.kategori_id', $jenisSuratId)
+                    ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $jenisSuratId));
+            }))
+            ->when($sifatSuratId, fn ($query) => $query->where(function ($sifatQuery) use ($sifatSuratId) {
+                $sifatQuery->where('peminjamans.sifat_surat_id', $sifatSuratId)
+                    ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $sifatSuratId));
+            }))
+            ->when($tanggalDokumen, fn ($query) => $query->whereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereDate('tanggal_dokumen', $tanggalDokumen)))
+            ->when($klasifikasiId, fn ($query) => $query->where(function ($klasifikasiQuery) use ($klasifikasiId) {
+                $klasifikasiQuery->where('peminjamans.klasifikasi_arsip_id', $klasifikasiId)
+                    ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('klasifikasi_arsip_id', $klasifikasiId));
+            }))
+            ->orderByDesc('tanggal_mulai')
+            ->orderByDesc('id')
             ->paginate(10)
             ->withQueryString();
 
-        return view('Super_Admin.peminjaman_aktif_superadmin', compact('peminjamans', 'search'));
+        return view('Super_Admin.peminjaman_aktif_superadmin', [
+            'peminjamans' => $peminjamans,
+            'search' => $search,
+            'filters' => $filters,
+            'jenisSurats' => KategoriArsip::orderBy('name')->get(),
+            'sifatSurats' => SifatSurat::orderBy('name')->get(),
+            'pokjas' => Pokja::orderBy('name')->get(),
+            'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
+        ]);
     }
 
-    public function createArchive()
+    public function createArchive(Request $request)
     {
-        return view('Super_Admin.form_upload_superadmin', [
-            'kategoris' => KategoriArsip::orderBy('name')->get(),
-            'klasifikasis' => KlasifikasiArsip::orderBy('bab_urutan')->orderBy('urutan')->orderBy('kode')->orderBy('nomor')->orderBy('id')->get(),
-            'pokjas' => Pokja::orderBy('name')->get(),
-        ]);
+        $selectedPokjaId = $request->validate([
+            'pokja_id' => ['nullable', 'integer', 'exists:pokjas,id'],
+        ])['pokja_id'] ?? null;
+        $kategoris = KategoriArsip::orderBy('name')->get();
+        $sifatSurats = SifatSurat::orderBy('name')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
+        $pokjas = Pokja::orderBy('name')->get();
+        $arsip = null;
+        $isEdit = false;
+        $submissionToken = old('submission_token', (string) Str::uuid());
+
+        return view('Super_Admin.form_upload_superadmin', compact(
+            'kategoris',
+            'sifatSurats',
+            'klasifikasis',
+            'pokjas',
+            'arsip',
+            'isEdit',
+            'selectedPokjaId',
+            'submissionToken'
+        ));
     }
 
     public function storeArchive(Request $request)
     {
         $validatedData = $request->validate([
             'nama_arsip' => ['required', 'string', 'max:255'],
-            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
-            'kategori_arsip_id' => ['required', 'exists:kategori_arsips,id'],
+            'kategori_arsip_id' => ['required', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['required', 'exists:sifat_surats,id'],
             'klasifikasi_arsip_id' => ['nullable', 'exists:klasifikasi_arsips,id'],
             'pokja_id' => ['required', 'exists:pokjas,id'],
             'tanggal_dokumen' => ['required', 'date'],
             'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,zip,rar,jpg,jpeg,png,gif,bmp,webp', 'max:5120'],
+            'submission_token' => ['required', 'uuid', 'unique:arsips,submission_token'],
         ], [
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
             'pokja_id.required' => 'Arsip tujuan / kelompok kerja wajib dipilih.',
@@ -177,11 +240,14 @@ class SuperadminDashboardController extends Controller
         try {
             DB::transaction(function () use ($file, $validatedData, &$storedPath) {
                 $storedPath = $file->store('arsip', 'public');
+                if (! is_string($storedPath) || $storedPath === '') {
+                    throw new \RuntimeException('File arsip gagal disimpan.');
+                }
 
                 Arsip::create([
-                    'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
+                    'sifat_surat_id' => $validatedData['sifat_surat_id'],
                     'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
                     'pokja_id' => $validatedData['pokja_id'],
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
@@ -190,8 +256,22 @@ class SuperadminDashboardController extends Controller
                     'file_size' => $file->getSize(),
                     'status' => 'aktif',
                     'uploaded_by' => auth()->id(),
+                    'submission_token' => $validatedData['submission_token'],
                 ]);
             });
+        } catch (QueryException $e) {
+            if ($storedPath && Storage::disk('public')->exists($storedPath)) {
+                Storage::disk('public')->delete($storedPath);
+            }
+
+            $existingArchive = Arsip::where('submission_token', $validatedData['submission_token'])->first();
+            if ($existingArchive) {
+                return redirect()
+                    ->route('superadmin.surat-masuk', Pokja::findOrFail($existingArchive->pokja_id)->slug)
+                    ->with('success', 'Pengiriman ganda diabaikan; arsip sudah tersimpan.');
+            }
+
+            throw $e;
         } catch (\Throwable $e) {
             if ($storedPath && Storage::disk('public')->exists($storedPath)) {
                 Storage::disk('public')->delete($storedPath);
@@ -200,17 +280,20 @@ class SuperadminDashboardController extends Controller
             throw $e;
         }
 
-        return redirect()->route('superadmin.arsip.laporan')->with('success', 'Arsip berhasil ditambahkan.');
+        return redirect()
+            ->route('superadmin.surat-masuk', Pokja::findOrFail($validatedData['pokja_id'])->slug)
+            ->with('success', 'Arsip berhasil dikirim ke kelompok kerja.');
     }
 
     public function editArchive(Arsip $arsip)
     {
-        $arsip->load(['kategori', 'pokja', 'klasifikasiArsip']);
+        $arsip->load(['kategori', 'pokja', 'klasifikasiArsip', 'sifatSurat']);
 
-        return view('Super_Admin.form_upload_superadmin', [
+        return view('Super_Admin.form_edit_superadmin', [
             'arsip' => $arsip,
             'kategoris' => KategoriArsip::orderBy('name')->get(),
-            'klasifikasis' => KlasifikasiArsip::orderBy('bab_urutan')->orderBy('urutan')->orderBy('kode')->orderBy('nomor')->orderBy('id')->get(),
+            'sifatSurats' => SifatSurat::orderBy('name')->get(),
+            'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
             'isEdit' => true,
         ]);
@@ -220,16 +303,13 @@ class SuperadminDashboardController extends Controller
     {
         $validatedData = $request->validate([
             'nama_arsip' => ['required', 'string', 'max:255'],
-            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
-            'kategori_arsip_id' => ['required', 'exists:kategori_arsips,id'],
+            'kategori_arsip_id' => ['required', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['required', 'exists:sifat_surats,id'],
             'klasifikasi_arsip_id' => ['nullable', 'exists:klasifikasi_arsips,id'],
-            'pokja_id' => ['required', 'exists:pokjas,id'],
-            'tanggal_dokumen' => ['required', 'date'],
             'file_arsip' => ['nullable', 'file', 'mimes:pdf,doc,docx,zip,rar,jpg,jpeg,png,gif,bmp,webp', 'max:5120'],
             'remove_existing_file' => ['nullable', 'boolean'],
         ], [
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
-            'pokja_id.required' => 'Arsip tujuan / kelompok kerja wajib dipilih.',
         ]);
 
         $newFilePath = $arsip->file_path;
@@ -239,6 +319,9 @@ class SuperadminDashboardController extends Controller
         if ($request->hasFile('file_arsip')) {
             $file = $request->file('file_arsip');
             $newFilePath = $file->store('arsip', 'public');
+            if (! is_string($newFilePath) || $newFilePath === '') {
+                throw new \RuntimeException('File arsip gagal disimpan.');
+            }
         }
 
         if ($removeExistingFile && ! $request->hasFile('file_arsip')) {
@@ -252,15 +335,13 @@ class SuperadminDashboardController extends Controller
                 }
 
                 $arsip->update([
-                    'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
+                    'sifat_surat_id' => $validatedData['sifat_surat_id'],
                     'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
-                    'pokja_id' => $validatedData['pokja_id'],
-                    'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
                     'file_path' => $newFilePath,
-                    'file_type' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getClientOriginalExtension() : $arsip->file_type,
-                    'file_size' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getSize() : $arsip->file_size,
+                    'file_type' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getClientOriginalExtension() : ($removeExistingFile ? null : $arsip->file_type),
+                    'file_size' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getSize() : ($removeExistingFile ? null : $arsip->file_size),
                 ]);
 
                 if ($request->hasFile('file_arsip') && $oldFilePath && $oldFilePath !== $newFilePath && Storage::disk('public')->exists($oldFilePath)) {
@@ -309,12 +390,18 @@ class SuperadminDashboardController extends Controller
     {
         $filters = $this->archiveFilters($request);
         $arsips = $this->archiveQuery($request)->paginate(10)->withQueryString();
+        $statistics = $this->archiveStatistics();
+        $statistics['totalArsipTu'] = (clone Arsip::whereNotIn('status', ['dihapus']))
+            ->whereHas('pokja', fn ($query) => $query->where('name', 'Tata Usaha dan Barang Milik Negara'))
+            ->count();
 
         return view('Super_Admin.laporan_arsip_superadmin', [
             'arsips' => $arsips,
             'kategoris' => KategoriArsip::orderBy('name')->get(),
+            'sifatSurats' => SifatSurat::orderBy('name')->get(),
+            'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
-            ...$this->archiveStatistics(),
+            ...$statistics,
             'filters' => $filters,
         ]);
     }
@@ -326,6 +413,8 @@ class SuperadminDashboardController extends Controller
         return view('Super_Admin.penghapusan_arsip_superadmin', [
             'arsips' => $this->archiveQuery($request)->paginate(10)->withQueryString(),
             'kategoris' => KategoriArsip::orderBy('name')->get(),
+            'sifatSurats' => SifatSurat::orderBy('name')->get(),
+            'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
             ...$this->archiveStatistics(),
             'filters' => $this->archiveFilters($request),
@@ -359,7 +448,7 @@ class SuperadminDashboardController extends Controller
     {
         $filters = $this->archiveFilters($request);
 
-        return Arsip::with(['kategori', 'pokja', 'uploader.role'])
+        return Arsip::with(['kategori', 'pokja', 'uploader.role', 'sifatSurat', 'klasifikasiArsip'])
             ->whereNotIn('status', ['dihapus'])
             ->when($filters['search'] !== '', function ($builder) use ($filters) {
                 $patterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($filters['search']));
@@ -369,6 +458,7 @@ class SuperadminDashboardController extends Controller
                         $searchQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern])
                             ->orWhereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern])
                             ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
+                            ->orWhereHas('sifatSurat', fn ($sifatQuery) => $sifatQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
                             ->orWhereHas('pokja', fn ($pokjaQuery) => $pokjaQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
                             ->orWhereHas('klasifikasiArsip', function ($klasifikasiQuery) use ($pattern) {
                                 $klasifikasiQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
@@ -378,8 +468,10 @@ class SuperadminDashboardController extends Controller
                     });
                 }
             })
-            ->when($filters['tanggal'], fn ($builder) => $builder->whereDate('created_at', $filters['tanggal']))
+            ->when($filters['tanggal'], fn ($builder) => $builder->whereDate('tanggal_dokumen', $filters['tanggal']))
             ->when($filters['kategoriId'], fn ($builder) => $builder->where('kategori_arsip_id', $filters['kategoriId']))
+            ->when($filters['sifatSuratId'], fn ($builder) => $builder->where('sifat_surat_id', $filters['sifatSuratId']))
+            ->when($filters['klasifikasiId'], fn ($builder) => $builder->where('klasifikasi_arsip_id', $filters['klasifikasiId']))
             ->when($filters['pokjaId'], fn ($builder) => $builder->where('pokja_id', $filters['pokjaId']))
             ->when($filters['source'] === 'kelompok_kerja', fn ($builder) => $builder->whereNotNull('pokja_id'))
             ->when($filters['source'] === 'tu', function ($builder) {
@@ -390,14 +482,24 @@ class SuperadminDashboardController extends Controller
 
     private function archiveFilters(Request $request): array
     {
-        $source = $request->query('sumber', 'semua');
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'tanggal' => ['nullable', 'date'],
+            'kategori_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+            'pokja_id' => ['nullable', 'integer', 'exists:pokjas,id'],
+            'sumber' => ['nullable', 'in:semua,kelompok_kerja,tu'],
+        ]);
 
         return [
-            'search' => $this->normalizeSearch($request->query('search')),
-            'tanggal' => $request->query('tanggal'),
-            'kategoriId' => $request->integer('kategori_id') ?: null,
-            'pokjaId' => $request->integer('pokja_id') ?: null,
-            'source' => in_array($source, ['semua', 'kelompok_kerja', 'tu'], true) ? $source : 'semua',
+            'search' => $this->normalizeSearch($validated['search'] ?? null),
+            'tanggal' => $validated['tanggal'] ?? null,
+            'kategoriId' => $validated['kategori_id'] ?? null,
+            'sifatSuratId' => $validated['sifat_surat_id'] ?? null,
+            'klasifikasiId' => $validated['klasifikasi_arsip_id'] ?? null,
+            'pokjaId' => $validated['pokja_id'] ?? null,
+            'source' => $validated['sumber'] ?? 'semua',
         ];
     }
 
@@ -418,31 +520,101 @@ class SuperadminDashboardController extends Controller
     public function dashboard()
     {
         $user = auth()->user();
-        $totalArsip = Arsip::whereNotIn('status', ['dihapus'])->count();
+        $totalArsip = Arsip::whereNotIn('status', ['dihapus'])
+            ->whereNotNull('pokja_id')
+            ->count();
 
         // Reuse scope yang sudah ada di Model Peminjaman (sama seperti
         // yang dipakai PeminjamanApprovalController::tuDashboard()),
         // supaya definisi "aktif" konsisten di seluruh dashboard.
         $totalPeminjamanAktif = Peminjaman::activeNow()->count();
 
-        $totalUserAktif = User::where('status', 'active')
-            ->whereHas('role', function ($query) {
-                $query->whereIn('slug', ['admin_pokja', 'ketua_pokja', 'admin_tu']);
-            })
-            ->count();
+        $totalUserAktif = User::where('status', 'active')->count();
 
         $totalPokja = Pokja::count();
+        $pokjas = Pokja::orderBy('name')->get();
 
-        $arsipTerbaru = Arsip::with(['kategori', 'pokja'])
+        $arsipTerbaru = Arsip::with(['kategori', 'pokja', 'sifatSurat', 'klasifikasiArsip'])
             ->whereNotIn('status', ['dihapus'])
+            ->whereNotNull('pokja_id')
             ->latest('created_at')
-            ->take(5)
+            ->limit(5)
             ->get();
 
-        $peminjamanTerbaru = Peminjaman::with(['user.pokja', 'kategori', 'arsip'])
+        $peminjamanTerbaru = Peminjaman::with([
+                'user.pokja',
+                'kategori',
+                'sifatSurat',
+                'klasifikasiArsip',
+                'arsip.kategori',
+                'arsip.sifatSurat',
+                'arsip.klasifikasiArsip',
+            ])
+            ->readyForFinalValidation()
             ->latest('created_at')
-            ->take(5)
+            ->limit(5)
             ->get();
+
+        $pendingValidationCount = Peminjaman::readyForFinalValidation()->count();
+        $ketuaApproval = fn ($query) => $query
+            ->where('status', 'disetujui')
+            ->whereHas('validator.role', fn ($role) => $role->where('slug', 'ketua_pokja'));
+        $pendingValidationNotifications = Peminjaman::with([
+                'user.pokja',
+                'validations' => fn ($query) => $query
+                    ->where('status', 'disetujui')
+                    ->whereHas('validator.role', fn ($role) => $role->where('slug', 'ketua_pokja'))
+                    ->with('validator.role')
+                    ->latest('validated_at'),
+            ])
+            ->readyForFinalValidation()
+            ->withMax(['validations as ketua_validated_at' => $ketuaApproval], 'validated_at')
+            ->orderByDesc('ketua_validated_at')
+            ->limit(5)
+            ->get();
+        $adminTuApproval = fn ($query) => $query
+            ->where('status', 'disetujui')
+            ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'));
+        $suratMasukQuery = Peminjaman::query()
+            ->whereIn('status', ['disetujui', 'aktif', 'selesai'])
+            ->whereHas('user.pokja')
+            ->whereHas('validations', $adminTuApproval);
+        $suratMasukNotificationCount = (clone $suratMasukQuery)->count();
+        $suratMasukTerbaru = (clone $suratMasukQuery)
+            ->with([
+                'user.pokja',
+                'validations' => fn ($query) => $query
+                    ->where('status', 'disetujui')
+                    ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'))
+                    ->with('validator.role')
+                    ->latest('validated_at'),
+            ])
+            ->withMax(['validations as admin_tu_validated_at' => $adminTuApproval], 'validated_at')
+            ->orderByDesc('admin_tu_validated_at')
+            ->limit(5)
+            ->get();
+
+        $notifications = $pendingValidationNotifications->map(fn (Peminjaman $peminjaman) => [
+            'category' => 'Peminjaman',
+            'message' => 'Peminjaman dari Pokja ' . ($peminjaman->user?->pokja?->name ?? '-') . ' menunggu validasi Super Admin',
+            'occurred_at' => $peminjaman->validations->first()?->validated_at ?? $peminjaman->created_at,
+            'url' => route('superadmin.peminjaman.validasi', ['peminjaman_id' => $peminjaman->id]),
+        ])->concat($suratMasukTerbaru->map(fn (Peminjaman $peminjaman) => [
+            'category' => 'Surat Masuk',
+            'message' => 'Surat Masuk Sudah Di Validasi dan masuk ke ' . $peminjaman->user->pokja->name,
+            'occurred_at' => $peminjaman->validations->first()?->validated_at ?? $peminjaman->created_at,
+            'url' => route('superadmin.surat-masuk.peminjaman.detail', [
+                $peminjaman->user->pokja->slug,
+                $peminjaman,
+            ]),
+        ]))
+            ->sortByDesc('occurred_at')
+            ->take(5)
+            ->values();
+        $notificationCount = $pendingValidationCount + $suratMasukNotificationCount;
+        $suratMasukIndexUrl = $suratMasukTerbaru->first()
+            ? route('superadmin.surat-masuk', $suratMasukTerbaru->first()->user->pokja->slug)
+            : null;
 
         return view('Super_Admin.dashboard_superadmin', compact(
             'user',
@@ -450,8 +622,14 @@ class SuperadminDashboardController extends Controller
             'totalPeminjamanAktif',
             'totalUserAktif',
             'totalPokja',
+            'pokjas',
             'arsipTerbaru',
-            'peminjamanTerbaru'
+            'peminjamanTerbaru',
+            'notifications',
+            'notificationCount',
+            'pendingValidationCount',
+            'suratMasukNotificationCount',
+            'suratMasukIndexUrl'
         ));
     }
 }

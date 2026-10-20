@@ -68,6 +68,11 @@ class User extends Authenticatable
         return $this->hasMany(Arsip::class, 'uploaded_by');
     }
 
+    public function suratMasukBalasans()
+    {
+        return $this->hasMany(SuratMasukBalasan::class, 'user_id');
+    }
+
     public function validations()
     {
         return $this->hasMany(PeminjamanValidation::class, 'validator_id');

@@ -16,6 +16,8 @@ class Peminjaman extends Model
     'arsip_id',
     'nama_surat',
     'kategori_id',
+    'sifat_surat_id',
+    'klasifikasi_arsip_id',
     'user_id',
     'keperluan',
     'tanggal_mulai',
@@ -48,6 +50,11 @@ class Peminjaman extends Model
         );
     }
 
+    public function balasans()
+    {
+        return $this->hasMany(SuratMasukBalasan::class, 'peminjaman_id')->oldest();
+    }
+
     public function kategori()
     {
         return $this->belongsTo(
@@ -56,12 +63,19 @@ class Peminjaman extends Model
         );
     }
 
+    public function sifatSurat()
+    {
+        return $this->belongsTo(SifatSurat::class, 'sifat_surat_id');
+    }
+
+    public function klasifikasiArsip()
+    {
+        return $this->belongsTo(KlasifikasiArsip::class, 'klasifikasi_arsip_id');
+    }
+
     public function scopeNeedsKetuaValidation(Builder $query): Builder
     {
         return $query->where('status', 'menunggu_validasi')
-            ->whereHas('user.role', function (Builder $role) {
-                $role->where('slug', 'admin_pokja');
-            })
             ->whereDoesntHave('validations', function (Builder $validation) {
                 $validation->whereHas('validator.role', function (Builder $role) {
                     $role->where('slug', 'ketua_pokja');
@@ -72,15 +86,11 @@ class Peminjaman extends Model
     public function scopeReadyForFinalValidation(Builder $query): Builder
     {
         return $query->where('status', 'menunggu_validasi')
-            ->where(function (Builder $outer) {
-                $outer->whereHas('user.role', function (Builder $role) {
-                    $role->where('slug', 'ketua_pokja');
-                })->orWhereHas('validations', function (Builder $validation) {
-                    $validation->where('status', 'disetujui')
-                        ->whereHas('validator.role', function (Builder $role) {
-                            $role->where('slug', 'ketua_pokja');
-                        });
-                });
+            ->whereHas('validations', function (Builder $validation) {
+                $validation->where('status', 'disetujui')
+                    ->whereHas('validator.role', function (Builder $role) {
+                        $role->where('slug', 'ketua_pokja');
+                    });
             });
     }
 

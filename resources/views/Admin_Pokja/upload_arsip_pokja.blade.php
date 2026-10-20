@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 flex font-sans text-gray-800">
+<body class="bg-[#f4f4f5] flex font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
     <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
@@ -57,15 +57,12 @@
                 </a>
             </nav>
         </div>
-        
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
-                @csrf
-                <button type="submit" class="w-full text-left flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-                </button>
-            </form>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+                    @csrf
+                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                    </button>
+                </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -73,20 +70,20 @@
 
         <!-- Navbar Atas -->
         <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <span class="text-sm font-semibold text-gray-700">Upload File Arsip Kelompok Kerja</span>
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-semibold text-gray-600">Upload File Arsip Kelompok Kerja</span>
+            </div>
             <div class="flex items-center gap-3">
-                <!-- Data User Login Tetap Terjaga -->
-                <span class="text-sm font-semibold text-gray-700">{{ auth()->user()?->name ?? auth()->user()?->username ?? 'Admin Pokja Kelembagaan' }}</span>
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                    <i class="fa-solid fa-user"></i>
+                <span class="text-sm font-bold text-gray-800">{{ auth()->user()?->name ?? auth()->user()?->username ?? 'admin Pokja Kelembagaan' }}</span>
+                <div class="w-8 h-8 rounded-full bg-[#e8efff] flex items-center justify-center text-blue-700">
+                    <i class="fa-solid fa-user text-sm"></i>
                 </div>
             </div>
         </header>
 
         <!-- KONTEN UTAMA -->
-        <!-- Menggunakan p-8 w-full agar membentang luas seperti screenshot -->
         <div class="p-8 w-full">
-            <h2 class="text-2xl font-bold mb-6 text-gray-900">Upload File Arsip Kelompok Kerja</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Upload Arsip</h2>
 
             {{-- PESAN SUKSES --}}
             @if (session('success'))
@@ -95,27 +92,30 @@
                 </div>
             @endif
 
-            <!-- Tombol Aksi (Stretching 50/50 proporsional) -->
+            <!-- Tombol Aksi -->
             <div class="flex gap-4 mb-10 w-full">
-                <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
+                <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     Download Template <i class="fa-solid fa-arrow-down ml-1 text-sm"></i>
                 </button>
                 <a href="{{ route('arsip.form') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
-                    Upload File Arsip <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
-                </a>
+                    Upload Arsip <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
+                </a>a
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Upload Arsip Terakhir</h3>
 
             <!-- Tabel Riwayat Upload Arsip -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 mb-6">
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-6">
                 <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 border-b border-gray-100">
+                    <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Nama Arsip</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Kategori</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Dokumen</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Upload</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Jenis Surat</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Sifat Surat</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Kode Klasifikasi</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Mulai</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Selesai</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Status</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-600">Aksi</th>
                         </tr>
                     </thead>
@@ -124,8 +124,15 @@
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6 text-sm text-gray-600 font-medium">{{ $arsip->nama_arsip }}</td>
                                 <td class="py-4 px-6 text-sm text-gray-500">{{ optional($arsip->kategori)->name ?? '-' }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-500">{{ optional($arsip->tanggal_dokumen)->format('d/m/Y') }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-500">{{ $arsip->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ $arsip->sifatSurat?->name ?? '-' }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ $arsip->klasifikasiArsip?->kode ?? 'DT.04.01' }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ optional($arsip->tanggal_dokumen)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-4 px-6 text-sm text-gray-500">{{ optional($arsip->tanggal_dokumen)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="py-4 px-6 text-sm">
+                                    <span class="inline-flex items-center rounded-full bg-[#eafff5] px-2.5 py-1 text-xs font-semibold text-[#1d8f5a]">
+                                        • Aktif
+                                    </span>
+                                </td>
                                 <td class="py-4 px-6">
                                     <a href="{{ Storage::url($arsip->file_path) }}" target="_blank"
                                         class="inline-block bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium hover:bg-blue-700 transition">
@@ -135,7 +142,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-500">
+                                <td colspan="8" class="py-8 text-center text-gray-500">
                                     Belum ada arsip yang diupload.
                                 </td>
                             </tr>
@@ -152,7 +159,7 @@
             <!-- Pagination aman di dalam tag main, didorong ke kanan -->
             @if ($arsips instanceof \Illuminate\Contracts\Pagination\Paginator)
                 <div class="pb-8 flex justify-end">
-                    {{ $arsips->withQueryString()->links() }}
+                    @if ($arsips->hasPages())<nav class="flex justify-center gap-2" aria-label="Pagination">@foreach ($arsips->getUrlRange(max(1, $arsips->currentPage() - 2), min($arsips->lastPage(), $arsips->currentPage() + 2)) as $page => $url)<a href="{{ $url }}" @class(['rounded px-3 py-2 text-sm font-semibold', 'bg-blue-600 text-white' => $page === $arsips->currentPage(), 'border border-gray-300 text-gray-700' => $page !== $arsips->currentPage()])>{{ $page }}</a>@endforeach</nav>@endif
                 </div>
             @endif
 

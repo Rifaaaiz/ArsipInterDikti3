@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50 flex font-sans text-gray-800">
+<body class="bg-[#f4f4f5] flex font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
     <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
@@ -70,32 +70,33 @@
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas -->
-        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <span class="text-sm font-semibold text-gray-700">Ajukan Peminjaman Arsip</span>
+        <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-semibold text-gray-600">Ajukan Peminjaman Arsip</span>
+            </div>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">Admin Pokja Kelembagaan</span>
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                    <i class="fa-solid fa-user"></i>
+                <span class="text-sm font-bold text-gray-800">{{ auth()->user()->name ?: auth()->user()->username }}</span>
+                <div class="w-8 h-8 rounded-full bg-[#e8efff] flex items-center justify-center text-blue-700">
+                    <i class="fa-solid fa-user text-sm"></i>
                 </div>
             </div>
         </header>
 
         <!-- KONTEN UTAMA -->
-        <!-- Menggunakan p-8 agar membentang proporsional seperti screenshot -->
-        <div class="p-8 w-full">
-            <h2 class="text-2xl font-bold mb-6 text-gray-900">Ajukan</h2>
+        <div class="p-8 w-full max-w-[1280px]">
+            <h2 class="text-4xl font-bold mb-6 text-black">Upload Arsip</h2>
 
-            <!-- Tombol Aksi (Stretching 50/50) -->
+            <!-- Tombol Aksi -->
             <div class="flex gap-4 mb-10 w-full">
-                <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
+                <button class="flex-1 flex items-center justify-center gap-2 bg-transparent border border-blue-600 text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition shadow-sm">
                     Download Template <i class="fa-solid fa-arrow-down ml-1 text-sm"></i>
                 </button>
-                <a href="{{ url('/dashboard-pokja/form-peminjaman-pokja') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
+                <a href="{{ route('peminjaman.form') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     Ajukan Peminjaman <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
                 </a>
             </div>
 
-            <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Peminjaman Terakhir</h3>
+            <h3 class="text-2xl font-bold mb-4 text-gray-900">Riwayat Upload Arsip Terakhir</h3>
 
             @if (session('success'))
                 <div class="mb-6 rounded-lg bg-green-100 border border-green-200 px-4 py-3 text-sm text-green-700">
@@ -104,15 +105,18 @@
             @endif
             
             <!-- Tabel Riwayat Peminjaman -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 mb-6">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 border-b border-gray-100">
+            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8"><div class="overflow-x-auto">
+                <table class="w-full min-w-[1050px] text-left border-collapse">
+                    <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Nama Arsip</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Kategori</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Tanggal Upload</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Status</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-600">Aksi</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Jenis Surat</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Sifat Surat</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal Mulai</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal Selesai</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Status</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -120,48 +124,59 @@
                         @forelse ($dataPeminjaman as $peminjaman)
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6 text-sm text-gray-800">
-                                    {{ $peminjaman->nama_surat }}
+                                    {{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat }}
                                 </td>
                                 <td class="py-4 px-6 text-sm text-gray-600">
-                                    {{ $peminjaman->kategori->name ?? '-' }}
+                                    {{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}
                                 </td>
                                 <td class="py-4 px-6 text-sm text-gray-600">
-                                    {{ $peminjaman->tanggal_mulai->format('d/m/Y') }}
+                                    {{ $peminjaman->arsip?->sifatSurat?->name ?? '-' }}
                                 </td>
                                 <td class="py-4 px-6 text-sm text-gray-600">
-                                    {{ $peminjaman->display_status }}
+                                    {{ $peminjaman->arsip?->klasifikasiArsip?->kode ?? '-' }}
+                                </td>
+                                <td class="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">
+                                    {{ $peminjaman->tanggal_mulai?->format('d/m/Y') ?? '-' }}
+                                </td>
+                                <td class="py-4 px-6 text-sm text-gray-600 whitespace-nowrap">
+                                    {{ $peminjaman->tanggal_selesai?->format('d/m/Y') ?? '-' }}
                                 </td>
                                 <td class="py-4 px-6 text-sm">
-                                    @if ($peminjaman->file_pengajuan)
-                                        <a href="{{ asset('storage/' . $peminjaman->file_pengajuan) }}" target="_blank" class="bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition inline-block">
-                                            Lihat
-                                        </a>
-                                    @else
-                                        <span class="text-gray-400">Tidak ada file</span>
-                                    @endif
+                                    <span class="inline-flex items-center gap-2 rounded-full bg-[#eaf5ff] px-2.5 py-1 text-xs font-semibold text-[#1b6ee8]">
+                                        <span class="h-2 w-2 rounded-full bg-[#2563eb]"></span>
+                                        {{ $peminjaman->display_status }}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-6 text-sm">
+                                    <a href="{{ route('pokja.peminjaman.aktif.detail', $peminjaman) }}" class="bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition inline-block">Lihat</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-8 text-center text-gray-500">
-                                    Belum ada pengajuan peminjaman.
+                                <td colspan="8" class="py-8 text-center text-gray-500">
+                                    Belum ada data yang tersedia.
                                 </td>
                             </tr>
                         @endforelse
 
                     </tbody>
                 </table>
+                </div>
                 
                 <!-- Link Lihat Semua -->
-                <div class="p-4 border-t border-gray-100 text-center">
-                    <a href="{{ route('peminjaman.riwayat') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                <div class="p-4 border-t border-gray-200 text-center">
+                    <a href="/dashboard-pokja/riwayat-peminjaman-terakhir-pokja" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
                 </div>
             </div>
 
-            <!-- Pagination sekarang aman berada di dalam tag main -->
-            @if ($dataPeminjaman instanceof \Illuminate\Contracts\Pagination\Paginator)
-                <div class="pb-8 flex justify-end">
-                    {{ $dataPeminjaman->withQueryString()->links() }}
+            @if ($dataPeminjaman->hasPages())
+                <div class="pb-8 flex justify-center">
+                    @php($pages = $dataPeminjaman->getUrlRange(max(1, $dataPeminjaman->currentPage() - 2), min($dataPeminjaman->lastPage(), $dataPeminjaman->currentPage() + 2)))
+                    <nav class="flex items-center gap-2" aria-label="Pagination">
+                        @if ($dataPeminjaman->onFirstPage())<span class="rounded border border-gray-200 px-3 py-2 text-gray-300">‹</span>@else<a href="{{ $dataPeminjaman->previousPageUrl() }}" class="rounded border border-gray-300 px-3 py-2 text-gray-700 hover:bg-gray-50">‹</a>@endif
+                        @foreach ($pages as $page => $url)<a href="{{ $url }}" @class(['rounded px-3 py-2 text-sm font-semibold', 'bg-blue-600 text-white' => $page === $dataPeminjaman->currentPage(), 'border border-gray-300 text-gray-700 hover:bg-gray-50' => $page !== $dataPeminjaman->currentPage()])>{{ $page }}</a>@endforeach
+                        @if ($dataPeminjaman->hasMorePages())<a href="{{ $dataPeminjaman->nextPageUrl() }}" class="rounded border border-gray-300 px-3 py-2 text-gray-700 hover:bg-gray-50">›</a>@else<span class="rounded border border-gray-200 px-3 py-2 text-gray-300">›</span>@endif
+                    </nav>
                 </div>
             @endif
 

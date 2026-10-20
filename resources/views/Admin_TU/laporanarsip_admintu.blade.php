@@ -472,6 +472,7 @@
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Nama Arsip</th>
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Kode Klasifikasi</th>
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Kategori</th>
+                            <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Sifat Surat</th>
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Kelompok Kerja</th>
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Tanggal Upload</th>
                             <th class="py-4 px-6 text-sm font-bold text-[#1e3a8a] whitespace-nowrap">Status</th>
@@ -486,6 +487,7 @@
                                     <td class="py-4 px-6 text-sm text-gray-700 font-semibold">{{ $arsip->nama_arsip }}</td>
                                     <td class="py-4 px-6 text-sm font-semibold text-gray-600">{{ $arsip->klasifikasiArsip?->kode ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-600 font-semibold">{{ $arsip->kategori?->name ?? '-' }}</td>
+                                    <td class="py-4 px-6 text-sm text-gray-600 font-semibold">{{ $arsip->sifatSurat?->name ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-600 font-semibold">{{ $arsip->pokja?->name ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-600 font-semibold">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm whitespace-nowrap">
@@ -512,7 +514,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8" class="p-10 text-center text-sm text-gray-500 bg-gray-50">
+                                <td colspan="9" class="p-10 text-center text-sm text-gray-500 bg-gray-50">
                                     {{ $namaSurat !== '' ? 'Tidak ada data arsip yang sesuai dengan pencarian.' : 'Tidak ada data arsip yang ditemukan.' }}
                                 </td>
                             </tr>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajukan Peminjaman - SIMARSIP</title>
+    <title>Riwayat Peminjaman Terakhir - SIMARSIP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -36,7 +36,7 @@
                         <i id="ikon-panah" class="fa-solid fa-chevron-right text-xs transition-transform duration-300 rotate-90"></i>
                     </button>
                     
-                    <!-- Sub-menu Terbuka dengan "Ajukan Peminjaman" Aktif -->
+                    <!-- Sub-menu Terbuka -->
                     <div id="submenu-arsip" class="overflow-hidden transition-all duration-300 max-h-40">
                         <div class="flex flex-col gap-2 pt-1 pb-2">
                             <a href="/dashboard-pokja/ajukan" class="block px-4 py-2 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-medium transition shadow-sm">Ajukan Peminjaman</a>
@@ -59,11 +59,11 @@
 
         <!-- Tombol Logout -->
         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
-                    @csrf
-                    <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-                    </button>
-                </form>
+            @csrf
+            <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </button>
+        </form>
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
@@ -72,84 +72,145 @@
         <!-- Navbar Atas dengan Tombol Back (<) di Kiri -->
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
-                    <a href="{{ route('peminjaman.ajukan') }}" class="text-black hover:text-blue-600 text-lg transition">
+                <a href="{{ route('peminjaman.ajukan') }}" class="text-black hover:text-blue-600 text-lg transition">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <span class="text-sm font-bold text-gray-500">Riwayat Peminjaman Terakhir - Pokja</span>
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">admin Pokja Kelembagaan</span>
+                <span class="text-base font-bold text-gray-900">Admin Pokja Kelembagaan</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
             </div>
         </header>
 
-        <!-- KONTEN UTAMA HALAMAN AJUKAN PEMINJAMAN -->
-        <div class="px-8 pb-10 max-w-6xl">
+        <!-- KONTEN UTAMA -->
+        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
             <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Peminjaman Terakhir</h2>
 
-            <form method="GET" class="flex flex-col gap-3 mb-6 md:flex-row">
-                <input type="text" name="search" value="{{ $search }}" placeholder="Nama surat, arsip, atau kategori" class="flex-1 border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                <select name="kategori_id" class="w-full md:w-64 border border-gray-400 bg-white rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600">
-                    <option value="">Semua kategori</option>
-                    @foreach ($kategoris as $kategori)
-                        <option value="{{ $kategori->id }}" @selected($kategoriId === $kategori->id)>{{ $kategori->name }}</option>
-                    @endforeach
-                </select>
-                <div class="flex gap-2"><button class="bg-[#2563eb] text-white px-6 py-2.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition shadow-sm">Filter</button><a href="{{ route('peminjaman.riwayat') }}" class="rounded-md border border-gray-300 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-100 transition">Reset</a></div>
+            <!-- FILTER BARU (Grid 2 Baris, 4 Kolom) -->
+            <form method="GET" action="{{ route('peminjaman.riwayat') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+
+                    <!-- BARIS 1 -->
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Cari nama surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+                    <select name="jenis_surat_id" aria-label="Jenis Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Jenis Surat</option>
+                        @foreach ($jenisSurats as $jenis)
+                            <option value="{{ $jenis->id }}" @selected(($filters['jenis_surat_id'] ?? null) == $jenis->id)>{{ $jenis->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="sifat_surat_id" aria-label="Sifat Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Sifat Surat</option>
+                        @foreach ($sifatSurats as $sifat)
+                            <option value="{{ $sifat->id }}" @selected(($filters['sifat_surat_id'] ?? null) == $sifat->id)>{{ $sifat->name }}</option>
+                        @endforeach
+                    </select>
+
+                    <button type="submit" class="h-[42px] w-full rounded-md bg-[#2563eb] text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                        Filter
+                    </button>
+
+                    <!-- BARIS 2 -->
+
+                    <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+                    <!-- Modal Custom Klasifikasi -->
+                    <div class="relative w-full md:col-span-2" data-klasifikasi-root="riwayat-peminjaman-klasifikasi">
+                        @php
+                            $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
+                        @endphp
+                        <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasi_arsip_id'] ?? '' }}" data-klasifikasi-value>
+                        <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none">
+                            <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? ($selectedKlasifikasi->kode . ' — ' . ($selectedKlasifikasi->judul ?? '')) : 'Pilih Kode Klasifikasi' }}</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+
+                        <div class="fixed inset-0 z-[100] hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
+                            <button type="button" class="fixed inset-0 cursor-default bg-slate-950/45" data-klasifikasi-close aria-label="Tutup pemilih kode klasifikasi"></button>
+                            <section class="relative mx-auto flex max-h-[88vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
+                                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pb-3 pt-5 sm:px-6">
+                                    <div class="flex flex-col gap-3 sm:flex-row">
+                                        <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" class="h-[42px] w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                        <button type="button" data-klasifikasi-search-button class="h-[42px] rounded-md bg-[#1d4ed8] px-5 text-sm font-semibold text-white hover:bg-[#1e40af] sm:w-[110px]">Cari</button>
+                                        <button type="button" data-klasifikasi-reset class="h-[42px] rounded-md border border-slate-300 bg-white px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-[110px]">Reset</button>
+                                    </div>
+                                </div>
+                                <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+                                    <div class="grid gap-3 md:grid-cols-2">
+                                        @foreach ($klasifikasis as $klasifikasi)
+                                            <label class="klasifikasi-option flex cursor-pointer gap-3 rounded-lg border border-slate-200 p-3 text-sm hover:border-blue-300 hover:bg-blue-50" data-search="{{ strtolower($klasifikasi->kode . ' ' . $klasifikasi->judul . ' ' . $klasifikasi->uraian) }}">
+                                                <input type="radio" name="filter-klasifikasi-picker" value="{{ $klasifikasi->id }}" data-code="{{ $klasifikasi->kode }}" data-label="{{ $klasifikasi->kode }} — {{ $klasifikasi->judul }}" class="mt-1 accent-blue-600" @checked(($filters['klasifikasi_arsip_id'] ?? null) == $klasifikasi->id)>
+                                                <span class="flex-1">
+                                                    <b class="text-slate-900">{{ $klasifikasi->kode }}</b><br>
+                                                    <span class="text-slate-600">{{ $klasifikasi->judul }}</span>
+                                                    @if ($klasifikasi->uraian)
+                                                        <br><small class="text-slate-500">{{ $klasifikasi->uraian }}</small>
+                                                    @endif
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <p class="hidden py-8 text-center text-sm text-slate-500" data-klasifikasi-empty>Kode klasifikasi tidak ditemukan.</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <a href="{{ route('peminjaman.riwayat') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
+                        Reset
+                    </a>
+                </div>
             </form>
 
-            <!-- Tabel Riwayat Peminjaman -->
-            <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+            <div class="mb-8 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table class="min-w-[1100px] w-full border-collapse text-left">
+                    <thead class="bg-slate-100 text-gray-700">
                         <tr>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Kategori</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Tanggal Upload</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Status</th>
-                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Aksi</th>
+                            <th class="px-6 py-4 text-sm font-bold">Nama Arsip</th>
+                            <th class="px-6 py-4 text-sm font-bold">Jenis Surat</th>
+                            <th class="px-6 py-4 text-sm font-bold">Sifat Surat</th>
+                            <th class="px-6 py-4 text-sm font-bold">Kode Klasifikasi</th>
+                            <th class="px-6 py-4 text-sm font-bold">Tanggal Mulai</th>
+                            <th class="px-6 py-4 text-sm font-bold">Tanggal Selesai</th>
+                            <th class="px-6 py-4 text-sm font-bold">Status</th>
+                            <th class="px-6 py-4 text-sm font-bold">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse ($riwayatPeminjaman as $peminjaman)
                             @php
-                                $statusLabels = ['Menunggu' => 'Menunggu', 'Aktif' => 'Aktif', 'Ditolak' => 'Ditolak', 'Selesai' => 'Selesai'];
-                                $statusClasses = ['Menunggu' => 'text-amber-600 bg-amber-50', 'Aktif' => 'text-blue-600 bg-blue-50', 'Ditolak' => 'text-red-600 bg-red-50', 'Selesai' => 'text-gray-600 bg-gray-100'];
                                 $status = $peminjaman->display_status;
-                                $statusLabel = $statusLabels[$status] ?? ucfirst(str_replace('_', ' ', $status));
-                                $statusClass = $statusClasses[$status] ?? 'text-gray-600 bg-gray-100';
-                                $filePath = $peminjaman->arsip?->file_path ?? $peminjaman->file_pengajuan;
+                                $statusStyles = [
+                                    'Ditolak' => ['text' => 'text-red-600', 'dot' => 'bg-red-500'],
+                                    'Diterima' => ['text' => 'text-green-600', 'dot' => 'bg-green-500'],
+                                    'Menunggu' => ['text' => 'text-yellow-600', 'dot' => 'bg-yellow-500'],
+                                    'Aktif' => ['text' => 'text-blue-600', 'dot' => 'bg-blue-500'],
+                                    'Selesai' => ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'],
+                                ];
+                                $statusStyle = $statusStyles[$status] ?? ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'];
                             @endphp
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3.5 px-6 text-gray-600">
-                                    {{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat }}
-                                </td>
-                                <td class="py-3.5 px-6 text-gray-500">
-                                    {{ $peminjaman->kategori?->name ?? '-' }}
-                                </td>
-                                <td class="py-3.5 px-6 text-gray-500">
-                                    {{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}
-                                </td>
-                                <td class="py-3.5 px-6">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">
-                                        <span class="w-2 h-2 rounded-full bg-current"></span>
-                                        {{ $statusLabel }}
+                                <td class="px-6 py-3.5 font-medium text-gray-700">{{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ $peminjaman->sifatSurat?->name ?? $peminjaman->arsip?->sifatSurat?->name ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ $peminjaman->klasifikasiArsip?->kode ?? $peminjaman->arsip?->klasifikasiArsip?->kode ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ optional($peminjaman->tanggal_mulai)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ optional($peminjaman->tanggal_selesai)->format('d/m/Y') ?? '-' }}</td>
+                                <td class="px-6 py-3.5">
+                                    <span class="inline-flex items-center gap-1.5 font-semibold {{ $statusStyle['text'] }}">
+                                        <span class="h-2 w-2 rounded-full {{ $statusStyle['dot'] }}"></span>
+                                        {{ $status }}
                                     </span>
                                 </td>
-                                <td class="py-3.5 px-6">
-                                    @if ($filePath)
-                                        <a href="{{ asset('storage/' . $filePath) }}" target="_blank" rel="noopener" class="inline-flex bg-blue-600 text-white px-5 py-1.5 rounded-md text-xs font-semibold hover:bg-blue-700 transition">
-                                            Lihat PDF
-                                        </a>
-                                    @else
-                                        <span class="text-xs text-gray-400">File tidak tersedia</span>
-                                    @endif
+                                <td class="px-6 py-3.5">
+                                    <a href="{{ route('pokja.peminjaman.aktif.detail', $peminjaman) }}" class="inline-flex rounded-md bg-blue-600 px-5 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">Lihat</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-10 px-6 text-center text-sm text-gray-500">
-                                    Belum ada riwayat peminjaman.
+                                <td colspan="8" class="px-6 py-10 text-center text-sm text-gray-500">
+                                    {{ $search !== '' || (($filters['jenis_surat_id'] ?? null) || ($filters['sifat_surat_id'] ?? null) || ($filters['kategori_arsip_id'] ?? null) || ($filters['tanggal_dokumen'] ?? null) || ($filters['klasifikasi_arsip_id'] ?? null)) ? 'Tidak ada data yang sesuai dengan filter.' : 'Belum ada peminjaman aktif.' }}
                                 </td>
                             </tr>
                         @endforelse
@@ -157,16 +218,23 @@
                 </table>
             </div>
 
-            <div class="mt-6">{{ $riwayatPeminjaman->withQueryString()->links() }}</div>
+            @if ($riwayatPeminjaman->hasPages())
+                <div class="mt-6">
+                    <nav class="flex justify-center gap-2" aria-label="Pagination">
+                        @foreach ($riwayatPeminjaman->getUrlRange(max(1, $riwayatPeminjaman->currentPage() - 2), min($riwayatPeminjaman->lastPage(), $riwayatPeminjaman->currentPage() + 2)) as $page => $url)
+                            <a href="{{ $url }}" @class(['rounded px-3 py-2 text-sm font-semibold', 'bg-blue-600 text-white' => $page === $riwayatPeminjaman->currentPage(), 'border border-gray-300 text-gray-700' => $page !== $riwayatPeminjaman->currentPage()])>{{ $page }}</a>
+                        @endforeach
+                    </nav>
+                </div>
+            @endif
         </div>
     </main>
 
-    <!-- SCRIPT ANIMASI MENU -->
     <script>
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
             const ikonPanah = document.getElementById('ikon-panah');
-            
+
             if (submenu.classList.contains('max-h-0')) {
                 submenu.classList.remove('max-h-0');
                 submenu.classList.add('max-h-40');
@@ -177,6 +245,92 @@
                 ikonPanah.classList.remove('rotate-180');
             }
         }
+
+        const klasifikasiRoot = document.querySelector('[data-klasifikasi-root]');
+        const klasifikasiModal = klasifikasiRoot?.querySelector('[data-klasifikasi-modal]');
+        const klasifikasiTrigger = klasifikasiRoot?.querySelector('[data-klasifikasi-trigger]');
+        const klasifikasiClose = klasifikasiRoot?.querySelector('[data-klasifikasi-close]');
+        const klasifikasiSearch = klasifikasiRoot?.querySelector('[data-klasifikasi-search]');
+        const klasifikasiSearchButton = klasifikasiRoot?.querySelector('[data-klasifikasi-search-button]');
+        const klasifikasiReset = klasifikasiRoot?.querySelector('[data-klasifikasi-reset]');
+        const klasifikasiValue = klasifikasiRoot?.querySelector('[data-klasifikasi-value]');
+        const klasifikasiLabel = klasifikasiRoot?.querySelector('[data-klasifikasi-label]');
+        const klasifikasiEmpty = klasifikasiRoot?.querySelector('[data-klasifikasi-empty]');
+
+        function closeKlasifikasiModal() {
+            if (!klasifikasiModal || !klasifikasiTrigger) return;
+            klasifikasiModal.classList.add('hidden');
+            klasifikasiTrigger.setAttribute('aria-expanded', 'false');
+        }
+
+        function openKlasifikasiModal() {
+            if (!klasifikasiModal || !klasifikasiTrigger) return;
+            klasifikasiModal.classList.remove('hidden');
+            klasifikasiTrigger.setAttribute('aria-expanded', 'true');
+            setTimeout(() => klasifikasiSearch?.focus(), 50);
+        }
+
+        klasifikasiTrigger?.addEventListener('click', function () {
+            if (klasifikasiModal.classList.contains('hidden')) {
+                openKlasifikasiModal();
+            } else {
+                closeKlasifikasiModal();
+            }
+        });
+
+        klasifikasiClose?.addEventListener('click', closeKlasifikasiModal);
+
+        function applyKlasifikasiFilter() {
+            const query = (klasifikasiSearch?.value || '').toLowerCase().trim();
+            let visible = 0;
+
+            klasifikasiRoot?.querySelectorAll('.klasifikasi-option').forEach((option) => {
+                const haystack = (option.dataset.search || '').toLowerCase();
+                const isMatch = !query || haystack.includes(query);
+                option.classList.toggle('hidden', !isMatch);
+                if (isMatch) visible++;
+            });
+
+            if (klasifikasiEmpty) {
+                klasifikasiEmpty.classList.toggle('hidden', visible > 0);
+            }
+        }
+
+        klasifikasiSearch?.addEventListener('input', applyKlasifikasiFilter);
+        klasifikasiSearchButton?.addEventListener('click', applyKlasifikasiFilter);
+
+        klasifikasiReset?.addEventListener('click', function () {
+            if (!klasifikasiSearch || !klasifikasiValue || !klasifikasiLabel) return;
+            klasifikasiSearch.value = '';
+            klasifikasiValue.value = '';
+            klasifikasiLabel.textContent = 'Pilih Kode Klasifikasi';
+            klasifikasiRoot.querySelectorAll('.klasifikasi-option').forEach((option) => option.classList.remove('hidden'));
+            klasifikasiRoot.querySelectorAll('input[name="filter-klasifikasi-picker"]').forEach((radio) => (radio.checked = false));
+            if (klasifikasiEmpty) klasifikasiEmpty.classList.add('hidden');
+            klasifikasiSearch.focus();
+        });
+
+        klasifikasiRoot?.querySelectorAll('input[name="filter-klasifikasi-picker"]').forEach((radio) => {
+            radio.addEventListener('change', function () {
+                if (!klasifikasiValue || !klasifikasiLabel) return;
+                klasifikasiValue.value = this.value;
+                klasifikasiLabel.textContent = this.dataset.label || this.dataset.code || 'Pilih Kode Klasifikasi';
+                closeKlasifikasiModal();
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!klasifikasiRoot || !klasifikasiModal) return;
+            if (!klasifikasiRoot.contains(event.target)) {
+                closeKlasifikasiModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && klasifikasiModal && !klasifikasiModal.classList.contains('hidden')) {
+                closeKlasifikasiModal();
+            }
+        });
     </script>
     <x-logout-confirmation />
 </body>

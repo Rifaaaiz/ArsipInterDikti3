@@ -17,6 +17,7 @@ class Arsip extends Model
         'nama_arsip',
         'kategori_arsip_id',
         'klasifikasi_arsip_id',
+        'sifat_surat_id',
         'pokja_id',
         'tanggal_dokumen',
         'file_path',
@@ -25,6 +26,7 @@ class Arsip extends Model
         'status',
         'uploaded_by',
         'masa_retensi_sampai',
+        'submission_token',
     ];
 
     protected $casts = [
@@ -43,6 +45,11 @@ class Arsip extends Model
     public function klasifikasiArsip()
     {
         return $this->belongsTo(KlasifikasiArsip::class);
+    }
+
+    public function sifatSurat()
+    {
+        return $this->belongsTo(SifatSurat::class, 'sifat_surat_id');
     }
 
     public function pokja()
@@ -67,5 +74,16 @@ class Arsip extends Model
             Peminjaman::class,
             'arsip_id'
         );
+    }
+
+    public function latestPeminjaman()
+    {
+        return $this->hasOne(Peminjaman::class, 'arsip_id')
+            ->latestOfMany('tanggal_mulai');
+    }
+
+    public function balasans()
+    {
+        return $this->hasMany(SuratMasukBalasan::class, 'arsip_id')->oldest();
     }
 }

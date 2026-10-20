@@ -6,73 +6,125 @@
     <title>Upload Arsip - Super Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --sidebar-width: 256px; }
+        #superadmin-sidebar { width: var(--sidebar-width); transition: width 200ms ease-out, transform 200ms ease-out; }
+        #superadmin-main { margin-left: var(--sidebar-width); transition: margin-left 200ms ease-out; }
+        .sidebar-collapsed { --sidebar-width: 76px; }
+        .sidebar-collapsed [data-sidebar-label],
+        .sidebar-collapsed [data-sidebar-heading] { display: none; }
+        .sidebar-collapsed #sidebar-logo { justify-content: center; padding-left: 0; padding-right: 0; }
+        .sidebar-collapsed #superadmin-sidebar nav > a,
+        .sidebar-collapsed #superadmin-sidebar nav > div > button { justify-content: center; padding-left: 0.5rem; padding-right: 0.5rem; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > button > span { justify-content: center; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > button > i { display: none; }
+        .sidebar-collapsed #superadmin-sidebar nav > div > div { display: none; }
+        .sidebar-collapsed #superadmin-sidebar form button { justify-content: center; }
+        @media (max-width: 767px) {
+            #superadmin-sidebar { width: 256px; transform: translateX(-100%); }
+            #superadmin-main { margin-left: 0; }
+            .sidebar-mobile-open #superadmin-sidebar { transform: translateX(0); }
+            .sidebar-collapsed { --sidebar-width: 0px; }
+            #sidebar-resize-handle { display: none; }
+        }
+    </style>
 </head>
 <body class="bg-[#f4f7f9] flex font-sans text-gray-800">
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
-        <div>
-            <div class="flex items-center gap-3 px-6 py-6 mb-2">
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+    @php
+        $arsipForm = $arsip ?? null;
+        $isEdit = (bool) ($isEdit ?? false);
+        $kategoris = collect($kategoris ?? []);
+        $sifatSurats = collect($sifatSurats ?? []);
+        $pokjas = collect($pokjas ?? []);
+        $klasifikasis = collect($klasifikasis ?? []);
+    @endphp
+    <aside id="superadmin-sidebar" class="fixed left-0 top-0 z-30 flex h-screen flex-col bg-[#0a1120] text-white">
+        <div class="min-h-0 flex-1 overflow-y-auto">
+            <div id="sidebar-logo" class="mb-2 flex items-center gap-3 px-6 py-6">
+                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
                     <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
                 </div>
-                <h1 class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
+                <h1 data-sidebar-label class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
             </div>
-
-            <nav class="px-4 space-y-1">
-                <a href="{{ route('superadmin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <nav class="space-y-1 px-4 pb-4">
+                <a href="{{ route('superadmin.dashboard') }}" title="Dashboard" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-gray-200 transition hover:bg-gray-800 hover:text-white">
+                    <svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                         <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg> Dashboard
+                    </svg><span data-sidebar-label>Dashboard</span>
                 </a>
-
                 <div class="pt-1">
-                    <button class="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-200 transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i> Kelola Arsip</span>
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    <button type="button" onclick="toggleSidebarMenu('submenu-arsip', 'ikon-panah-arsip')" aria-expanded="true" class="flex w-full items-center justify-between rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors focus:outline-none">
+                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i><span data-sidebar-label>Kelola Arsip</span></span>
+                        <i id="ikon-panah-arsip" class="fa-solid fa-chevron-right rotate-90 text-xs transition-transform duration-300"></i>
                     </button>
-
-                    <div class="flex flex-col gap-1 pt-1 pb-2">
-                        <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block pl-12 py-2 text-sm font-medium text-gray-400 hover:text-white transition">Penghapusan Arsip</a>
-                        <a href="{{ route('superadmin.arsip.laporan') }}" class="block px-4 py-2.5 ml-4 mr-2 bg-blue-600 text-white rounded-lg text-sm font-semibold transition shadow-sm">Laporan Arsip</a>
+                    <div id="submenu-arsip" class="max-h-96 overflow-hidden transition-all duration-300">
+                        <div class="flex flex-col gap-1 pt-1 pb-2">
+                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Penghapusan Arsip</a>
+                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Laporan Arsip</a>
+                        </div>
                     </div>
                 </div>
-
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-regular fa-circle-check w-5"></i> Validasi Peminjaman
+                <a href="{{ route('superadmin.peminjaman.validasi') }}" title="Validasi Peminjaman" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-regular fa-circle-check w-5"></i><span data-sidebar-label>Validasi Peminjaman</span>
                 </a>
-                <a href="{{ route('superadmin.users') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-solid fa-users w-5"></i> Kelola User
+                <a href="{{ route('superadmin.users') }}" title="Kelola User" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-solid fa-users w-5"></i><span data-sidebar-label>Kelola User</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition">
-                    <i class="fa-regular fa-file-lines w-5"></i> Panduan Penggunaan
+                <p data-sidebar-heading class="px-4 pb-1 pt-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tim Pokja</p>
+                @foreach ($pokjas as $pokja)
+                    <div>
+                        <button type="button" onclick="toggleSidebarMenu('submenu-pokja-{{ $pokja->id }}', 'ikon-panah-pokja-{{ $pokja->id }}')" aria-expanded="false" class="flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                            <span class="flex min-w-0 items-center gap-3"><i class="fa-solid fa-people-group w-5 shrink-0"></i><span data-sidebar-label class="truncate">{{ $pokja->name }}</span></span>
+                            <i id="ikon-panah-pokja-{{ $pokja->id }}" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-300"></i>
+                        </button>
+                        <div id="submenu-pokja-{{ $pokja->id }}" class="max-h-0 overflow-hidden transition-all duration-300">
+                            <div class="flex flex-col gap-1 py-1">
+                                <a href="{{ route('superadmin.surat-masuk', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Masuk</a>
+                                <a href="{{ route('superadmin.surat-keluar', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Keluar</a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+                <a href="#" title="Panduan Penggunaan" class="mt-3 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-regular fa-file-lines w-5"></i><span data-sidebar-label>Panduan Penggunaan</span>
+                </a>
+                <a href="#" title="Pengaturan Sistem" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
+                    <i class="fa-solid fa-gear w-5"></i><span data-sidebar-label>Pengaturan Sistem</span>
                 </a>
             </nav>
         </div>
-
-        <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-800 p-4">
             @csrf
-            <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            <button type="submit" title="Logout" class="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-red-500 transition hover:bg-red-950 hover:text-red-400">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i><span data-sidebar-label>Logout</span>
             </button>
         </form>
+        <button id="sidebar-resize-handle" type="button" aria-label="Ubah lebar sidebar" title="Tarik untuk mengubah lebar sidebar" class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize bg-transparent transition hover:bg-blue-500/60"></button>
     </aside>
 
-    <main class="flex-1 ml-64 min-h-screen">
-        <header class="px-8 py-6 flex justify-end items-center">
-            <span class="font-bold text-gray-900">{{ auth()->user()->name ?? 'SuperAdmin' }}</span>
-            <i class="fa-solid fa-circle-user text-2xl ml-3"></i>
+    <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
+    <main id="superadmin-main" class="flex min-h-screen w-full min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-5 py-5 sm:px-8">
+            <button id="sidebar-toggle" type="button" aria-label="Ciutkan atau buka sidebar" aria-expanded="true" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600">
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-gray-900">Super Admin</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
+            </div>
         </header>
 
-        <div class="px-8 pb-10">
-            <div class="flex items-center gap-3 mb-6">
-                <a href="{{ route('superadmin.arsip.laporan') }}" class="text-black hover:text-blue-600 text-lg transition">
-                    <i class="fa-solid fa-chevron-left"></i>
+        <div class="w-full min-w-0 flex-1 px-5 pb-10 sm:px-8">
+            <div class="mb-6 flex items-center gap-3">
+                <a href="{{ route('superadmin.arsip.laporan') }}" aria-label="Kembali ke Laporan Arsip" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:border-blue-500 hover:text-blue-600">
+                    <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
-                <span class="text-sm font-bold text-gray-500">Tambah Arsip - SuperAdmin</span>
+                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Form Upload Arsip</h1>
             </div>
 
-            <div class="max-w-5xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h2 class="text-3xl font-bold mb-6 text-gray-900">Upload File Kearsipan</h2>
+            <div class="w-full rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <h2 class="mb-6 text-xl font-bold text-gray-900">{{ $isEdit ? 'Perbarui Arsip' : 'Form Upload Arsip' }}</h2>
 
                 @if ($errors->any())
                     <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -84,28 +136,79 @@
                     </div>
                 @endif
 
-                <form action="{{ route('superadmin.arsip.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ $isEdit ? route('superadmin.arsip.update', $arsipForm) : route('superadmin.arsip.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @unless ($isEdit)
+                        <input type="hidden" name="submission_token" value="{{ $submissionToken }}">
+                    @endunless
+                    @if ($isEdit)
+                        @method('PUT')
+                    @endif
 
                     <div class="mb-5">
-                        <label for="nama_arsip" class="block text-sm font-bold text-black mb-1.5">Nama Arsip</label>
-                        <input type="text" id="nama_arsip" name="nama_arsip" value="{{ old('nama_arsip') }}" placeholder="Nama Arsip" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                        @error('nama_arsip')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <label for="nama_arsip" class="mb-1.5 block text-sm font-bold text-slate-800">Nama Surat <span class="text-red-600">*</span></label>
+                        <input type="text" id="nama_arsip" name="nama_arsip" value="{{ old('nama_arsip', $arsipForm?->nama_arsip) }}" placeholder="Nama Surat" required class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        @error('nama_arsip')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+                        <div>
+                            <label for="kategori_arsip_id" class="mb-1.5 block text-sm font-bold text-slate-800">Jenis Surat <span class="text-red-600">*</span></label>
+                            <div class="relative">
+                                <select id="kategori_arsip_id" name="kategori_arsip_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                    <option value="" disabled {{ old('kategori_arsip_id', $arsipForm?->kategori_arsip_id) ? '' : 'selected' }}>Pilih Jenis Surat</option>
+                                    @foreach ($kategoris as $kategori)
+                                        <option value="{{ $kategori->id }}" @selected((string) old('kategori_arsip_id', $arsipForm?->kategori_arsip_id) === (string) $kategori->id)>{{ $kategori->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
+                            </div>
+                            @error('kategori_arsip_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="sifat_surat_id" class="mb-1.5 block text-sm font-bold text-slate-800">Sifat Surat <span class="text-red-600">*</span></label>
+                            <div class="relative">
+                                <select id="sifat_surat_id" name="sifat_surat_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                    <option value="" disabled {{ old('sifat_surat_id', $arsipForm?->sifat_surat_id) ? '' : 'selected' }}>Pilih Sifat Surat</option>
+                                    @foreach ($sifatSurats as $sifatSurat)
+                                        <option value="{{ $sifatSurat->id }}" @selected((string) old('sifat_surat_id', $arsipForm?->sifat_surat_id) === (string) $sifatSurat->id)>{{ $sifatSurat->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
+                            </div>
+                            @error('sifat_surat_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="pokja_id" class="mb-1.5 block text-sm font-bold text-slate-800">Kelompok Kerja <span class="text-red-600">*</span></label>
+                            <div class="relative">
+                                <select id="pokja_id" name="pokja_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                    <option value="" disabled {{ old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
+                                    @foreach ($pokjas as $pokja)
+                                        <option value="{{ $pokja->id }}" @selected((string) old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) === (string) $pokja->id)>{{ $pokja->name }}</option>
+                                    @endforeach
+                                </select>
+                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
+                            </div>
+                            @error('pokja_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="tanggal_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Tanggal Dokumen <span class="text-red-600">*</span></label>
+                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', $arsipForm?->tanggal_dokumen?->format('Y-m-d')) }}" required class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            @error('tanggal_dokumen')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
                     </div>
 
                     <div class="mb-5">
-                        <label class="block text-sm font-bold text-black mb-1.5">Kode Klasifikasi</label>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-800">Kode Klasifikasi</label>
                         @php
-                            $klasifikasiValue = old('klasifikasi_arsip_id', '');
+                            $klasifikasiValue = old('klasifikasi_arsip_id', $arsipForm?->klasifikasi_arsip_id ?? '');
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) $klasifikasiValue);
                         @endphp
                         <div class="relative" data-klasifikasi-root="admin-tu-klasifikasi">
                             <input type="hidden" name="klasifikasi_arsip_id" value="{{ $klasifikasiValue }}" data-klasifikasi-value>
-                            <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-500 bg-[#f8f9fa] px-4 text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none">
+                            <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex w-full items-center justify-between rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-left text-sm text-slate-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none">
                                 <span data-klasifikasi-label>{{ $selectedKlasifikasi ? $selectedKlasifikasi->kode . ' - ' . ($selectedKlasifikasi->judul ?? $selectedKlasifikasi->uraian ?? '-') : 'Pilih Kode Klasifikasi' }}</span>
-                                <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+                                <i class="fa-solid fa-chevron-down text-xs text-slate-500"></i>
                             </button>
 
                             <div class="fixed inset-0 z-[100] hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
@@ -119,9 +222,9 @@
                                             @php $first = $group->first(); @endphp
                                             <div class="mb-6">
                                                 <h3 class="mb-3 text-sm font-bold text-slate-700">{{ $first->bab ?? 'BAB' }}</h3>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                                                     @foreach ($group as $item)
-                                                        <button type="button" data-klasifikasi-option data-value="{{ $item->id }}" data-label="{{ $item->kode }} - {{ $item->judul ?? $item->uraian ?? '-' }}" class="rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-blue-300 hover:bg-blue-50 text-sm text-slate-700">
+                                                        <button type="button" data-klasifikasi-option data-value="{{ $item->id }}" data-label="{{ $item->kode }} - {{ $item->judul ?? $item->uraian ?? '-' }}" class="rounded-lg border border-slate-200 bg-white p-3 text-left text-sm text-slate-700 transition hover:border-blue-300 hover:bg-blue-50">
                                                             <span class="block font-bold text-slate-900">{{ $item->kode }}</span>
                                                             <span class="block text-xs text-slate-600">{{ $item->judul ?? $item->uraian ?? '-' }}</span>
                                                         </button>
@@ -133,58 +236,30 @@
                                 </section>
                             </div>
                         </div>
-                        @error('klasifikasi_arsip_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                        <div>
-                            <label for="kategori_arsip_id" class="block text-sm font-bold text-black mb-1.5">Kategori</label>
-                            <select id="kategori_arsip_id" name="kategori_arsip_id" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                                <option value="" disabled {{ old('kategori_arsip_id') ? '' : 'selected' }}>Kategori Surat</option>
-                                @foreach ($kategoris as $kategori)
-                                    <option value="{{ $kategori->id }}" {{ old('kategori_arsip_id') == $kategori->id ? 'selected' : '' }}>{{ $kategori->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('kategori_arsip_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="tanggal_dokumen" class="block text-sm font-bold text-black mb-1.5">Tanggal Dokumen</label>
-                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen') }}" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                            @error('tanggal_dokumen')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                        @error('klasifikasi_arsip_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="mb-5">
-                        <label for="pokja_id" class="block text-sm font-bold text-black mb-1.5">Kelompok Kerja / Pokja</label>
-                        <select id="pokja_id" name="pokja_id" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
-                            <option value="" disabled {{ old('pokja_id') ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
-                            @foreach ($pokjas as $pokja)
-                                <option value="{{ $pokja->id }}" {{ old('pokja_id') == $pokja->id ? 'selected' : '' }}>{{ $pokja->name }}</option>
-                            @endforeach
-                        </select>
-                        @error('pokja_id')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                        <label for="file_arsip" class="mb-1.5 block text-sm font-bold text-slate-800">Upload File <span class="text-red-600">{{ $isEdit ? '' : '*' }}</span></label>
+                        <label class="relative flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center transition hover:border-blue-500 hover:bg-blue-50/40">
+                            <input type="file" id="file_arsip" name="file_arsip" accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png,.gif,.bmp,.webp" {{ $isEdit ? '' : 'required' }} class="absolute inset-0 h-full w-full cursor-pointer opacity-0">
+                            <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600"><i class="fa-solid fa-cloud-arrow-up text-xl"></i></span>
+                            <span class="text-base font-semibold text-slate-800">Select File</span>
+                            <span id="selected-file-name" class="mt-1 text-sm text-slate-500">Upload File Kearsipan Disini (PDF, Doc, DOCX, ZIP, RAR - Maks 5 Mb)</span>
+                            @if ($isEdit && $arsipForm?->file_path)
+                                <span class="mt-2 text-xs text-slate-500">Kosongkan jika ingin mempertahankan file yang tersimpan.</span>
+                            @endif
+                        </label>
+                        <p class="mt-2 text-xs text-slate-500">Maximal upload file 5 MB. (Jika Lebih Bisa Di Kompress Filenya Terlebih Dahulu)</p>
+                        @error('file_arsip')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
-                    <div class="mb-5">
-                        <label for="file_arsip" class="block text-sm font-bold text-black mb-1.5">Upload File</label>
-                        <input type="file" id="file_arsip" name="file_arsip" accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png,.gif,.bmp,.webp" required class="block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-700">
-                        <p class="mt-1 text-xs text-gray-500">Maksimal ukuran file 5 MB. Format yang didukung: PDF, DOC, DOCX, ZIP, RAR, JPG, PNG, GIF, BMP, WEBP.</p>
-                        @error('file_arsip')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex items-center justify-end gap-3 pt-3">
-                        <a href="{{ route('superadmin.arsip.form') }}" class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">Batal</a>
-                        <button type="submit" class="rounded-lg bg-[#2563eb] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">Simpan Arsip</button>
+                    <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
+                        <a href="{{ route('superadmin.arsip.laporan') }}" class="flex items-center justify-center rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-1/3">Batal</a>
+                        <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">
+                            <span>{{ $isEdit ? 'Perbarui Arsip' : 'Submit Peminjaman' }}</span>
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -192,6 +267,71 @@
     </main>
 
     <script>
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        const sidebarResizeHandle = document.getElementById('sidebar-resize-handle');
+        const isMobileViewport = () => window.matchMedia('(max-width: 767px)').matches;
+
+        const setMobileSidebar = (open) => {
+            document.body.classList.toggle('sidebar-mobile-open', open);
+            sidebarBackdrop.classList.toggle('hidden', !open);
+            sidebarToggle.setAttribute('aria-expanded', String(open));
+        };
+
+        sidebarToggle.addEventListener('click', () => {
+            if (isMobileViewport()) {
+                setMobileSidebar(!document.body.classList.contains('sidebar-mobile-open'));
+                return;
+            }
+
+            const collapsed = document.body.classList.toggle('sidebar-collapsed');
+            sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        });
+        sidebarBackdrop.addEventListener('click', () => setMobileSidebar(false));
+        window.addEventListener('resize', () => {
+            if (!isMobileViewport()) {
+                setMobileSidebar(false);
+            }
+        });
+
+        let resizingSidebar = false;
+        sidebarResizeHandle.addEventListener('pointerdown', (event) => {
+            if (isMobileViewport()) return;
+            resizingSidebar = true;
+            sidebarResizeHandle.setPointerCapture(event.pointerId);
+            document.body.classList.remove('sidebar-collapsed');
+            document.body.style.userSelect = 'none';
+        });
+        sidebarResizeHandle.addEventListener('pointermove', (event) => {
+            if (!resizingSidebar) return;
+            const width = Math.min(360, Math.max(220, event.clientX));
+            document.body.style.setProperty('--sidebar-width', `${width}px`);
+        });
+        sidebarResizeHandle.addEventListener('pointerup', () => {
+            resizingSidebar = false;
+            document.body.style.userSelect = '';
+        });
+
+        window.toggleSidebarMenu = (submenuId, iconId) => {
+            const submenu = document.getElementById(submenuId);
+            const icon = document.getElementById(iconId);
+            const button = icon?.closest('button');
+            if (!submenu || !icon || !button) return;
+
+            const isOpen = Number.parseFloat(window.getComputedStyle(submenu).maxHeight) > 0;
+            submenu.style.maxHeight = isOpen ? '0px' : `${submenu.scrollHeight}px`;
+            icon.classList.toggle('rotate-90', !isOpen);
+            button.setAttribute('aria-expanded', String(!isOpen));
+        };
+
+        const fileInput = document.getElementById('file_arsip');
+        const fileNameLabel = document.getElementById('selected-file-name');
+        if (fileInput && fileNameLabel) {
+            fileInput.addEventListener('change', () => {
+                fileNameLabel.textContent = fileInput.files?.[0]?.name || 'Upload File Kearsipan Disini (PDF, Doc, DOCX, ZIP, RAR - Maks 5 Mb)';
+            });
+        }
+
         document.querySelectorAll('[data-klasifikasi-root]').forEach((root) => {
             const trigger = root.querySelector('[data-klasifikasi-trigger]');
             const modal = root.querySelector('[data-klasifikasi-modal]');
@@ -235,6 +375,10 @@
                     label.textContent = text;
                     close();
                 });
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !modal.classList.contains('hidden')) close();
             });
         });
     </script>

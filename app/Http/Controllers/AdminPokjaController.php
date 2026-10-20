@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 use App\Models\Arsip;
 use App\Models\Peminjaman;
 use App\Models\KategoriArsip;
 use App\Models\KlasifikasiArsip;
+use App\Models\SifatSurat;
 
 class AdminPokjaController extends Controller
 {
@@ -26,18 +28,19 @@ class AdminPokjaController extends Controller
             ->whereNotIn('status', ['dihapus'])
             ->count();
 
-        // Total peminjaman aktif oleh user/Pokja
-        $peminjamanAktif = Peminjaman::where('user_id', $user->id)
+        $peminjamanAktif = Peminjaman::whereHas('user', function ($query) use ($pokjaId) {
+            $query->where('pokja_id', $pokjaId);
+        })
             ->activeNow()
             ->count();
 
-        // Total arsip yang diupload oleh user tersebut
-        $uploadArsip = Arsip::where('uploaded_by', $user->id)
+        // Hitung arsip Pokja yang benar-benar memiliki file tersimpan.
+        $uploadArsip = Arsip::where('pokja_id', $pokjaId)
             ->whereNotIn('status', ['dihapus'])
+            ->whereNotNull('file_path')
             ->count();
 
-        // 5 arsip terbaru milik Pokja
-        $arsipTerbaru = Arsip::with('kategori')
+        $arsipTerbaru = Arsip::with(['kategori', 'klasifikasiArsip', 'sifatSurat', 'latestPeminjaman'])
             ->where('pokja_id', $pokjaId)
             ->whereNotIn('status', ['dihapus'])
             ->latest()
@@ -60,7 +63,7 @@ class AdminPokjaController extends Controller
         // Daftar arsip milik Pokja yang sedang login, arsip terbaru di atas.
         // Relasi kategori arsip di Model Arsip bernama "kategori", bukan
         // "kategoriArsip", jadi eager-load-nya harus mengikuti nama itu.
-        $arsips = Arsip::with('kategori')
+        $arsips = Arsip::with(['kategori', 'sifatSurat'])
             ->where('pokja_id', $pokjaId)
             ->whereNotIn('status', ['dihapus'])
             ->latest()
@@ -72,54 +75,121 @@ class AdminPokjaController extends Controller
     public function history(Request $request)
     {
         $user = Auth::user();
-        $filter = $request->query('filter', 'semua');
+        $filters = $request->validate([
+            'filter' => ['nullable', 'in:semua,arsip,peminjaman'],
+            'search' => ['nullable', 'string', 'max:255'],
+            'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+        ]);
+        $filter = $filters['filter'] ?? 'semua';
+        $search = $this->normalizeSearch($filters['search'] ?? '');
+        $searchPatterns = array_map(
+            fn ($token) => $this->searchLikePattern($token),
+            $this->searchTokens($search)
+        );
 
-        if (! in_array($filter, ['semua', 'arsip', 'peminjaman'], true)) {
-            $filter = 'semua';
-        }
-
-        $arsipQuery = DB::table('arsips')
-            ->leftJoin(
-                'kategori_arsips',
-                'kategori_arsips.id',
-                '=',
-                'arsips.kategori_arsip_id'
-            )
-            ->where('arsips.pokja_id', $user->pokja_id)
-            ->whereNotIn('arsips.status', ['dihapus'])
+        $arsipQuery = DB::table('arsips as arsip')
+            ->leftJoin('jenis_surats as jenis_arsip', 'jenis_arsip.id', '=', 'arsip.kategori_arsip_id')
+            ->leftJoin('sifat_surats as sifat_arsip', 'sifat_arsip.id', '=', 'arsip.sifat_surat_id')
+            ->leftJoin('klasifikasi_arsips as klasifikasi_arsip', 'klasifikasi_arsip.id', '=', 'arsip.klasifikasi_arsip_id')
+            ->where('arsip.pokja_id', $user->pokja_id)
+            ->whereNotIn('arsip.status', ['dihapus'])
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(arsip.nama_arsip) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(jenis_arsip.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(sifat_arsip.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip.kode) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip.judul) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip.uraian) LIKE ?', [$pattern]);
+                    });
+                }
+            })
+            ->when($filters['jenis_surat_id'] ?? null, fn ($query, $id) => $query->where('arsip.kategori_arsip_id', $id))
+            ->when($filters['sifat_surat_id'] ?? null, fn ($query, $id) => $query->where('arsip.sifat_surat_id', $id))
+            ->when($filters['tanggal_dokumen'] ?? null, fn ($query, $date) => $query->whereDate('arsip.tanggal_dokumen', $date))
+            ->when($filters['klasifikasi_arsip_id'] ?? null, fn ($query, $id) => $query->where('arsip.klasifikasi_arsip_id', $id))
             ->select([
                 DB::raw("'arsip' as jenis"),
-                'arsips.id',
-                'arsips.nama_arsip as nama',
-                'kategori_arsips.name as kategori',
-                'arsips.created_at as tanggal',
-                'arsips.status',
-                'arsips.file_path as file_path',
+                'arsip.id',
+                'arsip.nama_arsip as nama',
+                'jenis_arsip.name as jenis_surat',
+                'sifat_arsip.name as sifat_surat',
+                'klasifikasi_arsip.kode as kode_klasifikasi',
+                'arsip.created_at as tanggal_upload',
+                'arsip.status',
+                'arsip.file_path',
             ]);
 
+        $today = now()->toDateString();
         $peminjamanQuery = DB::table('peminjamans')
+            ->join('users as peminjam_user', 'peminjam_user.id', '=', 'peminjamans.user_id')
             ->leftJoin('arsips as arsip_peminjaman', 'arsip_peminjaman.id', '=', 'peminjamans.arsip_id')
-            ->leftJoin('kategori_arsips as kategori_peminjaman', 'kategori_peminjaman.id', '=', 'peminjamans.kategori_id')
-            ->where('peminjamans.user_id', $user->id)
-            ->when($filter === 'peminjaman', function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->where('peminjamans.status', 'selesai')
-                        ->orWhere(function ($dateQuery) {
-                            $dateQuery->where('peminjamans.status', 'aktif')
-                                ->whereDate('peminjamans.tanggal_selesai', '<', now()->toDateString());
-                        });
+            ->leftJoin('jenis_surats as jenis_peminjaman', 'jenis_peminjaman.id', '=', 'peminjamans.kategori_id')
+            ->leftJoin('jenis_surats as jenis_arsip_peminjaman', 'jenis_arsip_peminjaman.id', '=', 'arsip_peminjaman.kategori_arsip_id')
+            ->leftJoin('sifat_surats as sifat_peminjaman', 'sifat_peminjaman.id', '=', 'peminjamans.sifat_surat_id')
+            ->leftJoin('sifat_surats as sifat_arsip_peminjaman', 'sifat_arsip_peminjaman.id', '=', 'arsip_peminjaman.sifat_surat_id')
+            ->leftJoin('klasifikasi_arsips as klasifikasi_peminjaman', 'klasifikasi_peminjaman.id', '=', 'peminjamans.klasifikasi_arsip_id')
+            ->leftJoin('klasifikasi_arsips as klasifikasi_arsip_peminjaman', 'klasifikasi_arsip_peminjaman.id', '=', 'arsip_peminjaman.klasifikasi_arsip_id')
+            ->where('peminjam_user.pokja_id', $user->pokja_id ?? 0)
+            ->where(function ($query) use ($today) {
+                $query->whereIn('peminjamans.status', ['ditolak', 'selesai', 'dikembalikan'])
+                    ->orWhere(function ($expiredQuery) use ($today) {
+                        $expiredQuery->whereIn('peminjamans.status', ['aktif', 'disetujui'])
+                            ->whereDate('peminjamans.tanggal_selesai', '<', $today);
+                    });
+            })
+            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
+                foreach ($searchPatterns as $pattern) {
+                    $query->where(function ($searchQuery) use ($pattern) {
+                        $searchQuery->whereRaw('LOWER(peminjamans.nama_surat) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(arsip_peminjaman.nama_arsip) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(jenis_peminjaman.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(jenis_arsip_peminjaman.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(sifat_peminjaman.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(sifat_arsip_peminjaman.name) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_peminjaman.kode) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip_peminjaman.kode) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_peminjaman.judul) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip_peminjaman.judul) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_peminjaman.uraian) LIKE ?', [$pattern])
+                            ->orWhereRaw('LOWER(klasifikasi_arsip_peminjaman.uraian) LIKE ?', [$pattern]);
+                    });
+                }
+            })
+            ->when($filters['jenis_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($subQuery) use ($id) {
+                    $subQuery->where('peminjamans.kategori_id', $id)
+                        ->orWhere('arsip_peminjaman.kategori_arsip_id', $id);
+                });
+            })
+            ->when($filters['sifat_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($subQuery) use ($id) {
+                    $subQuery->where('peminjamans.sifat_surat_id', $id)
+                        ->orWhere('arsip_peminjaman.sifat_surat_id', $id);
+                });
+            })
+            ->when($filters['tanggal_dokumen'] ?? null, fn ($query, $date) => $query->whereDate('arsip_peminjaman.tanggal_dokumen', $date))
+            ->when($filters['klasifikasi_arsip_id'] ?? null, function ($query, $id) {
+                $query->where(function ($subQuery) use ($id) {
+                    $subQuery->where('peminjamans.klasifikasi_arsip_id', $id)
+                        ->orWhere('arsip_peminjaman.klasifikasi_arsip_id', $id);
                 });
             })
             ->select([
                 DB::raw("'peminjaman' as jenis"),
                 'peminjamans.id',
                 DB::raw('COALESCE(arsip_peminjaman.nama_arsip, peminjamans.nama_surat) as nama'),
-                DB::raw('COALESCE(kategori_peminjaman.name, kategori_arsip.name) as kategori'),
-                'peminjamans.created_at as tanggal',
-                DB::raw("CASE WHEN peminjamans.status = 'aktif' AND peminjamans.tanggal_selesai < CURRENT_DATE THEN 'selesai' ELSE peminjamans.status END as status"),
+                DB::raw('COALESCE(jenis_peminjaman.name, jenis_arsip_peminjaman.name) as jenis_surat'),
+                DB::raw('COALESCE(sifat_peminjaman.name, sifat_arsip_peminjaman.name) as sifat_surat'),
+                DB::raw('COALESCE(klasifikasi_peminjaman.kode, klasifikasi_arsip_peminjaman.kode) as kode_klasifikasi'),
+                'peminjamans.updated_at as tanggal_upload',
+                DB::raw("CASE WHEN peminjamans.status IN ('aktif', 'disetujui') AND peminjamans.tanggal_selesai < '{$today}' THEN 'selesai' ELSE peminjamans.status END as status"),
                 DB::raw('COALESCE(arsip_peminjaman.file_path, peminjamans.file_pengajuan) as file_path'),
-            ])
-            ->leftJoin('kategori_arsips as kategori_arsip', 'kategori_arsip.id', '=', 'arsip_peminjaman.kategori_arsip_id');
+            ]);
 
         $historyQuery = match ($filter) {
             'arsip' => $arsipQuery,
@@ -129,14 +199,24 @@ class AdminPokjaController extends Controller
 
         $history = DB::query()
             ->fromSub($historyQuery, 'history')
-            ->orderByDesc('tanggal')
+            ->orderByDesc('tanggal_upload')
             ->orderByDesc('id')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view(
-            'Admin_Pokja.history_pokja',
-            compact('history', 'filter')
-        );
+        $jenisSurats = KategoriArsip::orderBy('name')->get();
+        $sifatSurats = SifatSurat::orderBy('name')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
+
+        return view('Admin_Pokja.history_pokja', compact(
+            'history',
+            'filter',
+            'filters',
+            'search',
+            'jenisSurats',
+            'sifatSurats',
+            'klasifikasis'
+        ));
     }
 
     public function profil()
@@ -147,25 +227,30 @@ class AdminPokjaController extends Controller
     public function formUpload()
     {
         $user = Auth::user();
-        $kategoris = KategoriArsip::all();
-        $klasifikasis = KlasifikasiArsip::orderBy('bab_urutan')
-            ->orderBy('urutan')
-            ->orderBy('kode')
-            ->orderBy('nomor')
-            ->orderBy('id')
-            ->get();
+        $jenisSurats = KategoriArsip::orderBy('name')->get();
+        $sifatSurats = SifatSurat::orderBy('name')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
 
         $view = $user && $user->role && $user->role->slug === 'ketua_pokja'
             ? 'Ketua_Pokja.form_upload_ketuapokja'
             : 'Admin_Pokja.form_upload_pokja';
 
-        return view($view, compact('kategoris', 'klasifikasis'));
+        return view($view, [
+            'jenisSurats' => $jenisSurats,
+            'kategoris' => $jenisSurats,
+            'klasifikasis' => $klasifikasis,
+            'sifatSurats' => $sifatSurats,
+        ]);
     }
 
     public function storeArsip(Request $request)
     {
         $user = Auth::user();
         $pokjaId = $user->pokja_id;
+
+        if (! $request->filled('jenis_surat_id') && $request->filled('kategori_arsip_id')) {
+            $request->merge(['jenis_surat_id' => $request->input('kategori_arsip_id')]);
+        }
 
         if (! $pokjaId) {
             return back()->withErrors([
@@ -174,14 +259,37 @@ class AdminPokjaController extends Controller
         }
 
         $validatedData = $request->validate([
-            'nama_arsip' => 'required|string|max:255',
-            'nomor_dokumen' => 'nullable|string|max:255',
-            'kategori_arsip_id' => 'required|exists:kategori_arsips,id',
-            'klasifikasi_arsip_id' => 'nullable|exists:klasifikasi_arsips,id',
-            'tanggal_dokumen' => 'required|date',
+            'nama_arsip' => ['required', 'string', 'max:255'],
+            'jenis_surat_id' => ['required', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['required', 'integer', 'exists:sifat_surats,id'],
+            'tanggal_dokumen' => ['required', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
             'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,zip,rar', 'max:5120'],
         ], [
+            'nama_arsip.required' => 'Nama surat wajib diisi.',
+            'nama_arsip.string' => 'Nama surat harus berupa teks.',
+            'nama_arsip.max' => 'Nama surat maksimal 255 karakter.',
+            'jenis_surat_id.required' => 'Jenis surat wajib dipilih.',
+            'jenis_surat_id.integer' => 'Jenis surat yang dipilih tidak valid.',
+            'jenis_surat_id.exists' => 'Jenis surat yang dipilih tidak tersedia.',
+            'sifat_surat_id.required' => 'Sifat surat wajib dipilih.',
+            'sifat_surat_id.integer' => 'Sifat surat yang dipilih tidak valid.',
+            'sifat_surat_id.exists' => 'Sifat surat yang dipilih tidak tersedia.',
+            'tanggal_dokumen.required' => 'Tanggal dokumen wajib diisi.',
+            'tanggal_dokumen.date' => 'Tanggal dokumen tidak valid.',
+            'klasifikasi_arsip_id.integer' => 'Kode klasifikasi yang dipilih tidak valid.',
+            'klasifikasi_arsip_id.exists' => 'Kode klasifikasi yang dipilih tidak tersedia.',
+            'file_arsip.required' => 'File arsip wajib diunggah.',
+            'file_arsip.file' => 'File arsip yang diunggah tidak valid.',
+            'file_arsip.mimes' => 'File arsip harus berformat PDF, DOC, DOCX, ZIP, atau RAR.',
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
+        ], [
+            'nama_arsip' => 'nama surat',
+            'jenis_surat_id' => 'jenis surat',
+            'sifat_surat_id' => 'sifat surat',
+            'tanggal_dokumen' => 'tanggal dokumen',
+            'klasifikasi_arsip_id' => 'kode klasifikasi',
+            'file_arsip' => 'file arsip',
         ]);
 
         $file = $request->file('file_arsip');
@@ -192,9 +300,9 @@ class AdminPokjaController extends Controller
                 $storedPath = $file->store('arsip', 'public');
 
                 Arsip::create([
-                    'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'nama_arsip' => $validatedData['nama_arsip'],
-                    'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
+                    'kategori_arsip_id' => $validatedData['jenis_surat_id'],
+                    'sifat_surat_id' => $validatedData['sifat_surat_id'],
                     'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
                     'pokja_id' => $pokjaId,
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
@@ -224,33 +332,95 @@ class AdminPokjaController extends Controller
 
     public function riwayatPeminjamanTerakhir(Request $request)
     {
-        $search = $this->normalizeSearch($request->query('search'));
-        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
-        $kategoriId = $request->integer('kategori_id') ?: null;
+        $user = Auth::user();
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+        ]);
 
-        $riwayatPeminjaman = Peminjaman::with(['arsip', 'kategori'])
-            ->where('user_id', Auth::id())
+        $search = $this->normalizeSearch($filters['search'] ?? '');
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+
+        $riwayatPeminjaman = Peminjaman::with([
+                'arsip.kategori',
+                'arsip.sifatSurat',
+                'arsip.klasifikasiArsip',
+                'kategori',
+                'sifatSurat',
+                'klasifikasiArsip',
+                'user',
+            ])
+            ->whereHas('user', function ($query) use ($user) {
+                $query->where('pokja_id', $user?->pokja_id);
+            })
             ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
                 foreach ($searchPatterns as $pattern) {
                     $query->where(function ($searchQuery) use ($pattern) {
-                        $searchQuery->whereRaw('LOWER(nama_surat) LIKE ?', [$pattern])
+                        $searchQuery->whereRaw('LOWER(peminjamans.nama_surat) LIKE ?', [$pattern])
                             ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]))
-                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]));
+                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
+                            ->orWhereHas('klasifikasiArsip', fn ($klasifikasiQuery) => $klasifikasiQuery->where(function ($subQuery) use ($pattern) {
+                                $subQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(judul) LIKE ?', [$pattern])
+                                    ->orWhereRaw('LOWER(uraian) LIKE ?', [$pattern]);
+                            }));
                     });
                 }
             })
-            ->when($kategoriId, fn ($query) => $query->where('kategori_id', $kategoriId))
+            ->when($filters['jenis_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.kategori_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
+                });
+            })
+            ->when($filters['sifat_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.sifat_surat_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $id));
+                });
+            })
+            ->when($filters['kategori_arsip_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.kategori_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
+                });
+            })
+            ->when($filters['tanggal_dokumen'] ?? null, function ($query, $date) {
+                $dateString = \Carbon\Carbon::parse($date)->toDateString();
+                $query->where(function ($sub) use ($dateString) {
+                    $sub->whereDate('peminjamans.tanggal_mulai', $dateString)
+                        ->orWhereDate('peminjamans.tanggal_selesai', $dateString)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereDate('tanggal_dokumen', $dateString));
+                });
+            })
+            ->when($filters['klasifikasi_arsip_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.klasifikasi_arsip_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('klasifikasi_arsip_id', $id));
+                });
+            })
             ->latest('created_at')
             ->paginate(10)
             ->withQueryString();
+
+        $jenisSurats = KategoriArsip::orderBy('name')->get();
+        $sifatSurats = \App\Models\SifatSurat::orderBy('name')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
 
         return view(
             'Admin_Pokja.riwayat_peminjaman_terakhir_pokja',
             [
                 'riwayatPeminjaman' => $riwayatPeminjaman,
-                'kategoris' => KategoriArsip::orderBy('name')->get(),
+                'kategoris' => $jenisSurats,
+                'jenisSurats' => $jenisSurats,
+                'sifatSurats' => $sifatSurats,
+                'klasifikasis' => $klasifikasis,
+                'filters' => $filters,
                 'search' => $search,
-                'kategoriId' => $kategoriId,
             ]
         );
     }
@@ -258,21 +428,26 @@ class AdminPokjaController extends Controller
     public function riwayatArsipTerakhir(Request $request)
     {
         $user = Auth::user();
-        $search = $this->normalizeSearch($request->query('search'));
-        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
-        $nomorDokumen = $this->normalizeSearch($request->query('nomor_dokumen'));
-        $documentPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($nomorDokumen));
-        $kategoriId = $request->integer('kategori_id') ?: null;
-        $tanggalDokumen = $request->query('tanggal_dokumen');
+        $filters = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+        ]);
 
-        $riwayatArsip = Arsip::with(['kategori', 'klasifikasiArsip'])
-            ->where('pokja_id', $user->pokja_id)
+        $search = $this->normalizeSearch($filters['search'] ?? '');
+        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+
+        $riwayatArsip = Arsip::with(['kategori', 'sifatSurat', 'klasifikasiArsip'])
+            ->where('pokja_id', $user?->pokja_id)
             ->whereNotIn('status', ['dihapus'])
             ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
                 foreach ($searchPatterns as $pattern) {
                     $query->where(function ($searchQuery) use ($pattern) {
                         $searchQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern])
                             ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
+                            ->orWhereHas('sifatSurat', fn ($sifatQuery) => $sifatQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
                             ->orWhereHas('klasifikasiArsip', function ($klasifikasiQuery) use ($pattern) {
                                 $klasifikasiQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
                                     ->orWhereRaw('LOWER(judul) LIKE ?', [$pattern])
@@ -281,13 +456,10 @@ class AdminPokjaController extends Controller
                     });
                 }
             })
-            ->when($documentPatterns !== [], function ($query) use ($documentPatterns) {
-                foreach ($documentPatterns as $pattern) {
-                    $query->whereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern]);
-                }
-            })
-            ->when($kategoriId, fn ($query) => $query->where('kategori_arsip_id', $kategoriId))
-            ->when($tanggalDokumen, fn ($query) => $query->whereDate('tanggal_dokumen', $tanggalDokumen))
+            ->when($filters['jenis_surat_id'] ?? null, fn ($query, $id) => $query->where('kategori_arsip_id', $id))
+            ->when($filters['sifat_surat_id'] ?? null, fn ($query, $id) => $query->where('sifat_surat_id', $id))
+            ->when($filters['klasifikasi_arsip_id'] ?? null, fn ($query, $id) => $query->where('klasifikasi_arsip_id', $id))
+            ->when($filters['tanggal_dokumen'] ?? null, fn ($query, $date) => $query->whereDate('tanggal_dokumen', $date))
             ->latest('created_at')
             ->paginate(10)
             ->withQueryString();
@@ -296,34 +468,182 @@ class AdminPokjaController extends Controller
             'Admin_Pokja.riwayat_arsip_terakhir_pokja',
             [
                 'riwayatArsip' => $riwayatArsip,
-                'kategoris' => KategoriArsip::orderBy('name')->get(),
+                'jenisSurats' => KategoriArsip::orderBy('name')->get(),
+                'sifatSurats' => SifatSurat::orderBy('name')->get(),
+                'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
+                'filters' => $filters,
                 'search' => $search,
-                'nomorDokumen' => $nomorDokumen,
-                'kategoriId' => $kategoriId,
-                'tanggalDokumen' => $tanggalDokumen,
             ]
         );
     }
 
-    public function peminjamanAktif()
+    public function peminjamanAktif(Request $request)
     {
         $user = Auth::user();
 
-        $peminjamans = Peminjaman::with(['user', 'kategori'])
+        $filters = $request->validate([
+            'nama_surat' => ['nullable', 'string', 'max:255'],
+            'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
+        ]);
+
+        $peminjamanQuery = Peminjaman::with([
+            'user',
+            'kategori',
+            'sifatSurat',
+            'klasifikasiArsip',
+            'arsip.kategori',
+            'arsip.sifatSurat',
+            'arsip.klasifikasiArsip',
+        ])
             ->whereHas('user', function ($query) use ($user) {
                 $query->where('pokja_id', $user->pokja_id);
             })
-            ->activeNow()
-            ->latest('tanggal_mulai')
-            ->paginate(10);
+            ->where(function ($query) {
+                $query->activeNow()
+                    ->orWhere('status', 'menunggu_validasi');
+            });
 
-        return view('Admin_Pokja.peminjaman_aktif_pokja', compact('peminjamans'));
+        if (! $user || ! $user->pokja_id) {
+            $peminjamanQuery->whereRaw('1 = 0');
+        }
+
+        $peminjamans = $peminjamanQuery
+            ->when($filters['nama_surat'] ?? null, function ($query, $namaSurat) {
+                $pattern = '%' . mb_strtolower(trim($namaSurat)) . '%';
+                $query->where(function ($nameQuery) use ($pattern) {
+                    $nameQuery->whereRaw('LOWER(peminjamans.nama_surat) LIKE ?', [$pattern])
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]));
+                });
+            })
+            ->when($filters['jenis_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.kategori_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
+                });
+            })
+            ->when($filters['sifat_surat_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sifatQuery) use ($id) {
+                    $sifatQuery->where('peminjamans.sifat_surat_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $id));
+                });
+            })
+            ->when($filters['kategori_arsip_id'] ?? null, function ($query, $id) {
+                $query->where(function ($sub) use ($id) {
+                    $sub->where('peminjamans.kategori_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
+                });
+            })
+            ->when($filters['tanggal_dokumen'] ?? null, function ($query, $date) {
+                $formattedDate = \Carbon\Carbon::parse($date)->toDateString();
+                // Tanggal dokumen merupakan atribut arsip, bukan periode peminjaman.
+                $query->whereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereDate('tanggal_dokumen', $formattedDate));
+            })
+            ->when($filters['klasifikasi_arsip_id'] ?? null, function ($query, $id) {
+                $query->where(function ($klasifikasiQuery) use ($id) {
+                    $klasifikasiQuery->where('peminjamans.klasifikasi_arsip_id', $id)
+                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('klasifikasi_arsip_id', $id));
+                });
+            })
+            ->latest('tanggal_mulai')
+            ->paginate(10)
+            ->withQueryString();
+        $peminjamans->getCollection()->each(function (Peminjaman $peminjaman) use ($user): void {
+            if ((int) $peminjaman->user_id === (int) $user->id) {
+                $peminjaman->load('balasans.user');
+            }
+        });
+
+        $jenisSurats = KategoriArsip::orderBy('name')->get();
+        $kategoris = $jenisSurats;
+        $sifatSurats = SifatSurat::orderBy('id')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
+
+        return view('Admin_Pokja.peminjaman_aktif_pokja', compact(
+            'peminjamans',
+            'filters',
+            'jenisSurats',
+            'kategoris',
+            'sifatSurats',
+            'klasifikasis'
+        ));
+    }
+
+    public function detailPeminjamanAktif(Peminjaman $peminjaman)
+    {
+        $user = Auth::user();
+        abort_unless($user?->pokja_id, 404);
+        abort_unless(
+            $peminjaman->user()->where('pokja_id', $user->pokja_id)->exists(),
+            404
+        );
+
+        $peminjaman->load([
+            'user',
+            'kategori',
+            'sifatSurat',
+            'klasifikasiArsip',
+            'validations.validator',
+            'arsip.kategori',
+            'arsip.sifatSurat',
+            'arsip.klasifikasiArsip',
+        ]);
+
+        return view('Admin_Pokja.detail_peminjaman_pokja', [
+            'peminjaman' => $peminjaman,
+            'user' => $user,
+        ]);
+    }
+
+    public function showPeminjamanReplyFile(Peminjaman $peminjaman)
+    {
+        $user = Auth::user();
+        abort_unless(
+            $user
+                && $user->pokja_id
+                && (int) $peminjaman->user_id === (int) $user->id
+                && $peminjaman->user()->where('pokja_id', $user->pokja_id)->exists(),
+            404
+        );
+
+        $balasan = $peminjaman->balasans()
+            ->whereNotNull('attachment_path')
+            ->latest('created_at')
+            ->first();
+        abort_unless(
+            $balasan?->attachment_path
+                && Storage::disk('public')->exists($balasan->attachment_path),
+            404
+        );
+
+        return response()->file(Storage::disk('public')->path($balasan->attachment_path));
+    }
+
+    public function suratMasuk()
+    {
+        return redirect()->route('pokja.peminjaman.aktif');
+    }
+
+    public function suratKeluar()
+    {
+        return redirect()->route('pokja.peminjaman.aktif');
     }
 
     public function ajukan()
     {
-        $dataPeminjaman = Peminjaman::with('kategori')
+        $user = Auth::user();
+
+        $dataPeminjaman = Peminjaman::with([
+                'kategori',
+                'arsip.kategori',
+                'arsip.sifatSurat',
+                'arsip.klasifikasiArsip',
+            ])
             ->where('user_id', Auth::id())
+            ->whereHas('user', fn ($query) => $query->where('pokja_id', $user?->pokja_id))
             ->latest()
             ->paginate(10);
 
@@ -343,13 +663,16 @@ class AdminPokjaController extends Controller
             ->latest()
             ->get();
 
-        $kategoris = \App\Models\KategoriArsip::all();
+        $kategoris = \App\Models\KategoriArsip::orderBy('name')->get();
+        $sifatSurats = SifatSurat::orderBy('name')->get();
+        $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
 
-        $view = $user->role?->slug === 'ketua_pokja'
-            ? 'Ketua_Pokja.form_peminjaman_ketuapokja'
-            : 'Admin_Pokja.form_peminjaman_pokja';
-
-        return view($view, compact('kategoris'));
+        return view('Admin_Pokja.form_peminjaman_pokja', compact(
+            'arsips',
+            'kategoris',
+            'sifatSurats',
+            'klasifikasis'
+        ));
     }
 
 
@@ -358,35 +681,52 @@ class AdminPokjaController extends Controller
         $user = Auth::user();
 
         $validatedData = $request->validate([
+            'arsip_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('arsips', 'id')
+                    ->where('pokja_id', $user->pokja_id)
+                    ->where('status', 'aktif')
+                    ->whereNull('deleted_at'),
+            ],
             'nama_surat' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategori_arsips,id',
+            'kategori_id' => 'required|exists:jenis_surats,id',
+            'sifat_surat_id' => 'nullable|exists:sifat_surats,id',
+            'klasifikasi_arsip_id' => 'nullable|exists:klasifikasi_arsips,id',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'keperluan' => 'required|string',
-            'file_pengajuan' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
+            'keterangan' => 'required|string',
+            'file_pengajuan' => ['nullable', 'file', 'mimes:pdf,doc,docx,zip,rar', 'max:5120'],
         ], [
             'file_pengajuan.max' => 'Ukuran file maksimal 5 MB.',
         ]);
 
+        $keterangan = trim((string) ($validatedData['keterangan'] ?? $request->input('keperluan', '')));
+
         $filePath = null;
 
         try {
-            DB::transaction(function () use ($request, $user, $validatedData, &$filePath) {
+            DB::transaction(function () use ($request, $user, $validatedData, $keterangan, &$filePath) {
                 if ($request->hasFile('file_pengajuan')) {
                     $filePath = $request
                         ->file('file_pengajuan')
                         ->store('pengajuan-peminjaman', 'public');
+                    if (! is_string($filePath) || $filePath === '') {
+                        throw new \RuntimeException('File pengajuan gagal disimpan.');
+                    }
                 }
 
                 Peminjaman::create([
-                    'arsip_id' => null,
+                    'arsip_id' => $validatedData['arsip_id'] ?? null,
                     'nama_surat' => $validatedData['nama_surat'],
                     'kategori_id' => $validatedData['kategori_id'],
+                    'sifat_surat_id' => $validatedData['sifat_surat_id'] ?? null,
+                    'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
                     'user_id' => $user->id,
-                    'keperluan' => $validatedData['keperluan'],
+                    'keperluan' => $keterangan,
                     'tanggal_mulai' => $validatedData['tanggal_mulai'],
                     'tanggal_selesai' => $validatedData['tanggal_selesai'],
-                    'keterangan' => null,
+                    'keterangan' => $keterangan,
                     'file_pengajuan' => $filePath,
                     'status' => 'menunggu_validasi',
                 ]);

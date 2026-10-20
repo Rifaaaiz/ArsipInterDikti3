@@ -89,7 +89,7 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-5">
                         <div>
                             <label for="nomor_dokumen" class="block text-sm font-bold text-black mb-1.5">Nomor Dokumen</label>
                             <input type="text" id="nomor_dokumen" name="nomor_dokumen" value="{{ old('nomor_dokumen') }}" placeholder="Nomor Dokumen (opsional)" class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
@@ -107,6 +107,18 @@
                                 @endforeach
                             </select>
                             @error('kategori_arsip_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="sifat_surat_id" class="block text-sm font-bold text-black mb-1.5">Sifat Surat</label>
+                            <select id="sifat_surat_id" name="sifat_surat_id" required class="w-full border border-gray-500 bg-[#f8f9fa] rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600">
+                                @foreach ($sifatSurats as $sifatSurat)
+                                    <option value="{{ $sifatSurat->id }}" @selected((string) old('sifat_surat_id') === (string) $sifatSurat->id)>{{ $sifatSurat->name }}</option>
+                                @endforeach
+                            </select>
+                            @error('sifat_surat_id')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
