@@ -46,16 +46,16 @@
                     </div>
                 </div>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-                
-                <!-- Menu Aktif (Biru Solid) untuk History -->
-                <a href="/dashboard-pokja/history" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-2">
+                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold bg-blue-600 text-white rounded-lg transition shadow-sm"">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
-                
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
@@ -69,7 +69,7 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="ml-64 flex min-h-screen flex-1 flex-col">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
             <div class="flex items-center gap-2 text-sm font-bold text-gray-900">
                 <span>admin Pokja Kelembagaan</span>
@@ -77,12 +77,13 @@
             </div>
         </header>
 
-        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
+        <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
             <h2 class="mb-6 text-3xl font-bold text-black">History Arsip Pokja</h2>
 
             @php
                 $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                 $hasHistoryFilters = $search !== ''
+                    || ($filters['nomor_dokumen'] ?? '')
                     || ($filters['filter'] ?? '')
                     || ($filters['jenis_surat_id'] ?? '')
                     || ($filters['sifat_surat_id'] ?? '')
@@ -90,8 +91,10 @@
                     || ($filters['klasifikasi_arsip_id'] ?? '');
             @endphp
             <form method="GET" action="{{ route('pokja.history') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+                <div class="grid grid-cols-1 gap-3 md:grid-cols-5">
                     <input type="text" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Cari nama surat"
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen"
                         class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
                     <div class="relative w-full">
@@ -135,7 +138,7 @@
                             class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     </div>
 
-                    <div class="relative w-full" data-klasifikasi-root="history-klasifikasi">
+                    <div class="relative w-full md:col-span-2" data-klasifikasi-root="history-klasifikasi">
                         <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasi_arsip_id'] ?? '' }}" data-klasifikasi-value>
                         <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? ($selectedKlasifikasi->kode . ' — ' . ($selectedKlasifikasi->judul ?? '')) : 'Kode Klasifikasi' }}</span>
@@ -183,18 +186,20 @@
                 <table class="min-w-[900px] w-full border-collapse text-left">
                     <thead class="border-b border-gray-200">
                         <tr>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Nama Arsip</th>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Jenis Surat</th>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Sifat Surat</th>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Kode Klasifikasi</th>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Tanggal Riwayat</th>
-                            <th class="px-5 py-3 text-sm font-bold text-indigo-800">Aksi</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Nama Arsip</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Nomor Dokumen</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Jenis Surat</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Sifat Surat</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Kode Klasifikasi</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Tanggal Upload</th>
+                            <th class="py-3 px-6 text-sm font-semibold text-slate-600">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($history as $item)
                             <tr class="transition hover:bg-white/70">
                                 <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->nama ?? '-' }}</td>
+                                <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->nomor_dokumen ?: '-' }}</td>
                                 <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->jenis_surat ?? '-' }}</td>
                                 <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->sifat_surat ?? '-' }}</td>
                                 <td class="px-5 py-3 text-sm font-semibold text-gray-600">{{ $item->kode_klasifikasi ?? '-' }}</td>
@@ -209,7 +214,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="7" class="px-6 py-10 text-center text-sm text-gray-500">
                                     {{ $hasHistoryFilters ? 'Tidak ada riwayat yang sesuai dengan filter.' : 'Belum ada riwayat arsip.' }}
                                 </td>
                             </tr>

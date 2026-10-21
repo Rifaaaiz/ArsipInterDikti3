@@ -48,14 +48,15 @@
                     </div>
                 </div>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
-
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
@@ -70,7 +71,7 @@
         </form>
     </aside>
 
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
                 <a href="/dashboard-pokja" class="text-black hover:text-blue-600 text-lg transition">
@@ -83,11 +84,12 @@
             </div>
         </header>
 
-        <div class="px-8 pb-10 max-w-7xl">
+        <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
             <h2 class="text-3xl font-bold mb-6 text-black">Peminjaman Aktif</h2>
 
-            <form method="GET" action="{{ route('pokja.peminjaman.aktif') }}" class="mb-8 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-4">
+            <form method="GET" action="{{ route('pokja.peminjaman.aktif') }}" class="mb-8 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-5">
                 <input name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
                 <select name="jenis_surat_id" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Jenis Surat</option>
@@ -114,7 +116,7 @@
 
                 <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                <div class="relative" data-klasifikasi-root="peminjaman-filter-klasifikasi">
+                <div class="relative md:col-span-2" data-klasifikasi-root="peminjaman-filter-klasifikasi">
                     @php
                         $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                     @endphp
@@ -164,6 +166,7 @@
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
+                                <th class="py-4 px-6 text-sm font-bold text-gray-700">Nomor Dokumen</th>
                                 <th class="py-4 px-6 text-sm font-bold text-gray-700">Jenis Surat</th>
                                 <th class="py-4 px-6 text-sm font-bold text-gray-700">Sifat Surat</th>
                                 <th class="py-4 px-6 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
@@ -177,6 +180,7 @@
                             @forelse ($peminjamans as $peminjaman)
                                 <tr class="hover:bg-gray-50 transition">
                                     <td class="py-3.5 px-6 text-gray-600 font-medium">{{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat }}</td>
+                                    <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->arsip?->nomor_dokumen ?: '-' }}</td>
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}</td>
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->sifatSurat?->name ?? $peminjaman->arsip?->sifatSurat?->name ?? '-' }}</td>
                                     <td class="py-3.5 px-6 text-gray-500">{{ $peminjaman->klasifikasiArsip?->kode ?? $peminjaman->arsip?->klasifikasiArsip?->kode ?? '-' }}</td>
@@ -213,7 +217,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada pengajuan menunggu validasi atau peminjaman aktif.</td>
+                                    <td colspan="9" class="py-8 px-6 text-center text-sm text-gray-500">Belum ada pengajuan menunggu validasi atau peminjaman aktif.</td>
                                 </tr>
                             @endforelse
                         </tbody>

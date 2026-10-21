@@ -53,11 +53,14 @@
                     </div>
                 </div>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
+                </a>
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
@@ -75,7 +78,7 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         
         <!-- Navbar Atas -->
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
@@ -91,12 +94,14 @@
         </header>
 
         <!-- KONTEN UTAMA -->
-        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
+        <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
             <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Arsip Terakhir</h2>
 
             <form method="GET" action="{{ route('arsip.riwayat') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <input type="text" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Cari nama surat"
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen"
                         class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
                     <select name="jenis_surat_id" aria-label="Jenis Surat"
@@ -120,9 +125,9 @@
                     </button>
 
                     <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen"
-                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 md:col-start-1">
 
-                    <div class="relative w-full md:col-span-2" data-klasifikasi-root="riwayat-arsip-klasifikasi">
+                    <div class="relative w-full md:col-start-2 md:col-span-3" data-klasifikasi-root="riwayat-arsip-klasifikasi">
                         @php
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                         @endphp
@@ -175,6 +180,7 @@
                     <thead class="bg-slate-100 text-gray-700">
                         <tr>
                             <th class="px-6 py-4 text-sm font-bold">Nama Arsip</th>
+                            <th class="px-6 py-4 text-sm font-bold">Nomor Dokumen</th>
                             <th class="px-6 py-4 text-sm font-bold">Jenis Surat</th>
                             <th class="px-6 py-4 text-sm font-bold">Sifat Surat</th>
                             <th class="px-6 py-4 text-sm font-bold">Kode Klasifikasi</th>
@@ -197,6 +203,7 @@
                             @endphp
                             <tr class="transition hover:bg-gray-50">
                                 <td class="px-6 py-3.5 font-medium text-gray-700">{{ $arsip->nama_arsip }}</td>
+                                <td class="px-6 py-3.5 text-gray-600">{{ $arsip->nomor_dokumen ?: '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-600">{{ $arsip->kategori?->name ?? '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-600">{{ $arsip->sifatSurat?->name ?? '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-600">{{ $arsip->klasifikasiArsip?->kode ?? '-' }}</td>
@@ -220,7 +227,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="9" class="px-6 py-10 text-center text-sm text-gray-500">
                                     {{ $search !== '' || collect($filters)->filter()->isNotEmpty() ? 'Tidak ada arsip yang sesuai dengan filter.' : 'Belum ada riwayat arsip.' }}
                                 </td>
                             </tr>

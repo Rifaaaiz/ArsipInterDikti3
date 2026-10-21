@@ -50,15 +50,16 @@
                     </div>
                 </div>
 
-                <a href="{{ $isKetuaPokja ? url('/ketua-pokja/profil') : url('/dashboard-pokja/profil') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-
-                <a href="{{ route($isKetuaPokja ? 'ketua.history' : 'pokja.history') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
-
-                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
             </nav>
@@ -72,7 +73,7 @@
         </form>
     </aside>
 
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
                 <a href="{{ route($isKetuaPokja ? 'ketua.ajukan' : 'peminjaman.ajukan') }}" class="text-black hover:text-blue-600 text-lg transition">
@@ -86,7 +87,7 @@
             </div>
         </header>
 
-        <div class="p-8 max-w-7xl">
+        <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
             <h2 class="text-4xl font-bold mb-6 text-black">Ajukan Peminjaman</h2>
 
             <form id="peminjaman-form" action="{{ route(auth()->user()?->role?->slug === 'ketua_pokja' ? 'ketua.peminjaman.store' : 'peminjaman.store') }}" method="POST" enctype="multipart/form-data" class="w-full">

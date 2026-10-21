@@ -20,6 +20,8 @@ class Arsip extends Model
         'sifat_surat_id',
         'pokja_id',
         'tanggal_dokumen',
+        'tanda_tangan',
+        'keterangan',
         'file_path',
         'file_type',
         'file_size',

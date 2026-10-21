@@ -50,6 +50,15 @@ use App\Http\Controllers\SuperadminSuratKeluarController;
         // Route untuk halaman Upload Arsip (Utama)
         Route::get('/dashboard-pokja/upload', [AdminPokjaController::class, 'upload']);
 
+        Route::get(
+            '/dashboard-pokja/seluruh-arsip',
+            [AdminPokjaController::class, 'seluruhArsip']
+        )->name('arsip.seluruh');
+        Route::get(
+            '/dashboard-pokja/seluruh-arsip/{arsipId}/metadata',
+            [AdminPokjaController::class, 'metadataSeluruhArsip']
+        )->name('arsip.seluruh.metadata');
+
         // Route untuk halaman History
         Route::get(
             '/dashboard-pokja/history',
@@ -148,6 +157,11 @@ use App\Http\Controllers\SuperadminSuratKeluarController;
 
         Route::get('/history', [KetuaPokjaController::class, 'history'])
             ->name('ketua.history');
+
+        Route::get('/seluruh-arsip', [AdminPokjaController::class, 'seluruhArsip'])
+            ->name('ketua.arsip.seluruh');
+        Route::get('/seluruh-arsip/{arsipId}/metadata', [AdminPokjaController::class, 'metadataSeluruhArsip'])
+            ->name('ketua.arsip.seluruh.metadata');
 
         Route::get('/profil', function () {
             return view('Ketua_Pokja.profile_ketuapokja');

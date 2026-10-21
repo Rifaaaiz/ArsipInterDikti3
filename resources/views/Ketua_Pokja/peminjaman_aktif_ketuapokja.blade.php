@@ -52,6 +52,10 @@
                     <i class="fa-regular fa-clock"></i> History
                 </a>
 
+                <a href="{{ route('ketua.arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
+
                 <!-- Panduan Penggunaan -->
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
@@ -67,34 +71,37 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         
         <!-- Navbar Atas -->
-        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-8 py-6">
+        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
+                <span class="text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 
         <!-- KONTEN UTAMA -->
-        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
+        <div class="box-border w-full min-w-0 px-5 pb-10 sm:px-8">
             <div class="mb-6 flex items-center gap-4">
                 <a href="/ketua-pokja" aria-label="Kembali ke dashboard Ketua Pokja" class="text-lg text-black transition hover:text-blue-600">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <h2 class="text-3xl font-bold text-black">Peminjaman Aktif</h2>
+                <h2 class="text-2xl font-bold text-black sm:text-3xl">Peminjaman Aktif</h2>
             </div>
 
             @php
                 $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
             @endphp
-            <form method="GET" action="{{ route('ketua.peminjaman.aktif') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <form method="GET" action="{{ route('ketua.peminjaman.aktif') }}" class="mb-8 box-border w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+                <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     <input type="text" name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" aria-label="Cari nama surat"
                         class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                    <div class="relative w-full">
+                    <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen"
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+                    <div class="relative w-full min-w-0">
                         <select name="jenis_surat_id" aria-label="Jenis Surat"
                             class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Jenis Surat</option>
@@ -105,7 +112,7 @@
                         <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
                     </div>
 
-                    <div class="relative w-full">
+                    <div class="relative w-full min-w-0">
                         <select name="sifat_surat_id" aria-label="Sifat Surat"
                             class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Sifat Surat</option>
@@ -120,7 +127,7 @@
                         Filter
                     </button>
 
-                    <div class="relative w-full">
+                    <div class="relative w-full min-w-0">
                         <select name="kategori_arsip_id" aria-label="Kategori"
                             class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Kategori</option>
@@ -179,11 +186,12 @@
                 </div>
             </form>
 
-            <div class="mb-8 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div class="mb-8 w-full min-w-0 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                 <table class="min-w-[1120px] w-full border-collapse text-left">
                     <thead class="border-b border-gray-200 bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Nomor Dokumen</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Jenis Surat</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Sifat Surat</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
@@ -202,12 +210,14 @@
                                     'Diterima' => ['text' => 'text-green-600', 'dot' => 'bg-green-500'],
                                     'Ditolak' => ['text' => 'text-red-600', 'dot' => 'bg-red-500'],
                                     'Menunggu' => ['text' => 'text-yellow-600', 'dot' => 'bg-yellow-500'],
+                                    'Selesai' => ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'],
                                     default => ['text' => 'text-gray-600', 'dot' => 'bg-gray-500'],
                                 };
                                 $filePath = $peminjaman->file_pengajuan ?: $peminjaman->arsip?->file_path;
                             @endphp
                             <tr class="transition hover:bg-gray-50">
                                 <td class="px-6 py-3.5 font-medium text-gray-700">{{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat ?? '-' }}</td>
+                                <td class="px-6 py-3.5 text-gray-500">{{ $peminjaman->arsip?->nomor_dokumen ?: '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-500">{{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-500">{{ $peminjaman->sifatSurat?->name ?? $peminjaman->arsip?->sifatSurat?->name ?? '-' }}</td>
                                 <td class="px-6 py-3.5 text-gray-500">{{ $peminjaman->klasifikasiArsip?->kode ?? $peminjaman->arsip?->klasifikasiArsip?->kode ?? '-' }}</td>
@@ -228,7 +238,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada peminjaman aktif yang sesuai dengan filter.</td>
+                                <td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada peminjaman aktif yang sesuai dengan filter.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -111,6 +111,9 @@
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
@@ -125,7 +128,7 @@
         </form>
     </aside>
 
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
                 <a href="/dashboard-pokja/upload" class="text-black hover:text-blue-600 text-lg transition" aria-label="Kembali">
@@ -139,8 +142,8 @@
             </div>
         </header>
         
-        <div class="p-8 max-w-7xl">
-            <h2 class="text-4xl font-bold mb-6 text-black">Upload File Arsip</h2>
+        <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
+            <h2 class="text-4xl font-bold mb-6 text-black">Upload File Kearsipan</h2>
 
                 @if ($errors->has('pokja_id'))
                     <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
@@ -158,7 +161,14 @@
                         @error('nama_arsip')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-1 mb-2">
+                    <div class="grid grid-cols-1 gap-2 md:grid-cols-4 mt-1 mb-2">
+                        <div class="min-w-0">
+                            <label for="nomor_dokumen" class="block text-sm font-bold text-black mb-1">Nomor Dokumen</label>
+                            <input type="text" id="nomor_dokumen" name="nomor_dokumen" value="{{ old('nomor_dokumen') }}" placeholder="Nomor Dokumen (opsional)" maxlength="255"
+                                class="h-10 w-full rounded-md border border-gray-400 bg-white px-3 text-sm text-gray-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            @error('nomor_dokumen')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                        </div>
+
                         <div class="min-w-0">
                             <label id="jenis-surat-label" class="block text-sm font-bold text-black mb-1">Jenis Surat</label>
                             @php
@@ -212,7 +222,7 @@
                         </div>
 
                         <div class="min-w-0">
-                            <label for="tanggal_dokumen" class="block text-sm font-bold text-black mb-1">Tanggal Dokumen</label>
+                            <label for="tanggal_dokumen" class="block text-sm font-bold text-black mb-1">Tanggal Upload</label>
                             <div class="relative">
                                 <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen') }}" required
                                     class="h-10 w-full rounded-md border border-gray-400 bg-white px-3 pr-10 text-sm text-gray-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">
@@ -228,6 +238,25 @@
                     <label class="block text-sm font-bold text-black mb-2">Kode Klasifikasi</label>
                     @php
                         $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) old('klasifikasi_arsip_id', ''));
+                        $formatMasaAktif = static function ($klasifikasi) {
+                            if (! $klasifikasi) {
+                                return '';
+                            }
+
+                            $tahun = $klasifikasi->masa_aktif_tahun;
+                            $catatan = trim((string) $klasifikasi->masa_aktif_catatan);
+
+                            if ($tahun !== null) {
+                                return $tahun . ' tahun' . ($catatan !== '' ? ' (' . $catatan . ')' : '');
+                            }
+
+                            return $catatan !== '' ? $catatan : 'Tidak tersedia';
+                        };
+                        $formatMasaInaktif = static fn ($klasifikasi) => $klasifikasi
+                            ? ($klasifikasi->masa_inaktif_tahun !== null
+                                ? $klasifikasi->masa_inaktif_tahun . ' tahun'
+                                : 'Tidak tersedia')
+                            : '';
                     @endphp
                     <div class="relative w-full" data-klasifikasi-root="pilih-klasifikasi_arsip_id">
                         <input type="hidden" name="klasifikasi_arsip_id" value="{{ old('klasifikasi_arsip_id') }}" data-klasifikasi-value>
@@ -249,7 +278,7 @@
                                 <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6" data-klasifikasi-content>
                                     <div class="grid gap-3 md:grid-cols-2" id="upload-klasifikasi-list">
                                         @foreach ($klasifikasis as $klasifikasi)
-                                            <button type="button" role="radio" aria-checked="{{ (string) $klasifikasi->id === (string) old('klasifikasi_arsip_id', '') ? 'true' : 'false' }}" class="klasifikasi-option flex cursor-pointer gap-3 rounded-lg border border-slate-200 p-3 text-left text-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300" data-search="{{ strtolower($klasifikasi->kode . ' ' . $klasifikasi->judul . ' ' . $klasifikasi->uraian) }}" data-value="{{ $klasifikasi->id }}" data-code="{{ $klasifikasi->kode }}">
+                                            <button type="button" role="radio" aria-checked="{{ (string) $klasifikasi->id === (string) old('klasifikasi_arsip_id', '') ? 'true' : 'false' }}" class="klasifikasi-option flex cursor-pointer gap-3 rounded-lg border border-slate-200 p-3 text-left text-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300" data-search="{{ strtolower($klasifikasi->kode . ' ' . $klasifikasi->judul . ' ' . $klasifikasi->uraian) }}" data-value="{{ $klasifikasi->id }}" data-code="{{ $klasifikasi->kode }}" data-masa-aktif="{{ $formatMasaAktif($klasifikasi) }}" data-masa-inaktif="{{ $formatMasaInaktif($klasifikasi) }}">
                                                 <span class="flex-1">
                                                     <b class="text-slate-900">{{ $klasifikasi->kode }}</b><br>
                                                     <span class="text-slate-600">{{ $klasifikasi->judul }}</span>
@@ -266,10 +295,44 @@
                             </section>
                         </div>
                     </div>
+                    <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <div class="min-w-0">
+                            <label for="masa-aktif-klasifikasi" class="mb-1 block text-sm font-bold text-black">Masa Aktif</label>
+                            <input id="masa-aktif-klasifikasi" type="text" value="{{ $formatMasaAktif($selectedKlasifikasi) }}" placeholder="Pilih Kode Klasifikasi" readonly aria-live="polite"
+                                class="h-10 w-full rounded-md border border-gray-300 bg-gray-100 px-3 text-sm text-gray-600 shadow-sm focus:outline-none">
+                        </div>
+                        <div class="min-w-0">
+                            <label for="masa-inaktif-klasifikasi" class="mb-1 block text-sm font-bold text-black">Masa Inaktif</label>
+                            <input id="masa-inaktif-klasifikasi" type="text" value="{{ $formatMasaInaktif($selectedKlasifikasi) }}" placeholder="Pilih Kode Klasifikasi" readonly aria-live="polite"
+                                class="h-10 w-full rounded-md border border-gray-300 bg-gray-100 px-3 text-sm text-gray-600 shadow-sm focus:outline-none">
+                        </div>
+                    </div>
                     @error('klasifikasi_arsip_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
+
+                    <fieldset class="mb-4">
+                        <legend class="mb-2 block text-sm font-bold text-black">Tanda Tangan</legend>
+                        <div class="flex flex-wrap gap-5">
+                            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                <input type="radio" name="tanda_tangan" value="digital" required @checked(old('tanda_tangan') === 'digital') class="h-4 w-4 accent-blue-600">
+                                <span>Digital</span>
+                            </label>
+                            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                <input type="radio" name="tanda_tangan" value="konvensional" required @checked(old('tanda_tangan') === 'konvensional') class="h-4 w-4 accent-blue-600">
+                                <span>Konvensional</span>
+                            </label>
+                        </div>
+                        @error('tanda_tangan')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </fieldset>
+
+                    <div class="mb-4">
+                        <label for="keterangan" class="mb-1 block text-sm font-bold text-black">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="4" placeholder="Keterangan"
+                            class="w-full resize-y rounded-md border border-gray-400 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100">{{ old('keterangan') }}</textarea>
+                        @error('keterangan')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                    </div>
 
                     <div class="mb-2">
                         <label for="file_arsip" class="sr-only">File arsip</label>
@@ -279,11 +342,13 @@
                             <span id="file-drop-text" class="pointer-events-none z-0 mb-1 text-sm font-bold text-blue-600">Select File</span>
                             <span id="file-drop-subtext" class="pointer-events-none z-0 text-xs text-gray-400">Upload File Kearsipan Disini (PDF, Doc, DOCX, ZIP, RAR - Maks 5 Mb)</span>
                         </div>
+                        <p id="file-client-error" class="mt-1 hidden text-xs text-red-600" role="alert"></p>
+                        <p class="mt-1 text-xs text-gray-400">Maximal upload file 5 MB. (Jika Lebih Bisa Di Kompress Filenya Terlebih Dahulu)</p>
                         @error('file_arsip')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
                     </div>
 
                     <button type="submit" class="mt-1 flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[#1d4ed8] px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                        Submit Surat Arsip <i class="fa-solid fa-arrow-right"></i>
+                        Submit Peminjaman <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </form>
             </section>
@@ -420,8 +485,10 @@
         const klasifikasiSearch = klasifikasiRoot.querySelector('[data-klasifikasi-search]');
         const klasifikasiValue = klasifikasiRoot.querySelector('[data-klasifikasi-value]');
         const klasifikasiLabel = klasifikasiRoot.querySelector('[data-klasifikasi-label]');
-        const klasifikasiOptions = Array.from(klasifikasiRoot.querySelectorAll('[data-klasifikasi-option]'));
+        const klasifikasiOptions = Array.from(klasifikasiRoot.querySelectorAll('.klasifikasi-option'));
         const klasifikasiEmpty = klasifikasiRoot.querySelector('#upload-klasifikasi-empty');
+        const masaAktifInput = document.getElementById('masa-aktif-klasifikasi');
+        const masaInaktifInput = document.getElementById('masa-inaktif-klasifikasi');
 
         const closeKlasifikasiModal = (restoreFocus = false) => {
             klasifikasiModal.dataset.open = 'false';
@@ -443,6 +510,8 @@
         const selectKlasifikasi = (option) => {
             klasifikasiValue.value = option.dataset.value;
             klasifikasiLabel.textContent = option.dataset.code;
+            masaAktifInput.value = option.dataset.masaAktif || 'Tidak tersedia';
+            masaInaktifInput.value = option.dataset.masaInaktif || 'Tidak tersedia';
             klasifikasiOptions.forEach((item) => {
                 const selected = item === option;
                 item.setAttribute('aria-checked', selected ? 'true' : 'false');
@@ -474,6 +543,8 @@
             klasifikasiSearch.value = '';
             klasifikasiValue.value = '';
             klasifikasiLabel.textContent = 'Pilih Kode Klasifikasi';
+            masaAktifInput.value = '';
+            masaInaktifInput.value = '';
             klasifikasiOptions.forEach((option) => {
                 option.hidden = false;
                 option.setAttribute('aria-checked', 'false');
@@ -539,14 +610,41 @@
         const dropBox = document.getElementById('file-drop-box');
         const fileName = document.getElementById('file-drop-text');
         const fileHint = document.getElementById('file-drop-subtext');
+        const fileClientError = document.getElementById('file-client-error');
         const defaultFileHint = 'Upload File Kearsipan Disini (PDF, Doc, DOCX, ZIP, RAR - Maks 5 Mb)';
+        const maxFileSize = 5 * 1024 * 1024;
+        const allowedExtensions = ['pdf', 'doc', 'docx', 'zip', 'rar'];
 
         const showFile = (file) => {
+            fileInput.setCustomValidity('');
+            fileClientError.textContent = '';
+            fileClientError.classList.add('hidden');
             fileName.textContent = file ? 'File Terpilih' : 'Select File';
             fileHint.textContent = file ? file.name : defaultFileHint;
         };
 
-        fileInput.addEventListener('change', () => showFile(fileInput.files[0]));
+        const rejectInvalidFile = (file) => {
+            if (!file) return false;
+            const extension = file.name.split('.').pop().toLowerCase();
+            let message = '';
+            if (!allowedExtensions.includes(extension)) {
+                message = 'Format file harus PDF, DOC, DOCX, ZIP, atau RAR.';
+            } else if (file.size > maxFileSize) {
+                message = 'Ukuran file maksimal 5 MB.';
+            }
+            if (!message) return false;
+            fileInput.value = '';
+            fileInput.setCustomValidity(message);
+            fileClientError.textContent = message;
+            fileClientError.classList.remove('hidden');
+            fileName.textContent = 'File tidak valid';
+            fileHint.textContent = 'Pilih file dengan format dan ukuran yang diizinkan.';
+            return true;
+        };
+
+        fileInput.addEventListener('change', () => {
+            if (!rejectInvalidFile(fileInput.files[0])) showFile(fileInput.files[0]);
+        });
         ['dragenter', 'dragover'].forEach((eventName) => {
             dropBox.addEventListener(eventName, (event) => {
                 event.preventDefault();
@@ -561,11 +659,13 @@
         });
         dropBox.addEventListener('drop', (event) => {
             if (!event.dataTransfer.files.length) return;
+            if (rejectInvalidFile(event.dataTransfer.files[0])) return;
             const transfer = new DataTransfer();
             Array.from(event.dataTransfer.files).forEach((file) => transfer.items.add(file));
             fileInput.files = transfer.files;
             showFile(fileInput.files[0]);
         });
+
     </script>
     <x-logout-confirmation />
 </body>

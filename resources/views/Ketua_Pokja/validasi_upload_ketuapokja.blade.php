@@ -42,6 +42,10 @@
                 <a href="{{ url('/ketua-pokja/history') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
+
+                <a href="{{ route('ketua.arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
                 
                 <!-- Panduan Penggunaan -->
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white hover:bg-gray-800 rounded-lg transition mt-1">

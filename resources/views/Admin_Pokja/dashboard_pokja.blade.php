@@ -41,14 +41,15 @@
                     </div>
                 </div>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
-
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
-
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
                 </a>
@@ -117,11 +118,11 @@
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Nama Arsip</th>
+                                <th class="py-3 px-6 text-sm font-semibold text-slate-600">Nomor Dokumen</th>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Jenis Surat</th>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Sifat Surat</th>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Kode Klasifikasi</th>
-                                <th class="py-3 px-6 text-sm font-semibold text-slate-600">Tanggal Mulai</th>
-                                <th class="py-3 px-6 text-sm font-semibold text-slate-600">Tanggal Selesai</th>
+                                <th class="py-3 px-6 text-sm font-semibold text-slate-600">Tanggal Upload</th>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Status</th>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Aksi</th>
                             </tr>
@@ -141,11 +142,11 @@
                                 @endphp
                                 <tr class="hover:bg-slate-50 transition">
                                     <td class="py-3 px-6 text-sm text-slate-800">{{ $arsip->nama_arsip }}</td>
+                                    <td class="py-3 px-6 text-sm text-slate-600">{{ $arsip->nomor_dokumen ?: '-' }}</td>
                                     <td class="py-3 px-6 text-sm text-slate-600">{{ optional($arsip->kategori)->name ?? '-' }}</td>
                                     <td class="py-3 px-6 text-sm text-slate-600">{{ $arsip->sifatSurat?->name ?? '-' }}</td>
                                     <td class="py-3 px-6 text-sm text-slate-600">{{ $arsip->klasifikasiArsip?->kode ?? '-' }}</td>
-                                    <td class="py-3 px-6 text-sm text-slate-600">{{ $peminjamanTerbaru?->tanggal_mulai?->format('d/m/Y') ?? '-' }}</td>
-                                    <td class="py-3 px-6 text-sm text-slate-600">{{ $peminjamanTerbaru?->tanggal_selesai?->format('d/m/Y') ?? '-' }}</td>
+                                    <td class="py-3 px-6 text-sm text-slate-600">{{ $arsip->created_at?->format('d/m/Y') ?? '-' }}</td>
                                     <td class="py-3 px-6 text-sm">
                                         <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">{{ $statusArsip }}</span>
                                     </td>

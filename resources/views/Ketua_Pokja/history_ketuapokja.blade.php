@@ -42,6 +42,10 @@
                 <a href="/ketua-pokja/history" class="flex items-center gap-3 bg-blue-600 text-white px-4 py-3 rounded-lg text-sm font-semibold transition shadow-sm mt-2">
                     <i class="fa-regular fa-clock"></i> History
                 </a>
+
+                <a href="{{ route('ketua.arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
+                </a>
                 
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition mt-2">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
@@ -56,26 +60,32 @@
                 </form>
     </aside>
 
-    <main class="ml-64 flex min-h-screen flex-1 flex-col bg-[#f4f4f5]">
-        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col bg-[#f4f4f5]">
+        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-5 py-6 sm:px-8">
+            <a href="{{ route('ketua.dashboard') }}" aria-label="Kembali ke Dashboard Ketua Pokja" class="text-lg text-black transition hover:text-blue-600">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
+                <span class="text-right text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 
-        <div class="w-full max-w-7xl px-5 pb-10 sm:px-8">
-            <h2 class="mb-6 text-3xl font-bold text-gray-900">History Arsip Pokja</h2>
+        <div class="box-border w-full min-w-0 px-5 pb-10 sm:px-8">
+            <h2 class="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">History Arsip</h2>
 
             @php
                 $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
             @endphp
-            <form method="GET" action="{{ route('ketua.history') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <form method="GET" action="{{ route('ketua.history') }}" class="mb-8 box-border w-full min-w-0 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5">
+                <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     <input type="search" name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" aria-label="Nama Surat"
-                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        class="h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                    <div class="relative w-full">
+                    <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen"
+                        class="h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+                    <div class="relative w-full min-w-0">
                         <select name="jenis_surat_id" aria-label="Jenis Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Jenis Surat</option>
                             @foreach ($jenisSurats as $jenis)
@@ -85,7 +95,7 @@
                         <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
                     </div>
 
-                    <div class="relative w-full">
+                    <div class="relative w-full min-w-0">
                         <select name="sifat_surat_id" aria-label="Sifat Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Sifat Surat</option>
                             @foreach ($sifatSurats as $sifat)
@@ -98,8 +108,8 @@
                     <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
                 </div>
 
-                <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-4">
-                    <div class="relative w-full">
+                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="relative w-full min-w-0">
                         <select name="filter" aria-label="Kategori Riwayat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="semua" @selected($filter === 'semua')>Kategori: Semua</option>
                             <option value="arsip" @selected($filter === 'arsip')>Arsip</option>
@@ -108,12 +118,12 @@
                         <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
                     </div>
 
-                    <div class="relative w-full">
+                    <div class="relative w-full min-w-0">
                         <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen"
                             class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     </div>
 
-                    <div class="relative w-full" data-klasifikasi-root="ketua-history-klasifikasi">
+                    <div class="relative w-full min-w-0" data-klasifikasi-root="ketua-history-klasifikasi">
                         <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasi_arsip_id'] ?? '' }}" data-klasifikasi-value>
                         <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? ($selectedKlasifikasi->kode . ' — ' . $selectedKlasifikasi->judul) : 'Kode Klasifikasi' }}</span>
@@ -151,15 +161,18 @@
                 </div>
             </form>
 
-            <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-                <table class="min-w-[900px] w-full border-collapse text-left">
+            <div class="w-full min-w-0 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table class="min-w-[1200px] w-full border-collapse text-left">
                     <thead class="border-b border-gray-200 bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Nomor Dokumen</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Jenis Surat</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Sifat Surat</th>
+                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Kelompok Kerja</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
-                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Tanggal Riwayat</th>
+                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Tanggal Upload</th>
+                            <th class="px-6 py-4 text-sm font-bold text-gray-700">Status</th>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Aksi</th>
                         </tr>
                     </thead>
@@ -167,10 +180,13 @@
                         @forelse ($history as $item)
                             <tr class="transition hover:bg-gray-50">
                                 <td class="px-6 py-4 font-medium text-gray-700">{{ $item->nama ?? '-' }}</td>
+                                <td class="break-words px-6 py-4 text-gray-500">{{ $item->nomor_dokumen ?: '-' }}</td>
                                 <td class="px-6 py-4 text-gray-500">{{ $item->jenis_surat ?? '-' }}</td>
                                 <td class="px-6 py-4 text-gray-500">{{ $item->sifat_surat ?? '-' }}</td>
+                                <td class="px-6 py-4 text-gray-500">{{ $item->pokja ?? '-' }}</td>
                                 <td class="px-6 py-4 text-gray-500">{{ $item->kode_klasifikasi ?? '-' }}</td>
                                 <td class="whitespace-nowrap px-6 py-4 text-gray-500">{{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d/m/Y') : '-' }}</td>
+                                <td class="whitespace-nowrap px-6 py-4 font-semibold text-gray-600">{{ ucfirst(str_replace('_', ' ', (string) $item->status)) }}</td>
                                 <td class="px-6 py-4">
                                     @if ($item->file_path)
                                         <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->file_path) }}" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-md bg-blue-600 px-5 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">Lihat</a>
@@ -181,7 +197,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
+                                <td colspan="9" class="px-6 py-10 text-center text-sm text-gray-500">
                                     @if ($filter === 'arsip')
                                         Belum ada riwayat arsip yang sesuai.
                                     @elseif ($filter === 'peminjaman')

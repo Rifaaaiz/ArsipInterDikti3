@@ -25,11 +25,22 @@ class KetuaPokjaController extends Controller
             $query->where('pokja_id', $pokjaId);
         });
 
-        $peminjamanMenungguKetua = Peminjaman::with(['user', 'arsip', 'kategori'])
+        $peminjamanMenungguKetua = Peminjaman::with([
+            'user.pokja',
+            'kategori',
+            'sifatSurat',
+            'klasifikasiArsip',
+            'arsip.kategori',
+            'arsip.pokja',
+            'arsip.sifatSurat',
+            'arsip.klasifikasiArsip',
+        ])
             ->needsKetuaValidation()
             ->whereHas('user', function ($query) use ($pokjaId) {
                 $query->where('pokja_id', $pokjaId);
-            });
+            })
+            ->where('user_id', '!=', $user->id)
+            ->when(! $pokjaId, fn ($query) => $query->whereRaw('1 = 0'));
 
         $totalArsip = (clone $arsipQuery)->count();
         $peminjamanAktif = (clone $peminjamanQuery)
@@ -42,8 +53,12 @@ class KetuaPokjaController extends Controller
                 'kategori',
                 'sifatSurat',
                 'klasifikasiArsip',
-                'latestPeminjaman',
             ])
+            ->latest('created_at')
+            ->limit(2)
+            ->get();
+
+        $pengajuanMenungguKetua = (clone $peminjamanMenungguKetua)
             ->latest('created_at')
             ->limit(5)
             ->get();
@@ -53,7 +68,8 @@ class KetuaPokjaController extends Controller
             'totalArsip',
             'peminjamanAktif',
             'menungguValidasi',
-            'arsipTerbaru'
+            'arsipTerbaru',
+            'pengajuanMenungguKetua'
         ));
     }
 
@@ -88,6 +104,7 @@ class KetuaPokjaController extends Controller
         $filters = $request->validate([
             'filter' => ['nullable', 'in:semua,arsip,peminjaman'],
             'nama_surat' => ['nullable', 'string', 'max:255'],
+            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
             'tanggal_dokumen' => ['nullable', 'date'],
@@ -95,6 +112,7 @@ class KetuaPokjaController extends Controller
         ]);
         $filter = $filters['filter'] ?? 'semua';
         $search = trim($filters['nama_surat'] ?? '');
+        $nomorDokumen = trim($filters['nomor_dokumen'] ?? '');
         $jenisSuratId = $filters['jenis_surat_id'] ?? null;
         $sifatSuratId = $filters['sifat_surat_id'] ?? null;
         $tanggalDokumen = $filters['tanggal_dokumen'] ?? null;
@@ -104,9 +122,11 @@ class KetuaPokjaController extends Controller
             ->leftJoin('jenis_surats as arsip_jenis', 'arsip_jenis.id', '=', 'arsips.kategori_arsip_id')
             ->leftJoin('sifat_surats as arsip_sifat', 'arsip_sifat.id', '=', 'arsips.sifat_surat_id')
             ->leftJoin('klasifikasi_arsips as arsip_klasifikasi', 'arsip_klasifikasi.id', '=', 'arsips.klasifikasi_arsip_id')
+            ->leftJoin('pokjas as arsip_pokja', 'arsip_pokja.id', '=', 'arsips.pokja_id')
             ->where('arsips.pokja_id', $user->pokja_id)
             ->whereNotIn('arsips.status', ['dihapus'])
             ->when($search !== '', fn ($query) => $query->whereRaw('LOWER(arsips.nama_arsip) LIKE ?', ['%' . mb_strtolower($search) . '%']))
+            ->when($nomorDokumen !== '', fn ($query) => $query->whereRaw('LOWER(arsips.nomor_dokumen) LIKE ?', ['%' . mb_strtolower($nomorDokumen) . '%']))
             ->when($jenisSuratId, fn ($query) => $query->where('arsips.kategori_arsip_id', $jenisSuratId))
             ->when($sifatSuratId, fn ($query) => $query->where('arsips.sifat_surat_id', $sifatSuratId))
             ->when($tanggalDokumen, fn ($query) => $query->whereDate('arsips.tanggal_dokumen', $tanggalDokumen))
@@ -115,8 +135,10 @@ class KetuaPokjaController extends Controller
                 DB::raw("'arsip' as jenis"),
                 'arsips.id',
                 'arsips.nama_arsip as nama',
+                'arsips.nomor_dokumen',
                 'arsip_jenis.name as jenis_surat',
                 'arsip_sifat.name as sifat_surat',
+                'arsip_pokja.name as pokja',
                 'arsip_klasifikasi.kode as kode_klasifikasi',
                 'arsips.created_at as tanggal',
                 'arsips.status',
@@ -133,6 +155,7 @@ class KetuaPokjaController extends Controller
             ->leftJoin('klasifikasi_arsips as klasifikasi_peminjaman', 'klasifikasi_peminjaman.id', '=', 'peminjamans.klasifikasi_arsip_id')
             ->leftJoin('klasifikasi_arsips as klasifikasi_arsip_peminjaman', 'klasifikasi_arsip_peminjaman.id', '=', 'arsip_peminjaman.klasifikasi_arsip_id')
             ->leftJoin('users', 'users.id', '=', 'peminjamans.user_id')
+            ->leftJoin('pokjas as pokja_peminjaman', 'pokja_peminjaman.id', '=', 'users.pokja_id')
             ->where('users.pokja_id', $user->pokja_id)
             ->where(function ($query) use ($today) {
                 $query->whereIn('peminjamans.status', ['ditolak', 'selesai', 'dikembalikan'])
@@ -148,6 +171,7 @@ class KetuaPokjaController extends Controller
                         ->orWhereRaw('LOWER(arsip_peminjaman.nama_arsip) LIKE ?', [$pattern]);
                 });
             })
+            ->when($nomorDokumen !== '', fn ($query) => $query->whereRaw('LOWER(arsip_peminjaman.nomor_dokumen) LIKE ?', ['%' . mb_strtolower($nomorDokumen) . '%']))
             ->when($jenisSuratId, fn ($query) => $query->where(function ($jenisQuery) use ($jenisSuratId) {
                 $jenisQuery->where('peminjamans.kategori_id', $jenisSuratId)
                     ->orWhere('arsip_peminjaman.kategori_arsip_id', $jenisSuratId);
@@ -171,8 +195,10 @@ class KetuaPokjaController extends Controller
                 DB::raw("'peminjaman' as jenis"),
                 'peminjamans.id',
                 DB::raw('COALESCE(arsip_peminjaman.nama_arsip, peminjamans.nama_surat) as nama'),
+                'arsip_peminjaman.nomor_dokumen',
                 DB::raw('COALESCE(jenis_peminjaman.name, jenis_arsip_peminjaman.name) as jenis_surat'),
                 DB::raw('COALESCE(sifat_peminjaman.name, sifat_arsip_peminjaman.name) as sifat_surat'),
+                'pokja_peminjaman.name as pokja',
                 DB::raw('COALESCE(klasifikasi_peminjaman.kode, klasifikasi_arsip_peminjaman.kode) as kode_klasifikasi'),
                 'peminjamans.updated_at as tanggal',
                 DB::raw("CASE WHEN peminjamans.status IN ('aktif', 'disetujui') AND peminjamans.tanggal_selesai < '{$today}' THEN 'selesai' ELSE peminjamans.status END as status"),
@@ -288,12 +314,14 @@ class KetuaPokjaController extends Controller
         $pokjaId = $user->pokja_id;
         $filters = $request->validate([
             'nama_surat' => ['nullable', 'string', 'max:255'],
+            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
             'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
+        $nomorDokumen = $this->normalizeSearch($filters['nomor_dokumen'] ?? '');
 
         $peminjamanQuery = Peminjaman::with([
             'user',
@@ -320,6 +348,10 @@ class KetuaPokjaController extends Controller
                     $searchQuery->whereRaw('LOWER(peminjamans.nama_surat) LIKE ?', [$pattern])
                         ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern]));
                 });
+            })
+            ->when($nomorDokumen !== '', function ($query) use ($nomorDokumen) {
+                $pattern = $this->searchLikePattern(mb_strtolower($nomorDokumen));
+                $query->whereHas('arsip', fn ($arsipQuery) => $arsipQuery->whereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern]));
             })
             ->when($filters['jenis_surat_id'] ?? null, function ($query, $id) {
                 $query->where(function ($jenisQuery) use ($id) {

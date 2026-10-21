@@ -47,11 +47,14 @@
                     </div>
                 </div>
 
-                <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-clock"></i> History
+                </a>
+                <a href="{{ route('arsip.seluruh') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 transition hover:text-white">
+                    <i class="fa-solid fa-box-archive"></i> Seluruh Arsip
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
                     <i class="fa-regular fa-file-lines"></i> Panduan Penggunaan
@@ -67,15 +70,15 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         
         <!-- Navbar Atas -->
-        <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
+        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <span class="text-sm font-semibold text-gray-600">Ajukan Peminjaman Arsip</span>
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-800">{{ auth()->user()->name ?: auth()->user()->username }}</span>
+                <span class="text-sm font-bold text-gray-800">{{ auth()->user()?->name ?? auth()->user()?->username ?? 'admin Pokja Kelembagaan' }}</span>
                 <div class="w-8 h-8 rounded-full bg-[#e8efff] flex items-center justify-center text-blue-700">
                     <i class="fa-solid fa-user text-sm"></i>
                 </div>
@@ -83,8 +86,8 @@
         </header>
 
         <!-- KONTEN UTAMA -->
-        <div class="p-8 w-full max-w-[1280px]">
-            <h2 class="text-4xl font-bold mb-6 text-black">Upload Arsip</h2>
+        <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Ajukan Peminjaman Arsip</h2>
 
             <!-- Tombol Aksi -->
             <div class="flex gap-4 mb-10 w-full">
@@ -110,6 +113,7 @@
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="py-4 px-6 text-sm font-bold text-gray-700">Nomor Dokumen</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Jenis Surat</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Sifat Surat</th>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
@@ -125,6 +129,9 @@
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="py-4 px-6 text-sm text-gray-800">
                                     {{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat }}
+                                </td>
+                                <td class="py-4 px-6 text-sm text-gray-600">
+                                    {{ $peminjaman->arsip?->nomor_dokumen ?: '-' }}
                                 </td>
                                 <td class="py-4 px-6 text-sm text-gray-600">
                                     {{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}
@@ -153,7 +160,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="py-8 text-center text-gray-500">
+                                <td colspan="9" class="py-8 text-center text-gray-500">
                                     Belum ada data yang tersedia.
                                 </td>
                             </tr>
