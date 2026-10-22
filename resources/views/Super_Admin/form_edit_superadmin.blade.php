@@ -28,68 +28,21 @@
     </style>
 </head>
 <body class="flex bg-[#f4f7f9] font-sans text-gray-800">
-    <aside id="superadmin-sidebar" class="fixed left-0 top-0 z-30 flex h-screen flex-col bg-[#0a1120] text-white">
-        <div class="min-h-0 flex-1 overflow-y-auto">
-            <div id="sidebar-logo" class="mb-2 flex items-center gap-3 px-6 py-6">
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                    <i class="fa-solid fa-book-open text-sm text-blue-600"></i>
-                </div>
-                <h1 data-sidebar-label class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
-            </div>
-            <nav class="space-y-1 px-4 pb-4">
-                <a href="{{ route('superadmin.dashboard') }}" title="Dashboard" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-gray-200 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-house w-5"></i><span data-sidebar-label>Dashboard</span>
-                </a>
-                <div class="pt-1">
-                    <button type="button" onclick="toggleSidebarMenu('submenu-arsip', 'ikon-panah-arsip')" aria-expanded="true" class="flex w-full items-center justify-between rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i><span data-sidebar-label>Kelola Arsip</span></span>
-                        <i id="ikon-panah-arsip" class="fa-solid fa-chevron-right rotate-90 text-xs transition-transform"></i>
-                    </button>
-                    <div id="submenu-arsip" class="max-h-40 overflow-hidden transition-all duration-300">
-                        <div class="flex flex-col gap-1 py-1">
-                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Penghapusan Arsip</a>
-                            <a href="{{ route('superadmin.arsip.laporan') }}" aria-current="page" class="mx-2 block rounded-lg bg-blue-600 px-4 py-2.5 pl-8 text-sm font-semibold text-white shadow-sm">Laporan Arsip</a>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" title="Validasi Peminjaman" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-circle-check w-5"></i><span data-sidebar-label>Validasi Peminjaman</span>
-                </a>
-                <a href="{{ route('superadmin.users') }}" title="Kelola User" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-users w-5"></i><span data-sidebar-label>Kelola User</span>
-                </a>
-                <a href="#" title="Panduan Penggunaan" class="mt-3 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-file-lines w-5"></i><span data-sidebar-label>Panduan Penggunaan</span>
-                </a>
-                <a href="#" title="Pengaturan Sistem" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-gear w-5"></i><span data-sidebar-label>Pengaturan Sistem</span>
-                </a>
-            </nav>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-800 p-4">
-            @csrf
-            <button type="submit" title="Logout" class="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-red-500 transition hover:bg-red-950 hover:text-red-400">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i><span data-sidebar-label>Logout</span>
-            </button>
-        </form>
-        <button id="sidebar-resize-handle" type="button" aria-label="Ubah lebar sidebar" title="Tarik untuk mengubah lebar sidebar" class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize bg-transparent transition hover:bg-blue-500/60"></button>
-    </aside>
-
-    <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
+    @include('Super_Admin.partials.sidebar_superadmin')
     <main id="superadmin-main" class="flex min-h-screen w-full min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-5 py-5 sm:px-8">
             <button id="sidebar-toggle" type="button" aria-label="Ciutkan atau buka sidebar" aria-expanded="true" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600">
                 <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-900">Super Admin</span>
+                <span class="text-sm font-bold text-gray-900">{{ auth()->user()?->name ?? 'Super Admin' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 
         <section class="w-full min-w-0 flex-1 px-5 pb-10 sm:px-8">
             <div class="mb-6 flex items-center gap-3">
-                <a href="{{ route('superadmin.arsip.laporan') }}" aria-label="Kembali ke Laporan Arsip" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:border-blue-500 hover:text-blue-600">
+                <a href="{{ $returnToVital ? route('superadmin.arsip-vital.aktif') : route('superadmin.arsip.laporan') }}" aria-label="Kembali" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 transition hover:border-blue-500 hover:text-blue-600">
                     <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                 </a>
                 <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">Edit File Kearsipan</h1>
@@ -109,11 +62,28 @@
                 <form action="{{ route('superadmin.arsip.update', $arsip) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+                    @if ($returnToVital)
+                        <input type="hidden" name="return_to" value="arsip-vital">
+                        <input type="hidden" name="return_query" value="{{ $returnQuery }}">
+                    @endif
 
                     <div class="mb-5">
                         <label for="nama_arsip" class="mb-1.5 block text-sm font-bold text-slate-800">Nama Surat <span class="text-red-600">*</span></label>
                         <input type="text" id="nama_arsip" name="nama_arsip" value="{{ old('nama_arsip', $arsip->nama_arsip) }}" placeholder="Nama Surat" required class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                         @error('nama_arsip')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="nomor_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Nomor Dokumen</label>
+                            <input type="text" id="nomor_dokumen" name="nomor_dokumen" value="{{ old('nomor_dokumen', $arsip->nomor_dokumen) }}" placeholder="Nomor Dokumen" class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            @error('nomor_dokumen')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="tanggal_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Tanggal Dokumen</label>
+                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', $arsip->tanggal_dokumen?->format('Y-m-d')) }}" class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            @error('tanggal_dokumen')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
                     </div>
 
                     <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -186,6 +156,27 @@
                         @error('klasifikasi_arsip_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
+                    <fieldset class="mb-5">
+                        <legend class="mb-2 block text-sm font-bold text-slate-800">Tanda Tangan</legend>
+                        <div class="flex flex-wrap gap-5">
+                            <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <input type="radio" name="tanda_tangan" value="digital" @checked(old('tanda_tangan', $arsip->tanda_tangan) === 'digital') class="h-4 w-4 accent-blue-600">
+                                <span>Digital</span>
+                            </label>
+                            <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <input type="radio" name="tanda_tangan" value="konvensional" @checked(old('tanda_tangan', $arsip->tanda_tangan) === 'konvensional') class="h-4 w-4 accent-blue-600">
+                                <span>Konvensional</span>
+                            </label>
+                        </div>
+                        @error('tanda_tangan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </fieldset>
+
+                    <div class="mb-5">
+                        <label for="keterangan" class="mb-1.5 block text-sm font-bold text-slate-800">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="4" placeholder="Keterangan" class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">{{ old('keterangan', $arsip->keterangan) }}</textarea>
+                        @error('keterangan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
                     <div class="mb-5">
                         <label for="file_arsip" class="mb-1.5 block text-sm font-bold text-slate-800">Ganti File</label>
                         <label class="relative flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center transition hover:border-blue-500 hover:bg-blue-50/40">
@@ -212,7 +203,7 @@
                     </div>
 
                     <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">
-                        <span>Submit Peminjaman</span>
+                        <span>Perbarui Arsip</span>
                         <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                     </button>
                 </form>

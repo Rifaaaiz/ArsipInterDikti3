@@ -317,7 +317,7 @@ class KetuaPokjaController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
-            'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
@@ -365,9 +365,9 @@ class KetuaPokjaController extends Controller
                         ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $id));
                 });
             })
-            ->when($filters['kategori_arsip_id'] ?? null, fn ($query, $id) => $query->whereHas(
+            ->when($filters['tanda_tangan'] ?? null, fn ($query, $value) => $query->whereHas(
                 'arsip',
-                fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id)
+                fn ($arsipQuery) => $arsipQuery->where('tanda_tangan', $value)
             ))
             ->when($filters['tanggal_dokumen'] ?? null, fn ($query, $date) => $query->whereHas(
                 'arsip',

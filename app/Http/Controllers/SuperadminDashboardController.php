@@ -222,11 +222,14 @@ class SuperadminDashboardController extends Controller
     {
         $validatedData = $request->validate([
             'nama_arsip' => ['required', 'string', 'max:255'],
+            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'kategori_arsip_id' => ['required', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['required', 'exists:sifat_surats,id'],
             'klasifikasi_arsip_id' => ['nullable', 'exists:klasifikasi_arsips,id'],
             'pokja_id' => ['required', 'exists:pokjas,id'],
             'tanggal_dokumen' => ['required', 'date'],
+            'tanda_tangan' => ['required', 'in:digital,konvensional'],
+            'keterangan' => ['nullable', 'string'],
             'file_arsip' => ['required', 'file', 'mimes:pdf,doc,docx,zip,rar,jpg,jpeg,png,gif,bmp,webp', 'max:5120'],
             'submission_token' => ['required', 'uuid', 'unique:arsips,submission_token'],
         ], [
@@ -234,23 +237,29 @@ class SuperadminDashboardController extends Controller
             'pokja_id.required' => 'Arsip tujuan / kelompok kerja wajib dipilih.',
         ]);
 
+        $klasifikasi = isset($validatedData['klasifikasi_arsip_id'])
+            ? KlasifikasiArsip::query()->findOrFail($validatedData['klasifikasi_arsip_id'])
+            : null;
         $file = $request->file('file_arsip');
         $storedPath = null;
 
         try {
-            DB::transaction(function () use ($file, $validatedData, &$storedPath) {
+            DB::transaction(function () use ($file, $validatedData, $klasifikasi, &$storedPath) {
                 $storedPath = $file->store('arsip', 'public');
                 if (! is_string($storedPath) || $storedPath === '') {
                     throw new \RuntimeException('File arsip gagal disimpan.');
                 }
 
                 Arsip::create([
+                    'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
                     'sifat_surat_id' => $validatedData['sifat_surat_id'],
-                    'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
+                    'klasifikasi_arsip_id' => $klasifikasi?->id,
                     'pokja_id' => $validatedData['pokja_id'],
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
+                    'tanda_tangan' => $validatedData['tanda_tangan'],
+                    'keterangan' => $validatedData['keterangan'] ?? null,
                     'file_path' => $storedPath,
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_size' => $file->getSize(),
@@ -285,9 +294,10 @@ class SuperadminDashboardController extends Controller
             ->with('success', 'Arsip berhasil dikirim ke kelompok kerja.');
     }
 
-    public function editArchive(Arsip $arsip)
+    public function editArchive(Request $request, Arsip $arsip)
     {
-        $arsip->load(['kategori', 'pokja', 'klasifikasiArsip', 'sifatSurat']);
+        $arsip->load(['kategori', 'pokja', 'klasifikasiArsip', 'sifatSurat', 'arsipVital']);
+        $returnToVital = $request->query('return_to') === 'arsip-vital' && $arsip->arsipVital !== null;
 
         return view('Super_Admin.form_edit_superadmin', [
             'arsip' => $arsip,
@@ -296,6 +306,8 @@ class SuperadminDashboardController extends Controller
             'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
             'isEdit' => true,
+            'returnToVital' => $returnToVital,
+            'returnQuery' => $returnToVital ? $request->query('return_query', '') : '',
         ]);
     }
 
@@ -303,11 +315,17 @@ class SuperadminDashboardController extends Controller
     {
         $validatedData = $request->validate([
             'nama_arsip' => ['required', 'string', 'max:255'],
+            'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'kategori_arsip_id' => ['required', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['required', 'exists:sifat_surats,id'],
             'klasifikasi_arsip_id' => ['nullable', 'exists:klasifikasi_arsips,id'],
+            'tanggal_dokumen' => ['nullable', 'date'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
+            'keterangan' => ['nullable', 'string'],
             'file_arsip' => ['nullable', 'file', 'mimes:pdf,doc,docx,zip,rar,jpg,jpeg,png,gif,bmp,webp', 'max:5120'],
             'remove_existing_file' => ['nullable', 'boolean'],
+            'return_to' => ['nullable', 'in:arsip-vital'],
+            'return_query' => ['nullable', 'string', 'max:2000'],
         ], [
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
         ]);
@@ -336,9 +354,13 @@ class SuperadminDashboardController extends Controller
 
                 $arsip->update([
                     'nama_arsip' => $validatedData['nama_arsip'],
+                    'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
                     'sifat_surat_id' => $validatedData['sifat_surat_id'],
                     'klasifikasi_arsip_id' => $validatedData['klasifikasi_arsip_id'] ?? null,
+                    'tanggal_dokumen' => $validatedData['tanggal_dokumen'] ?? $arsip->tanggal_dokumen,
+                    'tanda_tangan' => $validatedData['tanda_tangan'] ?? $arsip->tanda_tangan,
+                    'keterangan' => $validatedData['keterangan'] ?? null,
                     'file_path' => $newFilePath,
                     'file_type' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getClientOriginalExtension() : ($removeExistingFile ? null : $arsip->file_type),
                     'file_size' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getSize() : ($removeExistingFile ? null : $arsip->file_size),
@@ -358,6 +380,28 @@ class SuperadminDashboardController extends Controller
             }
 
             throw $e;
+        }
+
+        if (($validatedData['return_to'] ?? null) === 'arsip-vital' && $arsip->arsipVital()->exists()) {
+            parse_str($validatedData['return_query'] ?? '', $requestedReturnFilters);
+            $allowedFilters = ['nama_arsip', 'nomor_dokumen', 'jenis_surat_id', 'sifat_surat_id', 'tanggal_upload', 'klasifikasi_arsip_id', 'page'];
+            $returnFilters = [];
+
+            foreach ($allowedFilters as $filter) {
+                $value = $requestedReturnFilters[$filter] ?? null;
+                if (! is_scalar($value)) {
+                    continue;
+                }
+
+                $value = (string) $value;
+                if (strlen($value) <= 255 && ($filter !== 'page' || ctype_digit($value))) {
+                    $returnFilters[$filter] = $value;
+                }
+            }
+
+            return redirect()
+                ->route('superadmin.arsip-vital.aktif', $returnFilters)
+                ->with('success', 'Arsip berhasil diperbarui.');
         }
 
         return redirect()->route('superadmin.arsip.laporan')->with('success', 'Arsip berhasil diperbarui.');
@@ -538,7 +582,7 @@ class SuperadminDashboardController extends Controller
             ->whereNotIn('status', ['dihapus'])
             ->whereNotNull('pokja_id')
             ->latest('created_at')
-            ->limit(5)
+            ->limit(2)
             ->get();
 
         $peminjamanTerbaru = Peminjaman::with([

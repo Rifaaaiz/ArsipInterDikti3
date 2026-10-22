@@ -85,7 +85,12 @@
                     <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
                 </div>
 
-                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <select name="tanda_tangan" aria-label="Kategori" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Kategori</option>
+                        <option value="digital" @selected(($filters['tanda_tangan'] ?? '') === 'digital')>Digital</option>
+                        <option value="konvensional" @selected(($filters['tanda_tangan'] ?? '') === 'konvensional')>Konvensional</option>
+                    </select>
                     <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen"
                         class="h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 

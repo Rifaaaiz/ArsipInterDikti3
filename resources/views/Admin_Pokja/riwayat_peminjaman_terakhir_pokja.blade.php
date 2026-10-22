@@ -91,7 +91,7 @@
 
             <!-- FILTER BARU (Grid 2 Baris, 4 Kolom) -->
             <form method="GET" action="{{ route('peminjaman.riwayat') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
+                <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
 
                     <!-- BARIS 1 -->
                     <input type="text" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Cari nama surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
@@ -114,13 +114,18 @@
                     <button type="submit" class="h-[42px] w-full rounded-md bg-[#2563eb] text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                         Filter
                     </button>
+                </div>
 
-                    <!-- BARIS 2 -->
-
-                    <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 md:col-start-1">
+                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <select name="tanda_tangan" aria-label="Kategori" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Kategori</option>
+                        <option value="digital" @selected(($filters['tanda_tangan'] ?? '') === 'digital')>Digital</option>
+                        <option value="konvensional" @selected(($filters['tanda_tangan'] ?? '') === 'konvensional')>Konvensional</option>
+                    </select>
+                    <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
                     <!-- Modal Custom Klasifikasi -->
-                    <div class="relative w-full md:col-start-2 md:col-span-3" data-klasifikasi-root="riwayat-peminjaman-klasifikasi">
+                    <div class="relative w-full min-w-0" data-klasifikasi-root="riwayat-peminjaman-klasifikasi">
                         @php
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                         @endphp

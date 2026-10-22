@@ -75,7 +75,7 @@
             <h2 class="mb-6 text-3xl font-bold text-black">Seluruh Arsip</h2>
 
             <form method="GET" action="{{ route('arsip.seluruh') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     <input type="search" name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" aria-label="Nama Surat"
                         class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen"
@@ -99,11 +99,16 @@
                     </button>
                 </div>
 
-                <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                <div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <select name="tanda_tangan" aria-label="Kategori" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                        <option value="">Kategori</option>
+                        <option value="digital" @selected(($filters['tanda_tangan'] ?? '') === 'digital')>Digital</option>
+                        <option value="konvensional" @selected(($filters['tanda_tangan'] ?? '') === 'konvensional')>Konvensional</option>
+                    </select>
                     <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" aria-label="Tanggal Dokumen"
-                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 xl:col-start-1">
+                        class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                    <div class="relative w-full xl:col-start-2 xl:col-span-3" data-klasifikasi-root>
+                    <div class="relative w-full min-w-0" data-klasifikasi-root>
                         @php
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                         @endphp
@@ -143,7 +148,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('arsip.seluruh') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-blue-600 bg-white px-4 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 xl:col-start-5">
+                    <a href="{{ route('arsip.seluruh') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-blue-600 bg-white px-4 text-sm font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50">
                         Reset
                     </a>
                 </div>

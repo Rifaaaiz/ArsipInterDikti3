@@ -126,14 +126,15 @@
                     <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                         Filter
                     </button>
+                </div>
 
+                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div class="relative w-full min-w-0">
-                        <select name="kategori_arsip_id" aria-label="Kategori"
+                        <select name="tanda_tangan" aria-label="Kategori"
                             class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <option value="">Kategori</option>
-                            @foreach ($kategoris as $kategori)
-                                <option value="{{ $kategori->id }}" @selected(($filters['kategori_arsip_id'] ?? null) == $kategori->id)>{{ $kategori->name }}</option>
-                            @endforeach
+                            <option value="digital" @selected(($filters['tanda_tangan'] ?? '') === 'digital')>Digital</option>
+                            <option value="konvensional" @selected(($filters['tanda_tangan'] ?? '') === 'konvensional')>Konvensional</option>
                         </select>
                         <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
                     </div>
@@ -143,7 +144,7 @@
                             class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     </div>
 
-                    <div class="relative w-full" data-klasifikasi-root="ketua-peminjaman-aktif-klasifikasi">
+                    <div class="relative w-full min-w-0" data-klasifikasi-root="ketua-peminjaman-aktif-klasifikasi">
                         <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasi_arsip_id'] ?? '' }}" data-klasifikasi-value>
                         <button type="button" data-klasifikasi-trigger aria-expanded="false" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? ($selectedKlasifikasi->kode . ' — ' . ($selectedKlasifikasi->judul ?? '')) : 'Kode Klasifikasi' }}</span>
@@ -183,6 +184,7 @@
                     <a href="{{ route('ketua.peminjaman.aktif') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-blue-600 bg-white text-sm font-semibold text-blue-700 transition hover:bg-blue-50">
                         Reset
                     </a>
+                </div>
                 </div>
             </form>
 

@@ -79,6 +79,7 @@ class AdminPokjaController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
@@ -111,6 +112,7 @@ class AdminPokjaController extends Controller
         $arsips = $query
             ->when($filters['jenis_surat_id'] ?? null, fn ($builder, $id) => $builder->where('kategori_arsip_id', $id))
             ->when($filters['sifat_surat_id'] ?? null, fn ($builder, $id) => $builder->where('sifat_surat_id', $id))
+            ->when($filters['tanda_tangan'] ?? null, fn ($builder, $value) => $builder->where('tanda_tangan', $value))
             ->when($filters['tanggal_dokumen'] ?? null, fn ($builder, $date) => $builder->whereDate('tanggal_dokumen', $date))
             ->when($filters['klasifikasi_arsip_id'] ?? null, fn ($builder, $id) => $builder->where('klasifikasi_arsip_id', $id))
             ->latest('created_at')
@@ -484,7 +486,7 @@ class AdminPokjaController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
-            'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
@@ -538,12 +540,10 @@ class AdminPokjaController extends Controller
                         ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $id));
                 });
             })
-            ->when($filters['kategori_arsip_id'] ?? null, function ($query, $id) {
-                $query->where(function ($sub) use ($id) {
-                    $sub->where('peminjamans.kategori_id', $id)
-                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
-                });
-            })
+            ->when($filters['tanda_tangan'] ?? null, fn ($query, $value) => $query->whereHas(
+                'arsip',
+                fn ($arsipQuery) => $arsipQuery->where('tanda_tangan', $value)
+            ))
             ->when($filters['tanggal_dokumen'] ?? null, function ($query, $date) {
                 $dateString = \Carbon\Carbon::parse($date)->toDateString();
                 $query->where(function ($sub) use ($dateString) {
@@ -588,6 +588,7 @@ class AdminPokjaController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
@@ -617,6 +618,7 @@ class AdminPokjaController extends Controller
                 }
             })
             ->when($nomorDokumenPattern !== null, fn ($query) => $query->whereRaw('LOWER(nomor_dokumen) LIKE ?', [$nomorDokumenPattern]))
+            ->when($filters['tanda_tangan'] ?? null, fn ($query, $value) => $query->where('tanda_tangan', $value))
             ->when($filters['jenis_surat_id'] ?? null, fn ($query, $id) => $query->where('kategori_arsip_id', $id))
             ->when($filters['sifat_surat_id'] ?? null, fn ($query, $id) => $query->where('sifat_surat_id', $id))
             ->when($filters['klasifikasi_arsip_id'] ?? null, fn ($query, $id) => $query->where('klasifikasi_arsip_id', $id))
@@ -647,7 +649,7 @@ class AdminPokjaController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'jenis_surat_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
-            'kategori_arsip_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
+            'tanda_tangan' => ['nullable', 'in:digital,konvensional'],
             'tanggal_dokumen' => ['nullable', 'date'],
             'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
         ]);
@@ -698,12 +700,10 @@ class AdminPokjaController extends Controller
                         ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('sifat_surat_id', $id));
                 });
             })
-            ->when($filters['kategori_arsip_id'] ?? null, function ($query, $id) {
-                $query->where(function ($sub) use ($id) {
-                    $sub->where('peminjamans.kategori_id', $id)
-                        ->orWhereHas('arsip', fn ($arsipQuery) => $arsipQuery->where('kategori_arsip_id', $id));
-                });
-            })
+            ->when($filters['tanda_tangan'] ?? null, fn ($query, $value) => $query->whereHas(
+                'arsip',
+                fn ($arsipQuery) => $arsipQuery->where('tanda_tangan', $value)
+            ))
             ->when($filters['tanggal_dokumen'] ?? null, function ($query, $date) {
                 $formattedDate = \Carbon\Carbon::parse($date)->toDateString();
                 // Tanggal dokumen merupakan atribut arsip, bukan periode peminjaman.

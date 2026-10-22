@@ -49,6 +49,11 @@ class Arsip extends Model
         return $this->belongsTo(KlasifikasiArsip::class);
     }
 
+    public function arsipVital()
+    {
+        return $this->hasOne(ArsipVital::class);
+    }
+
     public function sifatSurat()
     {
         return $this->belongsTo(SifatSurat::class, 'sifat_surat_id');

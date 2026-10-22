@@ -30,72 +30,7 @@
     </style>
 </head>
 <body class="bg-[#f4f7f9] flex font-sans text-gray-800">
-    <aside id="superadmin-sidebar" class="fixed left-0 top-0 z-30 flex h-screen flex-col bg-[#0a1120] text-white">
-        <div class="min-h-0 flex-1 overflow-y-auto">
-            <div id="sidebar-logo" class="mb-2 flex items-center gap-3 px-6 py-6">
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                    <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
-                </div>
-                <h1 data-sidebar-label class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
-            </div>
-            <nav class="space-y-1 px-4 pb-4">
-                <a href="{{ route('superadmin.dashboard') }}" title="Dashboard" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-gray-200 transition hover:bg-gray-800 hover:text-white">
-                    <svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg><span data-sidebar-label>Dashboard</span>
-                </a>
-                <div class="pt-1">
-                    <button type="button" onclick="toggleSidebarMenu('submenu-arsip', 'ikon-panah-arsip')" aria-expanded="true" class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-sm font-medium text-gray-200 transition-colors hover:bg-gray-800 hover:text-white focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i><span data-sidebar-label>Kelola Arsip</span></span>
-                        <i id="ikon-panah-arsip" class="fa-solid fa-chevron-right rotate-90 text-xs transition-transform duration-300"></i>
-                    </button>
-                    <div id="submenu-arsip" class="max-h-96 overflow-hidden transition-all duration-300">
-                        <div class="flex flex-col gap-1 pt-1 pb-2">
-                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Penghapusan Arsip</a>
-                            <a href="{{ route('superadmin.arsip.laporan') }}" aria-current="page" class="mx-2 block rounded-lg bg-blue-600 px-4 py-2.5 pl-8 text-sm font-semibold text-white shadow-sm">Laporan Arsip</a>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" title="Validasi Peminjaman" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-circle-check w-5"></i><span data-sidebar-label>Validasi Peminjaman</span>
-                </a>
-                <a href="{{ route('superadmin.users') }}" title="Kelola User" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-users w-5"></i><span data-sidebar-label>Kelola User</span>
-                </a>
-                <p data-sidebar-heading class="px-4 pb-1 pt-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tim Pokja</p>
-                @foreach ($pokjas as $pokja)
-                    <div>
-                        <button type="button" onclick="toggleSidebarMenu('submenu-pokja-{{ $pokja->id }}', 'ikon-panah-pokja-{{ $pokja->id }}')" aria-expanded="false" class="flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                            <span class="flex min-w-0 items-center gap-3"><i class="fa-solid fa-people-group w-5 shrink-0"></i><span data-sidebar-label class="truncate">{{ $pokja->name }}</span></span>
-                            <i id="ikon-panah-pokja-{{ $pokja->id }}" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-300"></i>
-                        </button>
-                        <div id="submenu-pokja-{{ $pokja->id }}" class="max-h-0 overflow-hidden transition-all duration-300">
-                            <div class="flex flex-col gap-1 py-1">
-                                <a href="{{ route('superadmin.surat-masuk', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Masuk</a>
-                                <a href="{{ route('superadmin.surat-keluar', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Keluar</a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-                <a href="#" title="Panduan Penggunaan" class="mt-3 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-file-lines w-5"></i><span data-sidebar-label>Panduan Penggunaan</span>
-                </a>
-                <a href="#" title="Pengaturan Sistem" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-gear w-5"></i><span data-sidebar-label>Pengaturan Sistem</span>
-                </a>
-            </nav>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-800 p-4">
-            @csrf
-            <button type="submit" title="Logout" class="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-red-500 transition hover:bg-red-950 hover:text-red-400">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i><span data-sidebar-label>Logout</span>
-            </button>
-        </form>
-        <button id="sidebar-resize-handle" type="button" aria-label="Ubah lebar sidebar" title="Tarik untuk mengubah lebar sidebar" class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize bg-transparent transition hover:bg-blue-500/60"></button>
-    </aside>
-
-    <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
+    @include('Super_Admin.partials.sidebar_superadmin')
     <main id="superadmin-main" class="flex min-h-screen flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-5 py-5 sm:px-8">
             <button id="sidebar-toggle" type="button" aria-label="Ciutkan atau buka sidebar" aria-expanded="true" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600">

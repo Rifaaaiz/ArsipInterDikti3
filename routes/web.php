@@ -9,6 +9,7 @@ use App\Http\Controllers\SuperadminDashboardController;
 use App\Http\Controllers\SuperadminPeminjamanController;
 use App\Http\Controllers\SuperadminSuratMasukController;
 use App\Http\Controllers\SuperadminSuratKeluarController;
+use App\Http\Controllers\SuperadminArsipVitalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -236,6 +237,24 @@ use App\Http\Controllers\SuperadminSuratKeluarController;
 
         Route::post('/arsip/tambah', [SuperadminDashboardController::class, 'storeArchive'])
             ->name('superadmin.arsip.store');
+
+        Route::get('/arsip-vital/aktif', [SuperadminArsipVitalController::class, 'index'])
+            ->name('superadmin.arsip-vital.aktif');
+
+        Route::get('/arsip-vital/inaktif', [SuperadminArsipVitalController::class, 'indexInactive'])
+            ->name('superadmin.arsip-vital.inaktif');
+
+        Route::get('/arsip-vital/tambah', [SuperadminArsipVitalController::class, 'create'])
+            ->name('superadmin.arsip-vital.create');
+
+        Route::post('/arsip-vital/tambah', [SuperadminArsipVitalController::class, 'store'])
+            ->name('superadmin.arsip-vital.store');
+
+        Route::get('/arsip-vital/{arsipVital}/lihat', [SuperadminArsipVitalController::class, 'show'])
+            ->name('superadmin.arsip-vital.show');
+
+        Route::delete('/arsip-vital/{arsipVital}', [SuperadminArsipVitalController::class, 'deleteInactive'])
+            ->name('superadmin.arsip-vital.delete-inaktif');
 
         Route::get('/peminjaman/buat', [SuperadminPeminjamanController::class, 'create'])
             ->name('superadmin.peminjaman.create');

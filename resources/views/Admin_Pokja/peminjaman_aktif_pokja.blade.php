@@ -87,36 +87,38 @@
         <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
             <h2 class="text-3xl font-bold mb-6 text-black">Peminjaman Aktif</h2>
 
-            <form method="GET" action="{{ route('pokja.peminjaman.aktif') }}" class="mb-8 grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 md:grid-cols-5">
-                <input name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+            <form method="GET" action="{{ route('pokja.peminjaman.aktif') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+                <input name="nama_surat" value="{{ $filters['nama_surat'] ?? '' }}" placeholder="Nama Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <input type="text" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                <select name="jenis_surat_id" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <select name="jenis_surat_id" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Jenis Surat</option>
                     @foreach ($jenisSurats as $jenis)
                         <option value="{{ $jenis->id }}" @selected(($filters['jenis_surat_id'] ?? null) == $jenis->id)>{{ $jenis->name }}</option>
                     @endforeach
                 </select>
 
-                <select name="sifat_surat_id" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <select name="sifat_surat_id" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Sifat Surat</option>
                     @foreach ($sifatSurats as $sifat)
                         <option value="{{ $sifat->id }}" @selected(($filters['sifat_surat_id'] ?? null) == $sifat->id)>{{ $sifat->name }}</option>
                     @endforeach
                 </select>
 
-                <button type="submit" class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Filter</button>
+                <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700">Filter</button>
 
-                <select name="kategori_arsip_id" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                </div>
+                <div class="mt-3 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <select name="tanda_tangan" aria-label="Kategori" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Kategori</option>
-                    @foreach ($kategoris as $kategori)
-                        <option value="{{ $kategori->id }}" @selected(($filters['kategori_arsip_id'] ?? null) == $kategori->id)>{{ $kategori->name }}</option>
-                    @endforeach
+                    <option value="digital" @selected(($filters['tanda_tangan'] ?? '') === 'digital')>Digital</option>
+                    <option value="konvensional" @selected(($filters['tanda_tangan'] ?? '') === 'konvensional')>Konvensional</option>
                 </select>
 
-                <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" class="rounded-md border border-gray-300 px-3 py-2.5 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <input type="date" name="tanggal_dokumen" value="{{ $filters['tanggal_dokumen'] ?? '' }}" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-                <div class="relative md:col-span-2" data-klasifikasi-root="peminjaman-filter-klasifikasi">
+                <div class="relative min-w-0" data-klasifikasi-root="peminjaman-filter-klasifikasi">
                     @php
                         $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) (($filters['klasifikasi_arsip_id'] ?? '') ?: ''));
                     @endphp
@@ -157,7 +159,8 @@
                     </div>
                 </div>
 
-                <a href="{{ route('pokja.peminjaman.aktif') }}" class="rounded-md border border-gray-300 px-6 py-2.5 text-center text-sm font-semibold text-gray-600 hover:bg-gray-50">Reset</a>
+                <a href="{{ route('pokja.peminjaman.aktif') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-600 hover:bg-gray-50">Reset</a>
+                </div>
             </form>
 
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">

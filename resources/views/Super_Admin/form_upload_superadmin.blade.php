@@ -38,79 +38,14 @@
         $pokjas = collect($pokjas ?? []);
         $klasifikasis = collect($klasifikasis ?? []);
     @endphp
-    <aside id="superadmin-sidebar" class="fixed left-0 top-0 z-30 flex h-screen flex-col bg-[#0a1120] text-white">
-        <div class="min-h-0 flex-1 overflow-y-auto">
-            <div id="sidebar-logo" class="mb-2 flex items-center gap-3 px-6 py-6">
-                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-                    <i class="fa-solid fa-book-open text-blue-600 text-sm"></i>
-                </div>
-                <h1 data-sidebar-label class="text-xl font-bold tracking-wider text-gray-200">SIMARSIP</h1>
-            </div>
-            <nav class="space-y-1 px-4 pb-4">
-                <a href="{{ route('superadmin.dashboard') }}" title="Dashboard" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-gray-200 transition hover:bg-gray-800 hover:text-white">
-                    <svg class="h-4 w-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                        <polyline stroke-linecap="round" stroke-linejoin="round" points="9 22 9 12 15 12 15 22"></polyline>
-                    </svg><span data-sidebar-label>Dashboard</span>
-                </a>
-                <div class="pt-1">
-                    <button type="button" onclick="toggleSidebarMenu('submenu-arsip', 'ikon-panah-arsip')" aria-expanded="true" class="flex w-full items-center justify-between rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition-colors focus:outline-none">
-                        <span class="flex items-center gap-3"><i class="fa-regular fa-folder w-5"></i><span data-sidebar-label>Kelola Arsip</span></span>
-                        <i id="ikon-panah-arsip" class="fa-solid fa-chevron-right rotate-90 text-xs transition-transform duration-300"></i>
-                    </button>
-                    <div id="submenu-arsip" class="max-h-96 overflow-hidden transition-all duration-300">
-                        <div class="flex flex-col gap-1 pt-1 pb-2">
-                            <a href="{{ route('superadmin.arsip.penghapusan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Penghapusan Arsip</a>
-                            <a href="{{ route('superadmin.arsip.laporan') }}" class="block py-2 pl-12 text-sm font-medium text-gray-400 transition hover:text-white">Laporan Arsip</a>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ route('superadmin.peminjaman.validasi') }}" title="Validasi Peminjaman" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-circle-check w-5"></i><span data-sidebar-label>Validasi Peminjaman</span>
-                </a>
-                <a href="{{ route('superadmin.users') }}" title="Kelola User" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-users w-5"></i><span data-sidebar-label>Kelola User</span>
-                </a>
-                <p data-sidebar-heading class="px-4 pb-1 pt-4 text-xs font-bold uppercase tracking-wider text-gray-500">Tim Pokja</p>
-                @foreach ($pokjas as $pokja)
-                    <div>
-                        <button type="button" onclick="toggleSidebarMenu('submenu-pokja-{{ $pokja->id }}', 'ikon-panah-pokja-{{ $pokja->id }}')" aria-expanded="false" class="flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-left text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                            <span class="flex min-w-0 items-center gap-3"><i class="fa-solid fa-people-group w-5 shrink-0"></i><span data-sidebar-label class="truncate">{{ $pokja->name }}</span></span>
-                            <i id="ikon-panah-pokja-{{ $pokja->id }}" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-300"></i>
-                        </button>
-                        <div id="submenu-pokja-{{ $pokja->id }}" class="max-h-0 overflow-hidden transition-all duration-300">
-                            <div class="flex flex-col gap-1 py-1">
-                                <a href="{{ route('superadmin.surat-masuk', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Masuk</a>
-                                <a href="{{ route('superadmin.surat-keluar', $pokja->slug) }}" class="block py-1.5 pl-12 text-xs font-medium text-gray-400 transition hover:text-white">Surat Keluar</a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-                <a href="#" title="Panduan Penggunaan" class="mt-3 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-regular fa-file-lines w-5"></i><span data-sidebar-label>Panduan Penggunaan</span>
-                </a>
-                <a href="#" title="Pengaturan Sistem" class="mt-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-gray-800 hover:text-white">
-                    <i class="fa-solid fa-gear w-5"></i><span data-sidebar-label>Pengaturan Sistem</span>
-                </a>
-            </nav>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" class="border-t border-gray-800 p-4">
-            @csrf
-            <button type="submit" title="Logout" class="flex w-full items-center gap-2 rounded-lg px-4 py-2.5 text-left text-sm font-semibold text-red-500 transition hover:bg-red-950 hover:text-red-400">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i><span data-sidebar-label>Logout</span>
-            </button>
-        </form>
-        <button id="sidebar-resize-handle" type="button" aria-label="Ubah lebar sidebar" title="Tarik untuk mengubah lebar sidebar" class="absolute right-0 top-0 h-full w-1.5 cursor-col-resize bg-transparent transition hover:bg-blue-500/60"></button>
-    </aside>
-
-    <div id="sidebar-backdrop" class="fixed inset-0 z-20 hidden bg-black/50 md:hidden"></div>
+    @include('Super_Admin.partials.sidebar_superadmin')
     <main id="superadmin-main" class="flex min-h-screen w-full min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-5 py-5 sm:px-8">
             <button id="sidebar-toggle" type="button" aria-label="Ciutkan atau buka sidebar" aria-expanded="true" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600">
                 <i class="fa-solid fa-bars" aria-hidden="true"></i>
             </button>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-900">Super Admin</span>
+                <span class="text-sm font-bold text-gray-900">{{ auth()->user()?->name ?? 'Super Admin' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
@@ -136,7 +71,7 @@
                     </div>
                 @endif
 
-                <form action="{{ $isEdit ? route('superadmin.arsip.update', $arsipForm) : route('superadmin.arsip.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ $isEdit ? route('superadmin.arsip.update', $arsipForm) : route('superadmin.arsip.store') }}" method="POST" enctype="multipart/form-data" data-archive-upload-form>
                     @csrf
                     @unless ($isEdit)
                         <input type="hidden" name="submission_token" value="{{ $submissionToken }}">
@@ -152,6 +87,11 @@
                     </div>
 
                     <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+                        <div>
+                            <label for="nomor_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Nomor Dokumen</label>
+                            <input type="text" id="nomor_dokumen" name="nomor_dokumen" value="{{ old('nomor_dokumen') }}" placeholder="Nomor Dokumen" class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            @error('nomor_dokumen')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
                         <div>
                             <label for="kategori_arsip_id" class="mb-1.5 block text-sm font-bold text-slate-800">Jenis Surat <span class="text-red-600">*</span></label>
                             <div class="relative">
@@ -179,23 +119,24 @@
                             @error('sifat_surat_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label for="pokja_id" class="mb-1.5 block text-sm font-bold text-slate-800">Kelompok Kerja <span class="text-red-600">*</span></label>
-                            <div class="relative">
-                                <select id="pokja_id" name="pokja_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                                    <option value="" disabled {{ old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
-                                    @foreach ($pokjas as $pokja)
-                                        <option value="{{ $pokja->id }}" @selected((string) old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) === (string) $pokja->id)>{{ $pokja->name }}</option>
-                                    @endforeach
-                                </select>
-                                <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
-                            </div>
-                            @error('pokja_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
-                            <label for="tanggal_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Tanggal Dokumen <span class="text-red-600">*</span></label>
-                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', $arsipForm?->tanggal_dokumen?->format('Y-m-d')) }}" required class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <label for="tanggal_dokumen" class="mb-1.5 block text-sm font-bold text-slate-800">Tanggal Upload <span class="text-red-600">*</span></label>
+                            <input type="date" id="tanggal_dokumen" name="tanggal_dokumen" value="{{ old('tanggal_dokumen', now()->format('Y-m-d')) }}" required class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                             @error('tanggal_dokumen')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                         </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label for="pokja_id" class="mb-1.5 block text-sm font-bold text-slate-800">Kelompok Kerja <span class="text-red-600">*</span></label>
+                        <div class="relative">
+                            <select id="pokja_id" name="pokja_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                <option value="" disabled {{ old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
+                                @foreach ($pokjas as $pokja)
+                                    <option value="{{ $pokja->id }}" @selected((string) old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) === (string) $pokja->id)>{{ $pokja->name }}</option>
+                                @endforeach
+                            </select>
+                            <i class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-500"></i>
+                        </div>
+                        @error('pokja_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="mb-5">
@@ -203,6 +144,11 @@
                         @php
                             $klasifikasiValue = old('klasifikasi_arsip_id', $arsipForm?->klasifikasi_arsip_id ?? '');
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) $klasifikasiValue);
+                            $selectedMasaAktif = $selectedKlasifikasi?->masa_aktif_catatan
+                                ?: ($selectedKlasifikasi?->masa_aktif_tahun !== null ? $selectedKlasifikasi->masa_aktif_tahun . ' tahun' : '');
+                            $selectedMasaInaktif = $selectedKlasifikasi?->masa_inaktif_tahun !== null
+                                ? $selectedKlasifikasi->masa_inaktif_tahun . ' tahun'
+                                : '';
                         @endphp
                         <div class="relative" data-klasifikasi-root="admin-tu-klasifikasi">
                             <input type="hidden" name="klasifikasi_arsip_id" value="{{ $klasifikasiValue }}" data-klasifikasi-value>
@@ -215,7 +161,10 @@
                                 <button type="button" class="fixed inset-0 cursor-default bg-slate-950/45" data-klasifikasi-close aria-label="Tutup pemilih kode klasifikasi"></button>
                                 <section class="relative mx-auto flex max-h-[88vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
                                     <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pb-3 pt-5 sm:px-6">
-                                        <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" class="h-[42px] w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                        <div class="flex gap-3">
+                                            <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" class="h-[42px] min-w-0 flex-1 rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                            <button type="button" data-klasifikasi-clear class="shrink-0 rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:border-blue-500 hover:text-blue-600">Hapus pilihan</button>
+                                        </div>
                                     </div>
                                     <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
                                         @foreach ($klasifikasis->groupBy(fn ($item) => ($item->bab_urutan ?? 999) . '|' . trim((string) ($item->bab ?? ''))) as $group)
@@ -224,7 +173,7 @@
                                                 <h3 class="mb-3 text-sm font-bold text-slate-700">{{ $first->bab ?? 'BAB' }}</h3>
                                                 <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                                                     @foreach ($group as $item)
-                                                        <button type="button" data-klasifikasi-option data-value="{{ $item->id }}" data-label="{{ $item->kode }} - {{ $item->judul ?? $item->uraian ?? '-' }}" class="rounded-lg border border-slate-200 bg-white p-3 text-left text-sm text-slate-700 transition hover:border-blue-300 hover:bg-blue-50">
+                                                        <button type="button" data-klasifikasi-option data-value="{{ $item->id }}" data-label="{{ $item->kode }} - {{ $item->judul ?? $item->uraian ?? '-' }}" data-masa-aktif="{{ $item->masa_aktif_catatan ?: ($item->masa_aktif_tahun !== null ? $item->masa_aktif_tahun . ' tahun' : '') }}" data-masa-inaktif="{{ $item->masa_inaktif_tahun !== null ? $item->masa_inaktif_tahun . ' tahun' : '' }}" class="rounded-lg border border-slate-200 bg-white p-3 text-left text-sm text-slate-700 transition hover:border-blue-300 hover:bg-blue-50">
                                                             <span class="block font-bold text-slate-900">{{ $item->kode }}</span>
                                                             <span class="block text-xs text-slate-600">{{ $item->judul ?? $item->uraian ?? '-' }}</span>
                                                         </button>
@@ -237,6 +186,38 @@
                             </div>
                         </div>
                         @error('klasifikasi_arsip_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </div>
+
+                    <div class="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="masa_aktif_display" class="mb-1.5 block text-sm font-bold text-slate-800">Masa Aktif</label>
+                            <input type="text" id="masa_aktif_display" value="{{ $selectedMasaAktif }}" readonly class="w-full rounded-md border border-slate-300 bg-slate-100 px-4 py-3 text-sm text-slate-700">
+                        </div>
+                        <div>
+                            <label for="masa_inaktif_display" class="mb-1.5 block text-sm font-bold text-slate-800">Masa Inaktif</label>
+                            <input type="text" id="masa_inaktif_display" value="{{ $selectedMasaInaktif }}" readonly class="w-full rounded-md border border-slate-300 bg-slate-100 px-4 py-3 text-sm text-slate-700">
+                        </div>
+                    </div>
+
+                    <fieldset class="mb-5">
+                        <legend class="mb-2 block text-sm font-bold text-slate-800">Tanda Tangan <span class="text-red-600">*</span></legend>
+                        <div class="flex flex-wrap gap-5">
+                            <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <input type="radio" name="tanda_tangan" value="digital" required @checked(old('tanda_tangan') === 'digital') class="h-4 w-4 accent-blue-600">
+                                <span>Digital</span>
+                            </label>
+                            <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <input type="radio" name="tanda_tangan" value="konvensional" required @checked(old('tanda_tangan') === 'konvensional') class="h-4 w-4 accent-blue-600">
+                                <span>Konvensional</span>
+                            </label>
+                        </div>
+                        @error('tanda_tangan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    </fieldset>
+
+                    <div class="mb-5">
+                        <label for="keterangan" class="mb-1.5 block text-sm font-bold text-slate-800">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" rows="4" placeholder="Keterangan" class="w-full rounded-md border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">{{ old('keterangan') }}</textarea>
+                        @error('keterangan')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
                     <div class="mb-5">
@@ -257,7 +238,7 @@
                     <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
                         <a href="{{ route('superadmin.arsip.laporan') }}" class="flex items-center justify-center rounded-lg border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-1/3">Batal</a>
                         <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-lg bg-blue-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700">
-                            <span>{{ $isEdit ? 'Perbarui Arsip' : 'Submit Peminjaman' }}</span>
+                            <span>{{ $isEdit ? 'Perbarui Arsip' : 'Submit Arsip' }}</span>
                             <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -339,9 +320,12 @@
             const input = root.querySelector('[data-klasifikasi-value]');
             const label = root.querySelector('[data-klasifikasi-label]');
             const search = root.querySelector('[data-klasifikasi-search]');
+            const clearButton = root.querySelector('[data-klasifikasi-clear]');
             const options = root.querySelectorAll('[data-klasifikasi-option]');
+            const masaAktif = document.getElementById('masa_aktif_display');
+            const masaInaktif = document.getElementById('masa_inaktif_display');
 
-            if (!trigger || !modal || !input || !label || !search) return;
+            if (!trigger || !modal || !input || !label || !search || !masaAktif || !masaInaktif) return;
 
             const close = () => {
                 modal.classList.add('hidden');
@@ -366,6 +350,13 @@
 
             closeButton.addEventListener('click', close);
             search.addEventListener('input', applyFilter);
+            clearButton?.addEventListener('click', () => {
+                input.value = '';
+                label.textContent = 'Pilih Kode Klasifikasi';
+                masaAktif.value = '';
+                masaInaktif.value = '';
+                close();
+            });
 
             options.forEach((option) => {
                 option.addEventListener('click', () => {
@@ -373,6 +364,8 @@
                     const text = option.dataset.label || 'Pilih Kode Klasifikasi';
                     input.value = value;
                     label.textContent = text;
+                    masaAktif.value = option.dataset.masaAktif || '';
+                    masaInaktif.value = option.dataset.masaInaktif || '';
                     close();
                 });
             });
@@ -380,6 +373,22 @@
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && !modal.classList.contains('hidden')) close();
             });
+        });
+
+        document.querySelector('[data-archive-upload-form]')?.addEventListener('submit', (event) => {
+            const form = event.currentTarget;
+            if (form.dataset.submitting === 'true') {
+                event.preventDefault();
+                return;
+            }
+
+            form.dataset.submitting = 'true';
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.setAttribute('aria-busy', 'true');
+                submitButton.querySelector('span').textContent = 'Menyimpan...';
+            }
         });
     </script>
 </body>
