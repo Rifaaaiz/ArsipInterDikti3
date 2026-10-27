@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#f8f9fa] flex font-sans text-gray-800">
+<body class="bg-[#f8f9fa] flex flex-col md:flex-row font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
+    <aside class="w-full md:w-64 bg-[#0a1120] text-white md:min-h-screen flex flex-col md:justify-between md:fixed md:top-0 md:left-0 z-20">
         <div>
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
@@ -59,10 +59,10 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="w-full min-w-0 flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas -->
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
+        <header class="px-4 sm:px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
             <div class="flex items-center gap-3">
                 <span class="text-base font-bold text-gray-900">admin TU</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
@@ -70,8 +70,8 @@
         </header>
 
         <!-- KONTEN UTAMA DASHBOARD -->
-        <div class="px-8 pb-10 max-w-7xl">
-            <h2 class="text-3xl font-bold mb-6 text-black">Dashboard Admin TU</h2>
+        <div class="w-full min-w-0 px-4 sm:px-8 pb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-black">Dashboard Admin TU</h2>
 
             @if (session('success'))
                 <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
@@ -103,16 +103,21 @@
                 </a>
             </div>
 
-            <h3 class="text-xl font-bold mb-4 text-gray-900">Peminjaman Menunggu Validasi</h3>
-            <div class="bg-transparent overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead>
+            <h3 class="mb-4 text-2xl font-bold text-black">Peminjaman Menunggu Validasi</h3>
+            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-330 border-collapse text-left">
+                        <thead class="border-b border-gray-200 bg-gray-50">
                         <tr>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Nama Surat</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Pengaju</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Kategori</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Tanggal Pengajuan</th>
-                            <th class="py-4 px-2 text-base font-bold text-indigo-900">Aksi</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Jenis Surat</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Sifat Surat</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Kelompok Kerja</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Tanggal Mulai</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Tanggal Selesai</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Status</th>
+                            <th class="px-5 py-4 text-sm font-bold text-gray-700">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-transparent">
@@ -121,14 +126,17 @@
                                 $fileUrl = $peminjaman->file_pengajuan
                                     ? asset('storage/' . $peminjaman->file_pengajuan)
                                     : ($peminjaman->arsip?->file_path ? asset('storage/' . $peminjaman->arsip->file_path) : null);
-                                $roleLabel = $peminjaman->user?->role?->slug === 'ketua_pokja' ? 'Ketua Pokja' : 'Admin Pokja';
                             @endphp
                             <tr class="hover:bg-gray-100 transition">
-                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->nama_surat }}</td>
-                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->user?->name ?? $peminjaman->user?->username ?? '-' }} ({{ $roleLabel }})</td>
-                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->kategori?->name ?? '-' }}</td>
-                                <td class="py-3 px-2 text-sm text-gray-500 font-semibold">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
-                                <td class="py-3 px-2">
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->arsip?->nama_arsip ?? $peminjaman->nama_surat ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->kategori?->name ?? $peminjaman->arsip?->kategori?->name ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->sifatSurat?->name ?? $peminjaman->arsip?->sifatSurat?->name ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->user?->pokja?->name ?? $peminjaman->arsip?->pokja?->name ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->klasifikasiArsip?->kode ?? $peminjaman->arsip?->klasifikasiArsip?->kode ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->tanggal_mulai?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->tanggal_selesai?->format('d/m/Y') ?? '-' }}</td>
+                                <td class="border border-gray-300 py-3 px-5 text-sm text-gray-500 font-semibold">{{ $peminjaman->display_status }}</td>
+                                <td class="border border-gray-300 py-3 px-2">
                                     <div class="flex flex-wrap gap-2">
                                         @if ($fileUrl)
                                             <a href="{{ $fileUrl }}" target="_blank" rel="noopener" class="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700 transition">Lihat File</a>
@@ -151,12 +159,13 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="py-8 px-2 text-center text-sm text-gray-500">Belum ada peminjaman yang menunggu validasi.</td></tr>
+                            <tr><td colspan="9" class="px-6 py-8 text-center text-sm text-gray-500">Belum ada peminjaman yang menunggu validasi.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
-                <div class="mt-4">
-                    <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="text-blue-600 text-sm font-semibold hover:underline">Lihat Semua</a>
+                </div>
+                <div class="mt-4 flex justify-center">
+                    <div class="p-4 text-center"><a href="{{ route('admin-tu.peminjaman.validasi') }}" class="text-sm font-bold text-blue-600 hover:underline">Lihat Semua</a></div>
                 </div>
             </div>
 

@@ -6,9 +6,17 @@
     <title>Validasi Peminjaman - Admin TU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        #admin-tu-sidebar { transition: transform 200ms ease-out; }
+        @media (max-width: 767px) {
+            #admin-tu-sidebar { transform: translateX(-100%); }
+            #admin-tu-main { margin-left: 0; }
+            .admin-tu-sidebar-open #admin-tu-sidebar { transform: translateX(0); }
+        }
+    </style>
 </head>
-<body class="bg-[#f8f9fa] flex font-sans text-gray-800">
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
+<body class="flex bg-[#f4f7f6] font-sans text-gray-800">
+    <aside id="admin-tu-sidebar" class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
         <div>
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
                 <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -45,115 +53,302 @@
             </form>
     </aside>
 
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
+    <button id="admin-tu-sidebar-backdrop" type="button" aria-label="Tutup menu" class="fixed inset-0 z-10 hidden bg-slate-950/40 md:hidden"></button>
+
+    <main id="admin-tu-main" class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-10 flex items-center justify-between gap-4 bg-[#f4f7f6] px-4 py-5 sm:px-6 lg:px-8">
+            <div class="flex min-w-0 items-center gap-3">
+                <button id="admin-tu-sidebar-toggle" type="button" aria-label="Buka menu" aria-expanded="false" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600 md:hidden">
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
+                </button>
+                <h1 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">Validasi Peminjaman</h1>
+            </div>
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ $user?->name ?? $user?->username ?? 'Admin TU' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
+                <span class="text-sm font-bold text-gray-900">{{ $user?->name ?? $user?->username ?? 'Admin TU' }}</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 
-        <div class="px-8 pb-10 max-w-7xl w-full">
+        <div class="w-full min-w-0 flex-1 px-4 pb-8 sm:px-6 lg:px-8">
             @if (session('success'))
-                <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
+                <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm">{{ session('success') }}</div>
             @endif
             @if ($errors->any())
-                <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first() }}</div>
+                <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">{{ $errors->first() }}</div>
             @endif
 
-            <h2 class="text-3xl font-bold mb-6 text-black">Validasi Peminjaman</h2>
+            <form method="GET" action="{{ route('admin-tu.peminjaman.validasi') }}" class="mb-5 space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <input type="search" name="search" value="{{ $search }}" placeholder="Nama Surat" aria-label="Nama Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <div class="relative w-full">
+                        <select name="kategori_id" aria-label="Jenis Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Jenis Surat</option>
+                            @foreach ($kategoris as $kategori)
+                                <option value="{{ $kategori->id }}" @selected((string) $kategoriId === (string) $kategori->id)>{{ $kategori->name }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
+                    </div>
+                    <div class="relative w-full">
+                        <select name="sifat_surat_id" aria-label="Sifat Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Sifat Surat</option>
+                            @foreach ($sifatSurats as $sifatSurat)
+                                <option value="{{ $sifatSurat->id }}" @selected((string) $sifatSuratId === (string) $sifatSurat->id)>{{ $sifatSurat->name }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
+                    </div>
+                    <button type="submit" class="h-[42px] rounded-md bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
+                </div>
 
-            <form method="GET" action="{{ route('admin-tu.peminjaman.validasi') }}" class="mb-8 grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm md:grid-cols-3">
-                <div>
-                    <label for="kategori_id" class="mb-1.5 block text-sm font-semibold text-gray-700">Kategori Surat</label>
-                    <select id="kategori_id" name="kategori_id" class="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                        <option value="">Semua Kategori</option>
-                        @foreach ($kategoris as $kategori)
-                            <option value="{{ $kategori->id }}" {{ (string) $kategoriId === (string) $kategori->id ? 'selected' : '' }}>{{ $kategori->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="pokja_id" class="mb-1.5 block text-sm font-semibold text-gray-700">Kelompok Kerja</label>
-                    <select id="pokja_id" name="pokja_id" class="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none">
-                        <option value="">Semua Kelompok Kerja</option>
-                        @foreach ($pokjas as $pokja)
-                            <option value="{{ $pokja->id }}" {{ (string) $pokjaId === (string) $pokja->id ? 'selected' : '' }}>{{ $pokja->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="flex items-end gap-3">
-                    <button type="submit" class="rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">Terapkan Filter</button>
-                    <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="rounded-md border border-gray-300 px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50">Reset</a>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div class="relative w-full">
+                        <select name="pokja_id" aria-label="Kelompok Kerja" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <option value="">Kelompok Kerja</option>
+                            @foreach ($pokjas as $pokja)
+                                <option value="{{ $pokja->id }}" @selected((string) $pokjaId === (string) $pokja->id)>{{ $pokja->name }}</option>
+                            @endforeach
+                        </select>
+                        <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
+                    </div>
+                    <input type="date" name="tanggal_dokumen" value="{{ $tanggalDokumen }}" aria-label="Tanggal Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    @php
+                        $selectedKlasifikasi = $klasifikasis->first(
+                            fn ($item) => (string) $item->id === (string) ($klasifikasiId ?? '')
+                        );
+                    @endphp
+                    <div class="relative w-full" data-klasifikasi-root>
+                        <input type="hidden" name="klasifikasi_arsip_id" value="{{ $klasifikasiId ?? '' }}" data-klasifikasi-value>
+                        <button type="button" data-klasifikasi-trigger aria-expanded="false" aria-controls="klasifikasi-filter-modal" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                            <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? $selectedKlasifikasi->kode . ' - ' . ($selectedKlasifikasi->judul ?? $selectedKlasifikasi->uraian ?? '-') : 'Kode Klasifikasi' }}</span>
+                            <i class="fa-solid fa-chevron-down ml-3 shrink-0 text-xs text-gray-500" aria-hidden="true"></i>
+                        </button>
+                        <div id="klasifikasi-filter-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
+                            <button type="button" class="fixed inset-0 cursor-default bg-slate-950/45" data-klasifikasi-close aria-label="Tutup pemilih kode klasifikasi"></button>
+                            <section class="relative mx-auto flex max-h-[88vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
+                                <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pb-3 pt-5 sm:px-6">
+                                    <div class="flex flex-col gap-3 sm:flex-row">
+                                        <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" aria-label="Cari Kode Klasifikasi" class="h-[42px] w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                        <button type="button" data-klasifikasi-clear class="h-[42px] shrink-0 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Hapus Pilihan</button>
+                                    </div>
+                                </div>
+                                <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
+                                    @foreach ($klasifikasis->groupBy(fn ($item) => ($item->bab_urutan ?? 999) . '|' . trim((string) ($item->bab ?? ''))) as $group)
+                                        @php $first = $group->first(); @endphp
+                                        <div class="mb-6">
+                                            <h3 class="mb-3 text-sm font-bold text-slate-700">{{ $first->bab ?? 'Kode Klasifikasi' }}</h3>
+                                            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                                @foreach ($group as $klasifikasi)
+                                                    @php $label = $klasifikasi->kode . ' - ' . ($klasifikasi->judul ?? $klasifikasi->uraian ?? '-'); @endphp
+                                                    <button type="button" data-klasifikasi-option data-value="{{ $klasifikasi->id }}" data-label="{{ $label }}" data-search="{{ strtolower($klasifikasi->kode . ' ' . ($klasifikasi->judul ?? '') . ' ' . ($klasifikasi->uraian ?? '')) }}" class="rounded-lg border border-slate-200 bg-white p-3 text-left text-sm text-slate-700 transition hover:border-blue-300 hover:bg-blue-50">
+                                                        <span class="block font-bold text-slate-900">{{ $klasifikasi->kode }}</span>
+                                                        <span class="block text-xs text-slate-600">{{ $klasifikasi->judul ?? $klasifikasi->uraian ?? '-' }}</span>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    <p class="hidden py-8 text-center text-sm text-slate-500" data-klasifikasi-empty>Tidak ditemukan kode klasifikasi.</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <a href="{{ route('admin-tu.peminjaman.validasi') }}" class="flex h-[42px] items-center justify-center rounded-md border border-blue-600 bg-white px-6 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">Reset</a>
                 </div>
             </form>
 
+            <p class="mb-4 text-sm text-slate-600" role="status" aria-live="polite">
+                {{ $pengajuan->total() > 0 ? 'Ditemukan ' . $pengajuan->total() . ' usulan menunggu validasi.' : 'Tidak ditemukan usulan yang sesuai.' }}
+            </p>
+
             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[980px] text-left">
+                    <table class="w-full min-w-[1000px] border-collapse text-left">
                         <thead class="border-b border-gray-200 bg-gray-50">
                             <tr>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Nama Surat</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Pengaju</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Role</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Pokja</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Kategori</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Tanggal Pengajuan</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Status</th>
-                                <th class="px-6 py-4 text-sm font-bold text-gray-700">Aksi</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Jenis Surat</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Sifat Surat</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Kelompok Kerja</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Kode Klasifikasi</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Tanggal Mulai</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Tanggal Selesai</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Status</th>
+                                <th class="px-5 py-4 text-sm font-bold text-gray-700">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 text-sm">
-                            @forelse ($pengajuan as $peminjaman)
+                            @forelse ($pengajuan as $item)
                                 @php
-                                    $filePath = $peminjaman->file_pengajuan ?: $peminjaman->arsip?->file_path;
-                                    $roleSlug = $peminjaman->user?->role?->slug;
-                                    $roleLabel = $roleSlug === 'ketua_pokja' ? 'Ketua Pokja' : ($roleSlug === 'admin_pokja' ? 'Admin Pokja' : ($roleSlug ?? '-'));
+                                    $filePath = $item->file_pengajuan ?: $item->arsip?->file_path;
+                                    $namaArsip = $item->arsip?->nama_arsip ?? $item->nama_surat ?? '-';
+                                    $jenisSurat = $item->kategori?->name ?? $item->arsip?->kategori?->name;
+                                    $sifatSurat = $item->sifatSurat?->name ?? $item->arsip?->sifatSurat?->name;
+                                    $kelompokKerja = $item->user?->pokja?->name ?? $item->arsip?->pokja?->name;
+                                    $kodeKlasifikasi = $item->klasifikasiArsip?->kode ?? $item->arsip?->klasifikasiArsip?->kode;
                                 @endphp
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-4 font-medium text-gray-700">{{ $peminjaman->nama_surat }}</td>
-                                    <td class="px-6 py-4 text-gray-600">{{ $peminjaman->user?->name ?? $peminjaman->user?->username ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-gray-600">{{ $roleLabel }}</td>
-                                    <td class="px-6 py-4 text-gray-600">{{ $peminjaman->user?->pokja?->name ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-gray-600">{{ $peminjaman->kategori?->name ?? '-' }}</td>
-                                    <td class="px-6 py-4 text-gray-600">{{ $peminjaman->created_at?->format('d/m/Y') ?? '-' }}</td>
-                                    <td class="px-6 py-4"><span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Menunggu Validasi</span></td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex flex-wrap gap-2">
+                                <tr class="transition hover:bg-gray-50">
+                                    <td class="px-5 py-4 font-semibold text-gray-700">{{ $namaArsip }}</td>
+                                    <td class="px-5 py-4 text-gray-500">{{ $jenisSurat ?? '-' }}</td>
+                                    <td class="px-5 py-4 text-gray-500">{{ $sifatSurat ?? '-' }}</td>
+                                    <td class="px-5 py-4 text-gray-500">{{ $kelompokKerja ?? '-' }}</td>
+                                    <td class="px-5 py-4 text-gray-500">{{ $kodeKlasifikasi ?? '-' }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-gray-500">{{ $item->tanggal_mulai?->format('d/m/Y') ?? '-' }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-gray-500">{{ $item->tanggal_selesai?->format('d/m/Y') ?? '-' }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4">
+                                        <span class="inline-flex items-center gap-1.5 font-semibold text-blue-700"><span class="h-2 w-2 rounded-full bg-blue-500"></span>Menunggu Validasi</span>
+                                    </td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex items-center gap-2">
                                             @if ($filePath)
-                                                <a href="{{ asset('storage/' . $filePath) }}" target="_blank" rel="noopener" class="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">Lihat</a>
+                                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($filePath) }}" target="_blank" rel="noopener noreferrer" class="rounded-md bg-blue-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-blue-700">Lihat</a>
                                             @else
-                                                <span class="text-xs text-gray-400">File tidak tersedia.</span>
+                                                <span class="text-xs text-gray-400">File tidak tersedia</span>
                                             @endif
-                                            <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $peminjaman) }}">
-                                                @csrf
-                                                @method('PATCH')
+                                            <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $item) }}" data-confirm-title="Apakah Anda yakin ingin menolak usulan ini?" data-confirm-button="Ya, Tolak" data-confirm-color="#dc2626">
+                                                @csrf @method('PATCH')
                                                 <input type="hidden" name="decision" value="reject">
-                                                <button type="submit" class="rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700">Tolak</button>
+                                                <button type="submit" class="rounded-md bg-red-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-red-700">Tolak</button>
                                             </form>
-                                            <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $peminjaman) }}">
-                                                @csrf
-                                                @method('PATCH')
+                                            <form method="POST" action="{{ route('admin-tu.peminjaman.decision', $item) }}" data-confirm-title="Apakah Anda yakin ingin menerima usulan ini?" data-confirm-button="Ya, Terima" data-confirm-color="#16a34a">
+                                                @csrf @method('PATCH')
                                                 <input type="hidden" name="decision" value="approve">
-                                                <button type="submit" class="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-600">Terima</button>
+                                                <button type="submit" class="rounded-md bg-green-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-green-700">Terima</button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="8" class="px-6 py-10 text-center text-sm text-gray-500">
-                                        {{ $kategoriId || $pokjaId ? 'Tidak ada peminjaman yang sesuai dengan filter.' : 'Belum ada peminjaman yang menunggu validasi.' }}
-                                    </td>
-                                </tr>
+                                <tr><td colspan="9" class="px-6 py-10 text-center text-sm text-gray-500">Belum ada usulan yang menunggu validasi.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div class="mt-6">{{ $pengajuan->withQueryString()->links() }}</div>
+
+            <div class="mt-6 flex flex-col items-center gap-3">
+                <p class="text-sm text-gray-500">Menampilkan {{ $pengajuan->firstItem() ?? 0 }}-{{ $pengajuan->lastItem() ?? 0 }} dari {{ $pengajuan->total() }} usulan</p>
+                @if ($pengajuan->hasPages())
+                    <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
+                        @if ($pengajuan->previousPageUrl())
+                            <a href="{{ $pengajuan->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-left"></i></a>
+                        @else
+                            <span class="flex h-9 w-9 items-center justify-center text-gray-400"><i class="fa-solid fa-arrow-left"></i></span>
+                        @endif
+                        @foreach ($pengajuan->getUrlRange(max(1, $pengajuan->currentPage() - 2), min($pengajuan->lastPage(), $pengajuan->currentPage() + 2)) as $page => $url)
+                            <a href="{{ $url }}" @class(['flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-sm font-semibold transition', 'bg-blue-600 text-white' => $page === $pengajuan->currentPage(), 'text-gray-800 hover:bg-gray-200' => $page !== $pengajuan->currentPage()]) @if ($page === $pengajuan->currentPage()) aria-current="page" @endif>{{ $page }}</a>
+                        @endforeach
+                        @if ($pengajuan->nextPageUrl())
+                            <a href="{{ $pengajuan->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-right"></i></a>
+                        @else
+                            <span class="flex h-9 w-9 items-center justify-center text-gray-400"><i class="fa-solid fa-arrow-right"></i></span>
+                        @endif
+                    </nav>
+                @endif
+            </div>
         </div>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        (() => {
+            const toggle = document.getElementById('admin-tu-sidebar-toggle');
+            const backdrop = document.getElementById('admin-tu-sidebar-backdrop');
+            if (toggle && backdrop) {
+                const setOpen = (open) => {
+                    document.body.classList.toggle('admin-tu-sidebar-open', open);
+                    backdrop.classList.toggle('hidden', !open);
+                    toggle.setAttribute('aria-expanded', String(open));
+                };
+                toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('admin-tu-sidebar-open')));
+                backdrop.addEventListener('click', () => setOpen(false));
+                window.addEventListener('resize', () => {
+                    if (window.matchMedia('(min-width: 768px)').matches) setOpen(false);
+                });
+            }
+        })();
+
+        (() => {
+            const root = document.querySelector('[data-klasifikasi-root]');
+            if (!root) return;
+            const trigger = root.querySelector('[data-klasifikasi-trigger]');
+            const modal = root.querySelector('[data-klasifikasi-modal]');
+            const input = root.querySelector('[data-klasifikasi-value]');
+            const label = root.querySelector('[data-klasifikasi-label]');
+            const search = root.querySelector('[data-klasifikasi-search]');
+            const clear = root.querySelector('[data-klasifikasi-clear]');
+            const empty = root.querySelector('[data-klasifikasi-empty]');
+            const options = Array.from(root.querySelectorAll('[data-klasifikasi-option]'));
+            if (!trigger || !modal || !input || !label || !search || !clear || !empty) return;
+
+            const close = () => {
+                modal.classList.add('hidden');
+                trigger.setAttribute('aria-expanded', 'false');
+                document.body.classList.remove('overflow-hidden');
+            };
+            const filterOptions = () => {
+                const query = search.value.trim().toLowerCase();
+                let visibleCount = 0;
+                options.forEach((option) => {
+                    const matches = !query || (option.dataset.search || '').includes(query);
+                    option.classList.toggle('hidden', !matches);
+                    visibleCount += Number(matches);
+                });
+                modal.querySelectorAll('.mb-6').forEach((group) => {
+                    const groupOptions = group.querySelectorAll('[data-klasifikasi-option]');
+                    group.classList.toggle('hidden', groupOptions.length > 0 && !Array.from(groupOptions).some((option) => !option.classList.contains('hidden')));
+                });
+                empty.classList.toggle('hidden', visibleCount > 0);
+            };
+            trigger.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                trigger.setAttribute('aria-expanded', 'true');
+                document.body.classList.add('overflow-hidden');
+                search.value = '';
+                filterOptions();
+                window.setTimeout(() => search.focus(), 50);
+            });
+            root.querySelectorAll('[data-klasifikasi-close]').forEach((button) => button.addEventListener('click', close));
+            search.addEventListener('input', filterOptions);
+            options.forEach((option) => option.addEventListener('click', () => {
+                input.value = option.dataset.value || '';
+                label.textContent = option.dataset.label || 'Kode Klasifikasi';
+                close();
+            }));
+            clear.addEventListener('click', () => {
+                input.value = '';
+                label.textContent = 'Kode Klasifikasi';
+                close();
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !modal.classList.contains('hidden')) close();
+            });
+        })();
+
+        document.querySelectorAll('form[data-confirm-title]').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                Swal.fire({
+                    title: form.dataset.confirmTitle,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: form.dataset.confirmButton,
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: form.dataset.confirmColor,
+                    cancelButtonColor: '#6b7280',
+                    reverseButtons: true,
+                }).then((result) => {
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+        });
+        @if (session('success'))
+            Swal.fire({ icon: 'success', title: @json(session('success')), confirmButtonColor: '#2563eb' });
+        @endif
+        @if (session('error'))
+            Swal.fire({ icon: 'error', title: @json(session('error')), confirmButtonColor: '#2563eb' });
+        @endif
+    </script>
     <x-logout-confirmation />
 </body>
 </html>

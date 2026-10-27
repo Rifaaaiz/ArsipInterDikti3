@@ -68,7 +68,7 @@
                 <input type="search" name="nama_arsip" value="{{ $filters['nama_arsip'] }}" placeholder="Nama Surat" aria-label="Nama Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                 <input type="search" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                 <div class="relative w-full">
-                    <select name="jenis_surat_id" aria-label="Jenis Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <select name="jenis_surat_id" aria-label="Jenis Surat" class="h-10.5 w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                         <option value="">Jenis Surat</option>
                         @foreach ($kategoris as $kategori)
                             <option value="{{ $kategori->id }}" @selected((string) $filters['jenisSuratId'] === (string) $kategori->id)>{{ $kategori->name }}</option>

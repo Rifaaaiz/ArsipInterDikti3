@@ -38,6 +38,7 @@ class PeminjamanApprovalController extends Controller
         }
         $tanggalDokumen = $request->query('tanggal');
         $kategoriId = $request->integer('kategori_id') ?: null;
+        $sifatSuratId = $request->integer('sifat_surat_id') ?: null;
         $pokjaId = $request->integer('pokja_id') ?: null;
 
         $arsips = Arsip::with(['pokja', 'kategori', 'uploader', 'klasifikasiArsip', 'sifatSurat'])
@@ -62,6 +63,7 @@ class PeminjamanApprovalController extends Controller
             ->when($kodeKlasifikasi !== '', fn ($query) => $query->whereHas('klasifikasiArsip', fn ($klasifikasi) => $klasifikasi->whereRaw('LOWER(kode) = ?', [mb_strtolower($kodeKlasifikasi)])))
             ->when($tanggalDokumen, fn ($query) => $query->whereDate('tanggal_dokumen', $tanggalDokumen))
             ->when($kategoriId, fn ($query) => $query->where('kategori_arsip_id', $kategoriId))
+            ->when($sifatSuratId, fn ($query) => $query->where('sifat_surat_id', $sifatSuratId))
             ->when($pokjaId, fn ($query) => $query->where('pokja_id', $pokjaId))
             ->latest('created_at')
             ->paginate(10)
@@ -85,6 +87,7 @@ class PeminjamanApprovalController extends Controller
 
         $pokjas = Pokja::orderBy('name')->get();
         $kategoris = KategoriArsip::orderBy('name')->get();
+        $sifatSurats = SifatSurat::orderBy('name')->get();
         $klasifikasis = KlasifikasiArsip::orderedForSelection()->get();
         $totalArsip = Arsip::whereNotIn('status', ['dihapus'])->count();
         $totalArsipPokja = $pokjaId
@@ -95,6 +98,7 @@ class PeminjamanApprovalController extends Controller
             'arsips',
             'pokjas',
             'kategoris',
+            'sifatSurats',
             'namaSurat',
             'kodeKlasifikasi',
             'tanggalDokumen',
@@ -106,6 +110,7 @@ class PeminjamanApprovalController extends Controller
             'search' => $namaSurat,
             'tanggal' => $tanggalDokumen,
             'kategoriId' => $kategoriId,
+            'sifatSuratId' => $sifatSuratId,
             'pokjaId' => $pokjaId,
             'kodeKlasifikasi' => $kodeKlasifikasi,
         ], 'klasifikasis' => $klasifikasis]);
@@ -113,7 +118,17 @@ class PeminjamanApprovalController extends Controller
 
     public function tuDashboard()
     {
-        $menungguValidasi = Peminjaman::with(['user.role', 'user.pokja', 'kategori', 'arsip'])
+        $menungguValidasi = Peminjaman::with([
+                'user.role',
+                'user.pokja',
+                'kategori',
+                'sifatSurat',
+                'klasifikasiArsip',
+                'arsip.kategori',
+                'arsip.sifatSurat',
+                'arsip.klasifikasiArsip',
+                'arsip.pokja',
+            ])
             ->readyForFinalValidation()
             ->latest('created_at')
             ->limit(5)

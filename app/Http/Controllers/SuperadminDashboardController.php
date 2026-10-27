@@ -11,6 +11,7 @@ use App\Models\KlasifikasiArsip;
 use App\Models\SifatSurat;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
@@ -95,9 +96,9 @@ class SuperadminDashboardController extends Controller
 
     public function deleteUser(Request $request, User $user)
     {
-        abort_unless(auth()->user()?->role?->slug === 'superadmin', 403);
+        abort_unless(Auth::user()?->role?->slug === 'superadmin', 403);
 
-        if ($user->is(auth()->user())) {
+        if ($user->is(Auth::user())) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Anda tidak dapat menghapus akun yang sedang digunakan.'], 422);
             }
@@ -225,8 +226,8 @@ class SuperadminDashboardController extends Controller
             'nomor_dokumen' => ['nullable', 'string', 'max:255'],
             'kategori_arsip_id' => ['required', 'exists:jenis_surats,id'],
             'sifat_surat_id' => ['required', 'exists:sifat_surats,id'],
-            'klasifikasi_arsip_id' => ['nullable', 'exists:klasifikasi_arsips,id'],
-            'pokja_id' => ['required', 'exists:pokjas,id'],
+            'klasifikasi_arsip_id' => ['required', 'exists:klasifikasi_arsips,id'],
+            'pokja_id' => ['nullable', 'exists:pokjas,id'],
             'tanggal_dokumen' => ['required', 'date'],
             'tanda_tangan' => ['required', 'in:digital,konvensional'],
             'keterangan' => ['nullable', 'string'],
@@ -234,7 +235,6 @@ class SuperadminDashboardController extends Controller
             'submission_token' => ['required', 'uuid', 'unique:arsips,submission_token'],
         ], [
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
-            'pokja_id.required' => 'Arsip tujuan / kelompok kerja wajib dipilih.',
         ]);
 
         $klasifikasi = isset($validatedData['klasifikasi_arsip_id'])
@@ -256,7 +256,7 @@ class SuperadminDashboardController extends Controller
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
                     'sifat_surat_id' => $validatedData['sifat_surat_id'],
                     'klasifikasi_arsip_id' => $klasifikasi?->id,
-                    'pokja_id' => $validatedData['pokja_id'],
+                    'pokja_id' => $validatedData['pokja_id'] ?? null,
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
                     'tanda_tangan' => $validatedData['tanda_tangan'],
                     'keterangan' => $validatedData['keterangan'] ?? null,
@@ -264,7 +264,7 @@ class SuperadminDashboardController extends Controller
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_size' => $file->getSize(),
                     'status' => 'aktif',
-                    'uploaded_by' => auth()->id(),
+                    'uploaded_by' => Auth::id(),
                     'submission_token' => $validatedData['submission_token'],
                 ]);
             });
@@ -275,6 +275,12 @@ class SuperadminDashboardController extends Controller
 
             $existingArchive = Arsip::where('submission_token', $validatedData['submission_token'])->first();
             if ($existingArchive) {
+                if (! $existingArchive->pokja_id) {
+                    return redirect()
+                        ->route('superadmin.arsip.laporan')
+                        ->with('success', 'Pengiriman ganda diabaikan; arsip sudah tersimpan.');
+                }
+
                 return redirect()
                     ->route('superadmin.surat-masuk', Pokja::findOrFail($existingArchive->pokja_id)->slug)
                     ->with('success', 'Pengiriman ganda diabaikan; arsip sudah tersimpan.');
@@ -287,6 +293,12 @@ class SuperadminDashboardController extends Controller
             }
 
             throw $e;
+        }
+
+        if (! ($validatedData['pokja_id'] ?? null)) {
+            return redirect()
+                ->route('superadmin.arsip.laporan')
+                ->with('success', 'Arsip berhasil diunggah.');
         }
 
         return redirect()
@@ -563,7 +575,7 @@ class SuperadminDashboardController extends Controller
 
     public function dashboard()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $totalArsip = Arsip::whereNotIn('status', ['dihapus'])
             ->whereNotNull('pokja_id')
             ->count();
@@ -637,6 +649,26 @@ class SuperadminDashboardController extends Controller
             ->orderByDesc('admin_tu_validated_at')
             ->limit(5)
             ->get();
+        $adminTuRejection = fn ($query) => $query
+            ->where('status', 'ditolak')
+            ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'));
+        $rejectedByAdminTuQuery = Peminjaman::query()
+            ->where('status', 'ditolak')
+            ->whereHas('validations', $adminTuRejection);
+        $rejectedByAdminTuCount = (clone $rejectedByAdminTuQuery)->count();
+        $rejectedByAdminTu = (clone $rejectedByAdminTuQuery)
+            ->with([
+                'user.pokja',
+                'validations' => fn ($query) => $query
+                    ->where('status', 'ditolak')
+                    ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'))
+                    ->with('validator.role')
+                    ->latest('validated_at'),
+            ])
+            ->withMax(['validations as admin_tu_validated_at' => $adminTuRejection], 'validated_at')
+            ->orderByDesc('admin_tu_validated_at')
+            ->limit(5)
+            ->get();
 
         $notifications = $pendingValidationNotifications->map(fn (Peminjaman $peminjaman) => [
             'category' => 'Peminjaman',
@@ -644,18 +676,24 @@ class SuperadminDashboardController extends Controller
             'occurred_at' => $peminjaman->validations->first()?->validated_at ?? $peminjaman->created_at,
             'url' => route('superadmin.peminjaman.validasi', ['peminjaman_id' => $peminjaman->id]),
         ])->concat($suratMasukTerbaru->map(fn (Peminjaman $peminjaman) => [
-            'category' => 'Surat Masuk',
-            'message' => 'Surat Masuk Sudah Di Validasi dan masuk ke ' . $peminjaman->user->pokja->name,
+            'category' => 'Validasi Peminjaman',
+            'message' => 'Surat peminjaman "' . ($peminjaman->nama_surat ?? '-') . '" dari Pokja ' . ($peminjaman->user?->pokja?->name ?? '-') . ' telah disetujui oleh Admin TU.',
             'occurred_at' => $peminjaman->validations->first()?->validated_at ?? $peminjaman->created_at,
             'url' => route('superadmin.surat-masuk.peminjaman.detail', [
                 $peminjaman->user->pokja->slug,
                 $peminjaman,
             ]),
+        ]))->concat($rejectedByAdminTu->map(fn (Peminjaman $peminjaman) => [
+            'category' => 'Validasi Peminjaman',
+            'message' => 'Surat peminjaman "' . ($peminjaman->nama_surat ?? '-') . '" dari Pokja ' . ($peminjaman->user?->pokja?->name ?? '-') . ' ditolak oleh Admin TU.'
+                . ($peminjaman->validations->first()?->alasan_penolakan ? ' Alasan: ' . $peminjaman->validations->first()->alasan_penolakan : ''),
+            'occurred_at' => $peminjaman->validations->first()?->validated_at ?? $peminjaman->created_at,
+            'url' => null,
         ]))
             ->sortByDesc('occurred_at')
             ->take(5)
             ->values();
-        $notificationCount = $pendingValidationCount + $suratMasukNotificationCount;
+        $notificationCount = $pendingValidationCount + $suratMasukNotificationCount + $rejectedByAdminTuCount;
         $suratMasukIndexUrl = $suratMasukTerbaru->first()
             ? route('superadmin.surat-masuk', $suratMasukTerbaru->first()->user->pokja->slug)
             : null;

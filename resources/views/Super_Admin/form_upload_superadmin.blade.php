@@ -126,10 +126,10 @@
                     </div>
 
                     <div class="mb-5">
-                        <label for="pokja_id" class="mb-1.5 block text-sm font-bold text-slate-800">Kelompok Kerja <span class="text-red-600">*</span></label>
+                        <label for="pokja_id" class="mb-1.5 block text-sm font-bold text-slate-800">Kelompok Kerja <span class="text-slate-500">(Opsional)</span></label>
                         <div class="relative">
-                            <select id="pokja_id" name="pokja_id" required class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                                <option value="" disabled {{ old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
+                            <select id="pokja_id" name="pokja_id" class="w-full appearance-none rounded-md border border-slate-300 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                <option value="" {{ old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) ? '' : 'selected' }}>Pilih Kelompok Kerja</option>
                                 @foreach ($pokjas as $pokja)
                                     <option value="{{ $pokja->id }}" @selected((string) old('pokja_id', $arsipForm?->pokja_id ?? $selectedPokjaId ?? null) === (string) $pokja->id)>{{ $pokja->name }}</option>
                                 @endforeach
@@ -140,7 +140,7 @@
                     </div>
 
                     <div class="mb-5">
-                        <label class="mb-1.5 block text-sm font-bold text-slate-800">Kode Klasifikasi</label>
+                        <label class="mb-1.5 block text-sm font-bold text-slate-800">Kode Klasifikasi <span class="text-red-600">*</span></label>
                         @php
                             $klasifikasiValue = old('klasifikasi_arsip_id', $arsipForm?->klasifikasi_arsip_id ?? '');
                             $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->id === (string) $klasifikasiValue);
@@ -185,6 +185,7 @@
                                 </section>
                             </div>
                         </div>
+                        <p id="klasifikasi-required-error" class="mt-1 hidden text-sm text-red-600" data-klasifikasi-required-error>Pilih Kode Klasifikasi.</p>
                         @error('klasifikasi_arsip_id')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
                     </div>
 
@@ -364,6 +365,7 @@
                     const text = option.dataset.label || 'Pilih Kode Klasifikasi';
                     input.value = value;
                     label.textContent = text;
+                    root.querySelector('[data-klasifikasi-required-error]')?.classList.add('hidden');
                     masaAktif.value = option.dataset.masaAktif || '';
                     masaInaktif.value = option.dataset.masaInaktif || '';
                     close();
@@ -377,6 +379,14 @@
 
         document.querySelector('[data-archive-upload-form]')?.addEventListener('submit', (event) => {
             const form = event.currentTarget;
+            const klasifikasiInput = form.querySelector('[data-klasifikasi-value]');
+            if (!klasifikasiInput?.value) {
+                event.preventDefault();
+                form.querySelector('[data-klasifikasi-required-error]')?.classList.remove('hidden');
+                form.querySelector('[data-klasifikasi-trigger]')?.click();
+                return;
+            }
+
             if (form.dataset.submitting === 'true') {
                 event.preventDefault();
                 return;

@@ -50,11 +50,19 @@
                         </header>
                         <div class="max-h-[65vh] overflow-y-auto">
                             @forelse ($notifications as $notification)
-                                <a href="{{ $notification['url'] }}" class="block border-b border-gray-100 px-4 py-3 transition last:border-b-0 hover:bg-blue-50">
+                                @if ($notification['url'])
+                                    <a href="{{ $notification['url'] }}" class="block border-b border-gray-100 px-4 py-3 transition last:border-b-0 hover:bg-blue-50">
+                                @else
+                                    <div class="block border-b border-gray-100 px-4 py-3 last:border-b-0">
+                                @endif
                                     <p class="text-xs font-semibold text-gray-500">{{ $notification['category'] }}</p>
                                     <p class="mt-1 text-sm font-semibold leading-5 text-gray-800">{{ $notification['message'] }}</p>
                                     <p class="mt-2 text-xs text-gray-400" title="{{ $notification['occurred_at']?->format('d/m/Y H:i') ?? '' }}">{{ $notification['occurred_at']?->format('H.i') ?? '-' }}</p>
-                                </a>
+                                @if ($notification['url'])
+                                    </a>
+                                @else
+                                    </div>
+                                @endif
                             @empty
                                 <p class="px-4 py-8 text-center text-sm text-gray-500">Tidak ada notifikasi baru.</p>
                             @endforelse
