@@ -611,10 +611,14 @@ class SuperadminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $pendingValidationCount = Peminjaman::readyForFinalValidation()->count();
+        $notificationSince = now()->subDays(7);
         $ketuaApproval = fn ($query) => $query
             ->where('status', 'disetujui')
+            ->where('validated_at', '>=', $notificationSince)
             ->whereHas('validator.role', fn ($role) => $role->where('slug', 'ketua_pokja'));
+        $pendingValidationCount = Peminjaman::readyForFinalValidation()
+            ->whereHas('validations', $ketuaApproval)
+            ->count();
         $pendingValidationNotifications = Peminjaman::with([
                 'user.pokja',
                 'validations' => fn ($query) => $query
@@ -624,12 +628,14 @@ class SuperadminDashboardController extends Controller
                     ->latest('validated_at'),
             ])
             ->readyForFinalValidation()
+            ->whereHas('validations', $ketuaApproval)
             ->withMax(['validations as ketua_validated_at' => $ketuaApproval], 'validated_at')
             ->orderByDesc('ketua_validated_at')
             ->limit(5)
             ->get();
         $adminTuApproval = fn ($query) => $query
             ->where('status', 'disetujui')
+            ->where('validated_at', '>=', $notificationSince)
             ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'));
         $suratMasukQuery = Peminjaman::query()
             ->whereIn('status', ['disetujui', 'aktif', 'selesai'])
@@ -651,6 +657,7 @@ class SuperadminDashboardController extends Controller
             ->get();
         $adminTuRejection = fn ($query) => $query
             ->where('status', 'ditolak')
+            ->where('validated_at', '>=', $notificationSince)
             ->whereHas('validator.role', fn ($role) => $role->where('slug', 'admin_tu'));
         $rejectedByAdminTuQuery = Peminjaman::query()
             ->where('status', 'ditolak')

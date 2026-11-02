@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#f8f9fa] flex font-sans text-gray-800">
+<body class="bg-[#f8f9fa] flex flex-col md:flex-row font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
+    <aside class="w-full md:w-64 bg-[#0a1120] text-white md:min-h-screen flex flex-col md:justify-between md:fixed md:top-0 md:left-0 z-20">
         <div>
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
@@ -58,42 +58,39 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="w-full min-w-0 flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas -->
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
+        <header class="px-4 sm:px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">admin TU</span>
+                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->username ?? auth()->user()?->name ?? 'User' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
             </div>
         </header>
 
         <!-- KONTEN UTAMA PROFIL -->
-        <div class="px-8 pb-10 max-w-4xl">
-            <h2 class="text-3xl font-bold mb-8 text-black">Profile</h2>
+        <div class="w-full min-w-0 px-4 pb-10 sm:px-8">
+            @php($profileUser = auth()->user())
+            <h2 class="mb-8 text-2xl font-bold text-black sm:text-3xl">Profile</h2>
 
-            <!-- Informasi Profil -->
-            <div class="space-y-6 text-base">
-                <div class="flex items-center">
-                    <span class="w-48 font-bold text-black">Nama :</span>
-                    <span class="font-semibold text-gray-900">Nanang Sunanang</span>
+            <div class="w-full divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white px-4 shadow-sm sm:px-6">
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Nama</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->username ?? $profileUser?->name ?? '-' }}</span>
                 </div>
-                <div class="flex items-center">
-                    <span class="w-48 font-bold text-black">NIP :</span>
-                    <span class="font-semibold text-gray-900">101819236705</span>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Role</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->role?->name ?? '-' }}</span>
                 </div>
-                <div class="flex items-center">
-                    <span class="w-48 font-bold text-black">Role :</span>
-                    <span class="font-semibold text-gray-900">Admin TU</span>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Kelompok Kerja</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->pokja?->name ?? 'Tidak terkait Pokja' }}</span>
                 </div>
-                <div class="flex items-center">
-                    <span class="w-48 font-bold text-black">Kelompok Kerja :</span>
-                    <span class="font-semibold text-gray-900">TUBMN</span>
-                </div>
-                <div class="flex items-center">
-                    <span class="w-48 font-bold text-black">Status Akun :</span>
-                    <span class="font-semibold text-gray-900 flex items-center gap-2">
-                        Active <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Status Akun</span>
+                    <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold {{ $profileUser?->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600' }}">
+                        {{ $profileUser?->status === 'active' ? 'Active' : 'Inactive' }}
+                        <span class="h-2 w-2 rounded-full {{ $profileUser?->status === 'active' ? 'bg-emerald-500' : 'bg-slate-500' }}"></span>
                     </span>
                 </div>
             </div>

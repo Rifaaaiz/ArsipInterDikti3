@@ -7,10 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-[#f4f4f5] flex font-sans text-gray-800">
+<body class="bg-[#f4f4f5] flex flex-col md:flex-row font-sans text-gray-800">
 
     <!-- SIDEBAR KIRI -->
-    <aside class="w-64 bg-[#0a1120] text-white min-h-screen flex flex-col justify-between fixed top-0 left-0 z-20">
+    <aside class="w-full md:w-64 bg-[#0a1120] text-white md:min-h-screen flex flex-col md:justify-between md:fixed md:top-0 md:left-0 z-20">
         <div>
             <!-- Logo -->
             <div class="flex items-center gap-3 px-6 py-6 mb-2">
@@ -46,7 +46,7 @@
                 </div>
 
                 <!-- Menu Aktif (Biru Solid) untuk Profil -->
-                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
+                 <a href="/dashboard-pokja/profil" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold bg-blue-600 text-white rounded-lg transition shadow-sm">
                     <i class="fa-regular fa-user"></i> Profil
                 </a>
                 <a href="/dashboard-pokja/history" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-200 hover:text-white transition">
@@ -71,53 +71,40 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="flex-1 ml-64 flex flex-col min-h-screen">
+    <main class="w-full min-w-0 flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas (Hanya ada user info di kanan) -->
-        <header class="px-8 py-6 flex items-center justify-end">
+        <header class="px-4 sm:px-8 py-6 flex items-center justify-end">
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">admin Pokja Kelembagaan</span>
+                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->username ?? auth()->user()?->name ?? 'User' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black"></i>
             </div>
         </header>
 
         <!-- KONTEN PROFIL -->
-        <div class="p-8">
-            <h2 class="text-4xl font-bold mb-12 text-black">Profile</h2>
-            
-            <!-- Daftar Detail Profil -->
-            <div class="w-full max-w-4xl space-y-8">
-                <!-- Baris Nama -->
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-black">Nama :</span>
-                    <span class="text-lg font-bold text-black">Nanang Sunanang</span>
+        <div class="w-full min-w-0 px-4 pb-10 sm:px-8">
+            @php($profileUser = auth()->user())
+            <h2 class="mb-8 text-2xl font-bold text-black sm:text-3xl">Profile</h2>
+
+            <div class="w-full divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white px-4 shadow-sm sm:px-6">
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Nama</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->username ?? $profileUser?->name ?? '-' }}</span>
                 </div>
-                
-                <!-- Baris NIP -->
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-black">NIP :</span>
-                    <span class="text-lg font-bold text-black">101819236705</span>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Role</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->role?->name ?? '-' }}</span>
                 </div>
-                
-                <!-- Baris Role -->
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-black">Role :</span>
-                    <span class="text-lg font-bold text-black">Admin Pokja</span>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Kelompok Kerja</span>
+                    <span class="min-w-0 break-words font-semibold text-gray-900">{{ $profileUser?->pokja?->name ?? 'Tidak terkait Pokja' }}</span>
                 </div>
-                
-                <!-- Baris Kelompok Kerja -->
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-black">Kelompok Kerja :</span>
-                    <span class="text-lg font-bold text-black">Kelembagaan</span>
-                </div>
-                
-                <!-- Baris Status Akun -->
-                <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-black">Status Akun :</span>
-                    <div class="flex items-center gap-2">
-                        <span class="text-lg font-bold text-black">Active</span>
-                        <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
-                    </div>
+                <div class="flex flex-col gap-1 py-4 sm:flex-row sm:items-center">
+                    <span class="w-full font-bold text-gray-700 sm:w-56">Status Akun</span>
+                    <span class="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold {{ $profileUser?->status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600' }}">
+                        {{ $profileUser?->status === 'active' ? 'Active' : 'Inactive' }}
+                        <span class="h-2 w-2 rounded-full {{ $profileUser?->status === 'active' ? 'bg-emerald-500' : 'bg-slate-500' }}"></span>
+                    </span>
                 </div>
             </div>
 
@@ -125,7 +112,7 @@
     </main>
 
     <!-- SCRIPT ANIMASI MENU -->
-    <<script>
+    <script>
         function toggleMenuArsip() {
             const submenu = document.getElementById('submenu-arsip');
             const ikonPanah = document.getElementById('ikon-panah');

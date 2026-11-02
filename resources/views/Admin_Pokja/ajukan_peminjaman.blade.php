@@ -70,7 +70,7 @@
     </aside>
 
     <!-- AREA KONTEN UTAMA -->
-    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">  
         
         <!-- Navbar Atas -->
         <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
@@ -109,7 +109,7 @@
             
             <!-- Tabel Riwayat Peminjaman -->
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8"><div class="overflow-x-auto">
-                <table class="w-full min-w-[1050px] text-left border-collapse">
+                <table class="w-full min-w-262.5 text-left border-collapse">
                     <thead class="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>

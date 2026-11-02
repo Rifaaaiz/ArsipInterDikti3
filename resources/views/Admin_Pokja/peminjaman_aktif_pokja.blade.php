@@ -70,7 +70,6 @@
             </button>
         </form>
     </aside>
-
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
             <div class="flex items-center gap-4">
@@ -159,13 +158,13 @@
                     </div>
                 </div>
 
-                <a href="{{ route('pokja.peminjaman.aktif') }}" class="flex h-[42px] w-full items-center justify-center rounded-md border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-600 hover:bg-gray-50">Reset</a>
+                <a href="{{ route('pokja.peminjaman.aktif') }}" class="flex h-10.5 w-full items-center justify-center rounded-md border border-gray-300 bg-white px-6 text-sm font-semibold text-gray-600 hover:bg-gray-50">Reset</a>
                 </div>
             </form>
 
             <div class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 mb-8">
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1050px] text-left border-collapse">
+                    <table class="w-full min-w-262.5 text-left border-collapse">
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th class="py-4 px-6 text-sm font-bold text-gray-700">Nama Arsip</th>
@@ -447,5 +446,77 @@
         });
     </script>
     <x-logout-confirmation />
+<style>
+    .filter-dropdown-control {
+        transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .filter-dropdown-control:focus {
+        box-shadow: 0 0 0 3px rgb(37 99 235 / 14%);
+    }
+
+    .filter-dropdown-indicator,
+    [data-klasifikasi-trigger] .fa-chevron-down {
+        transition: rotate 180ms ease;
+    }
+
+    .filter-dropdown-indicator[data-filter-dropdown-open="true"],
+    [data-klasifikasi-trigger][aria-expanded="true"] .fa-chevron-down {
+        rotate: 180deg;
+    }
+</style>
+
+<script>
+    (() => {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const filterForms = Array.from(document.forms).filter((form) => form.method.toLowerCase() === 'get');
+
+        filterForms.forEach((form) => {
+            form.querySelectorAll('select').forEach((select) => {
+                select.classList.add('filter-dropdown-control');
+
+                const indicator = select.parentElement?.querySelector(':scope > .fa-chevron-down');
+                if (!indicator) return;
+
+                indicator.classList.add('filter-dropdown-indicator');
+                select.addEventListener('focus', () => indicator.dataset.filterDropdownOpen = 'true');
+                select.addEventListener('blur', () => delete indicator.dataset.filterDropdownOpen);
+            });
+
+            form.querySelectorAll('[data-klasifikasi-trigger]').forEach((trigger) => {
+                trigger.addEventListener('click', () => {
+                    if (prefersReducedMotion) return;
+
+                    window.requestAnimationFrame(() => {
+                        if (trigger.getAttribute('aria-expanded') !== 'true') return;
+
+                        const root = trigger.closest('[data-klasifikasi-root]');
+                        const modal = root?.querySelector('[data-klasifikasi-modal]');
+                        const panel = modal?.querySelector('[data-klasifikasi-panel], section');
+                        if (!modal || !panel || modal.classList.contains('hidden')) return;
+
+                        modal.classList.remove('opacity-0');
+                        modal.getAnimations().forEach((animation) => animation.cancel());
+                        panel.getAnimations().forEach((animation) => animation.cancel());
+
+                        modal.animate(
+                            [{ opacity: 0 }, { opacity: 1 }],
+                            { duration: 180, easing: 'ease-out' }
+                        );
+
+                        const panelHeight = panel.getBoundingClientRect().height;
+                        panel.animate(
+                            [
+                                { height: '0px', opacity: 0, transform: 'translateY(8px)' },
+                                { height: `${panelHeight}px`, opacity: 1, transform: 'translateY(0)' },
+                            ],
+                            { duration: 220, easing: 'ease-out' }
+                        );
+                    });
+                });
+            });
+        });
+    })();
+</script>
 </body>
 </html>
