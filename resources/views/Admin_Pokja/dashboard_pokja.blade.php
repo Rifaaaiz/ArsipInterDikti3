@@ -114,7 +114,7 @@
                 <h3 class="text-lg font-bold mb-4">Arsip Terbaru Pokja</h3>
                 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1050px] text-left border-collapse">
+                    <table class="w-full min-w-262.5 text-left border-collapse">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th class="py-3 px-6 text-sm font-semibold text-slate-600">Nama Arsip</th>

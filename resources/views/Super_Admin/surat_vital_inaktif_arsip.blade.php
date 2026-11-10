@@ -67,7 +67,7 @@
                     fn ($item) => (string) $item->id === (string) ($filters['klasifikasiId'] ?? '')
                 );
             @endphp
-            <form method="GET" action="{{ route('superadmin.arsip-vital.inaktif') }}" class="mb-6 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-5" data-klasifikasi-root>
+            <form method="GET" action="{{ route('superadmin.arsip-vital.inaktif') }}" class="mb-6 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-2 md:grid-cols-5" data-klasifikasi-root>
                 <input type="search" name="nama_arsip" value="{{ $filters['nama_arsip'] }}" placeholder="Nama Surat" aria-label="Nama Surat" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                 <input type="search" name="nomor_dokumen" value="{{ $filters['nomor_dokumen'] }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                 <div class="relative w-full">
@@ -88,8 +88,9 @@
                     </select>
                     <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"></i>
                 </div>
-                <button type="submit" class="h-[42px] rounded-md bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
+                <button type="submit" class="h-[42px] w-full rounded-md bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
 
+                <div class="grid grid-cols-1 gap-3 md:col-span-4 md:grid-cols-3">
                 <div class="relative w-full">
                     <select name="kategori" aria-label="Kategori" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                         <option value="">Kategori</option>
@@ -99,7 +100,7 @@
                     <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500"></i>
                 </div>
                 <input type="date" name="tanggal_upload" value="{{ $filters['tanggalUpload'] }}" aria-label="Tanggal Upload" class="h-[42px] w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                <div class="relative w-full lg:col-span-2">
+                <div class="relative w-full">
                     <input type="hidden" name="klasifikasi_arsip_id" value="{{ $filters['klasifikasiId'] ?? '' }}" data-klasifikasi-value>
                     <button type="button" data-klasifikasi-trigger aria-expanded="false" aria-controls="vital-inaktif-klasifikasi-modal" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                         <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi ? $selectedKlasifikasi->kode . ' - ' . ($selectedKlasifikasi->judul ?? $selectedKlasifikasi->uraian ?? '-') : 'Kode Klasifikasi' }}</span>
@@ -135,7 +136,8 @@
                         </section>
                     </div>
                 </div>
-                <a href="{{ route('superadmin.arsip-vital.inaktif') }}" class="flex h-[42px] items-center justify-center rounded-md border border-blue-600 bg-white px-5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50">Reset</a>
+                </div>
+                <a href="{{ route('superadmin.arsip-vital.inaktif') }}" class="flex h-[42px] items-center justify-center rounded-md border border-blue-600 bg-white px-5 text-sm font-semibold text-blue-700 transition hover:bg-blue-50 md:col-start-5">Reset</a>
             </form>
 
             <div class="mb-3 text-sm text-gray-500">{{ $arsipVitals->total() }} arsip vital inaktif</div>

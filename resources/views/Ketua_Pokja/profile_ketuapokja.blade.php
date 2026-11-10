@@ -65,10 +65,13 @@
     <main class="w-full min-w-0 flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas (Hanya ada user info di kanan) -->
-        <header class="px-4 sm:px-8 py-6 flex items-center justify-end">
+        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-5 py-6 sm:px-8">
+            <a href="{{ route('ketua.dashboard') }}" aria-label="Kembali ke Dashboard Ketua Pokja" class="text-lg text-black transition hover:text-blue-600">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->username ?? auth()->user()?->name ?? 'User' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
+                <span class="text-right text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
+                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 

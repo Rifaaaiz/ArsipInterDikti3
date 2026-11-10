@@ -31,6 +31,7 @@ class PeminjamanApprovalController extends Controller
     public function tuArchiveReport(Request $request)
     {
         $namaSurat = $this->normalizeSearch($request->query('search'));
+        $nomorDokumen = $this->normalizeSearch($request->query('nomor_dokumen'));
         $searchTokens = $this->searchTokens($namaSurat);
         $kodeKlasifikasi = trim((string) $request->query('kode_klasifikasi', ''));
         if ($request->query('pakai_klasifikasi') === '0') {
@@ -60,6 +61,10 @@ class PeminjamanApprovalController extends Controller
                     });
                 }
             })
+            ->when($nomorDokumen !== '', fn ($query) => $query->whereRaw(
+                'LOWER(arsips.nomor_dokumen) LIKE ?',
+                [$this->searchLikePattern(mb_strtolower($nomorDokumen))]
+            ))
             ->when($kodeKlasifikasi !== '', fn ($query) => $query->whereHas('klasifikasiArsip', fn ($klasifikasi) => $klasifikasi->whereRaw('LOWER(kode) = ?', [mb_strtolower($kodeKlasifikasi)])))
             ->when($tanggalDokumen, fn ($query) => $query->whereDate('tanggal_dokumen', $tanggalDokumen))
             ->when($kategoriId, fn ($query) => $query->where('kategori_arsip_id', $kategoriId))
@@ -108,6 +113,7 @@ class PeminjamanApprovalController extends Controller
             'totalArsipPokja'
         ) + ['filters' => [
             'search' => $namaSurat,
+            'nomorDokumen' => $nomorDokumen,
             'tanggal' => $tanggalDokumen,
             'kategoriId' => $kategoriId,
             'sifatSuratId' => $sifatSuratId,

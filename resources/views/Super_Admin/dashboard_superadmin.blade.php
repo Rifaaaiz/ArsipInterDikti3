@@ -84,7 +84,7 @@
             </div>
         </header>
 
-        <div class="w-full max-w-[1600px] px-5 pb-10 sm:px-8">
+        <div class="w-full max-w-400 px-5 pb-10 sm:px-8">
             @if (session('success'))
                 <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
             @endif
@@ -120,7 +120,7 @@
             <h3 class="mb-4 text-2xl font-bold text-black">Arsip Terbaru Pokja</h3>
             <div class="mb-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1180px] border-collapse text-left">
+                    <table class="w-full min-w-295 border-collapse text-left">
                         <thead class="border-b border-gray-200 bg-gray-50">
                             <tr>
                                 <th class="px-5 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>
@@ -171,7 +171,7 @@
             <h3 class="mb-4 text-2xl font-bold text-black">Peminjaman Menunggu Validasi</h3>
             <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[1320px] border-collapse text-left">
+                    <table class="w-full min-w-295 border-collapse text-left">
                         <thead class="border-b border-gray-200 bg-gray-50">
                             <tr>
                                 <th class="px-5 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>

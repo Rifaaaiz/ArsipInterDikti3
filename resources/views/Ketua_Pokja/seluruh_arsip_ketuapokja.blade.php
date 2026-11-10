@@ -185,23 +185,30 @@
                 </table>
             </div>
 
-            @if ($arsips->hasPages())
-                <nav class="flex items-center justify-center gap-2" aria-label="Pagination">
-                    @if ($arsips->previousPageUrl())
-                        <a href="{{ $arsips->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-left"></i></a>
-                    @else
-                        <span class="flex h-9 w-9 items-center justify-center text-gray-400" aria-hidden="true"><i class="fa-solid fa-arrow-left"></i></span>
-                    @endif
-                    @foreach ($arsips->getUrlRange(max(1, $arsips->currentPage() - 2), min($arsips->lastPage(), $arsips->currentPage() + 2)) as $page => $url)
-                        <a href="{{ $url }}" @class(['flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-sm font-semibold transition', 'bg-blue-600 text-white' => $page === $arsips->currentPage(), 'text-gray-800 hover:bg-gray-200' => $page !== $arsips->currentPage()]) @if ($page === $arsips->currentPage()) aria-current="page" @endif>{{ $page }}</a>
-                    @endforeach
-                    @if ($arsips->nextPageUrl())
-                        <a href="{{ $arsips->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-9 w-9 items-center justify-center rounded-md text-gray-800 transition hover:bg-gray-200"><i class="fa-solid fa-arrow-right"></i></a>
-                    @else
-                        <span class="flex h-9 w-9 items-center justify-center text-gray-400" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
-                    @endif
-                </nav>
-            @endif
+            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-center">
+                <p class="text-left text-xs text-gray-500">Menampilkan {{ $arsips->count() }} dari {{ $arsips->total() }} arsip (maks. 10 per halaman)</p>
+                @if ($arsips->hasPages())
+                    <nav class="flex items-center justify-center gap-1" aria-label="Pagination">
+                        @if ($arsips->previousPageUrl())
+                            <a href="{{ $arsips->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></span>
+                        @endif
+                        @foreach ($arsips->getUrlRange(max(1, $arsips->currentPage() - 2), min($arsips->lastPage(), $arsips->currentPage() + 2)) as $page => $url)
+                            @if ($page === $arsips->currentPage())
+                                <span aria-current="page" class="flex h-7 min-w-5 items-center justify-center rounded-sm bg-blue-600 px-1 text-xs font-semibold text-white">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="flex h-7 min-w-5 items-center justify-center rounded-sm px-1 text-xs font-semibold text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if ($arsips->nextPageUrl())
+                            <a href="{{ $arsips->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
+                        @endif
+                    </nav>
+                @endif
+            </div>
         </section>
     </main>
 

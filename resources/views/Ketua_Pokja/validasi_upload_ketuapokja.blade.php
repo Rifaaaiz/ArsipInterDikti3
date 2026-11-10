@@ -65,7 +65,7 @@
     <main class="ml-64 flex min-h-screen flex-1 flex-col bg-[#f4f4f5] p-5 sm:p-8">
         <header class="mb-8 flex justify-end">
             <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja Kelembagaan</span>
+                <span class="text-base font-bold text-gray-900">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>

@@ -70,17 +70,17 @@
         
         <!-- Navbar Atas -->
         <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-5 py-6 sm:px-8">
-            <span class="text-sm font-semibold text-gray-500">Dashboard - Ketua Pokja</span>
+            <a href="{{ route('ketua.dashboard') }}" aria-label="Kembali ke Dashboard Ketua Pokja" class="text-lg text-black transition hover:text-blue-600">
+                <i class="fa-solid fa-chevron-left"></i>
+            </a>
             <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-900">Ketua Pokja {{ $user->pokja?->name ?? '-' }}</span>
+                <span class="text-right text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
                 <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
             </div>
         </header>
 
         <!-- KONTEN UTAMA DASHBOARD KETUA POKJA -->
         <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
-            <h2 class="mb-6 text-3xl font-bold text-black">Dashboard Ketua Pokja</h2>
-
             @if (session('success'))
                 <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>
             @endif

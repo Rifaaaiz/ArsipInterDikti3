@@ -111,11 +111,12 @@
             </div>
         </div>
 
-        <!-- FORM FILTER PENCARIAN (Diubah jadi Flexbox menyamping sesuai gambar) -->
-        <form id="arsip-search-form" method="GET" action="{{ route('admin-tu.laporan.arsip') }}" class="mb-4 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-2 xl:grid-cols-4">
+        <form id="arsip-search-form" method="GET" action="{{ route('admin-tu.laporan.arsip') }}" class="mb-4 grid min-w-0 grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-2 md:grid-cols-5">
             <input id="arsip-search-input" type="search" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Nama Surat" aria-label="Nama Surat" class="order-1 h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
-            <div class="relative order-2 w-full min-w-0">
+            <input type="search" name="nomor_dokumen" value="{{ $filters['nomorDokumen'] ?? '' }}" placeholder="Nomor Dokumen" aria-label="Nomor Dokumen" class="order-2 h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 placeholder:text-gray-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+
+            <div class="relative order-3 w-full min-w-0">
                 <select name="kategori_id" aria-label="Jenis Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Jenis Surat</option>
                     @foreach ($kategoris as $kategori)
@@ -125,7 +126,7 @@
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
             </div>
 
-            <div class="relative order-3 w-full min-w-0">
+            <div class="relative order-4 w-full min-w-0">
                 <select name="sifat_surat_id" aria-label="Sifat Surat" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <option value="">Sifat Surat</option>
                     @foreach ($sifatSurats as $sifatSurat)
@@ -135,11 +136,12 @@
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
             </div>
 
-            <button id="arsip-search-submit" type="submit" class="order-4 h-[42px] rounded-md bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
+            <button id="arsip-search-submit" type="submit" class="order-5 h-[42px] w-full rounded-md bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">Filter</button>
 
-            <div class="relative order-5 w-full min-w-0">
-                <select name="pokja_id" aria-label="Kelompok Kerja" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
-                    <option value="">Kelompok Kerja</option>
+            <div class="order-6 grid grid-cols-1 gap-3 md:col-span-4 md:grid-cols-3">
+                <div class="relative w-full min-w-0">
+                <select name="pokja_id" aria-label="Kategori" class="h-[42px] w-full appearance-none rounded-md border border-gray-300 bg-white px-3 pr-9 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                    <option value="">Kategori</option>
                     @foreach ($pokjas as $pokja)
                         <option value="{{ $pokja->id }}" @selected((string) ($filters['pokjaId'] ?? '') === (string) $pokja->id)>{{ $pokja->name }}</option>
                     @endforeach
@@ -147,25 +149,25 @@
                 <i class="fa-solid fa-chevron-down pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500" aria-hidden="true"></i>
             </div>
 
-            <input type="date" name="tanggal" value="{{ $filters['tanggal'] ?? '' }}" aria-label="Tanggal Dokumen" class="order-6 h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+            <input type="date" name="tanggal" value="{{ $filters['tanggal'] ?? '' }}" aria-label="Tanggal Dokumen" class="h-[42px] w-full min-w-0 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
 
             @php
                 $klasifikasiValue = (string) ($filters['kodeKlasifikasi'] ?? '');
                 $selectedKlasifikasi = $klasifikasis->first(fn ($item) => (string) $item->kode === $klasifikasiValue);
             @endphp
-            <div class="relative order-7 w-full min-w-0" data-klasifikasi-root>
+            <div class="relative w-full min-w-0" data-klasifikasi-root>
                 <input type="hidden" name="kode_klasifikasi" value="{{ $klasifikasiValue }}" data-klasifikasi-value>
-                <button type="button" data-klasifikasi-trigger aria-expanded="false" aria-controls="klasifikasi-filter-modal" class="flex h-10.5 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
+                <button type="button" data-klasifikasi-trigger aria-expanded="false" aria-controls="klasifikasi-filter-modal" class="flex h-[42px] w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 text-left text-sm text-gray-700 transition hover:border-blue-600 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600">
                     <span data-klasifikasi-label class="truncate">{{ $selectedKlasifikasi?->kode ?? 'Kode Klasifikasi' }}</span>
                     <i class="fa-solid fa-chevron-down ml-3 shrink-0 text-xs text-gray-500" aria-hidden="true"></i>
                 </button>
-                <div id="klasifikasi-filter-modal" class="fixed inset-0 z-100 hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
+                <div id="klasifikasi-filter-modal" class="fixed inset-0 z-[100] hidden p-4 sm:p-6" data-klasifikasi-modal role="dialog" aria-modal="true" aria-label="Pilih Kode Klasifikasi">
                     <button type="button" class="fixed inset-0 cursor-default bg-slate-950/45" data-klasifikasi-close aria-label="Tutup pemilih kode klasifikasi"></button>
-                    <section class="relative mx-auto flex max-h-[88vh] w-full max-w-275 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
+                    <section class="relative z-10 mx-auto flex max-h-[88vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
                         <div class="sticky top-0 z-10 border-b border-slate-200 bg-white px-4 pb-3 pt-5 sm:px-6">
                             <div class="flex flex-col gap-3 sm:flex-row">
-                                <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" aria-label="Cari Kode Klasifikasi" class="h-10.5 w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
-                                <button type="button" data-klasifikasi-clear class="h-10.5 shrink-0 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Hapus Pilihan</button>
+                                <input type="search" data-klasifikasi-search placeholder="Cari Kode Klasifikasi" aria-label="Cari Kode Klasifikasi" class="h-[42px] w-full rounded-md border border-slate-300 bg-slate-50 px-4 text-sm text-slate-800 placeholder:text-slate-500 focus:border-blue-600 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-600">
+                                <button type="button" data-klasifikasi-clear class="h-[42px] shrink-0 rounded-md border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Hapus Pilihan</button>
                             </div>
                         </div>
                         <div class="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
@@ -189,8 +191,9 @@
                     </section>
                 </div>
             </div>
+            </div>
 
-            <a href="{{ route('admin-tu.laporan.arsip') }}" class="order-8 flex h-10.5 items-center justify-center rounded-md border border-blue-600 bg-white text-sm font-semibold text-blue-700 transition hover:bg-blue-50">Reset</a>
+            <a href="{{ route('admin-tu.laporan.arsip') }}" class="order-7 flex h-[42px] items-center justify-center rounded-md border border-blue-600 bg-white text-sm font-semibold text-blue-700 transition hover:bg-blue-50 md:col-start-5">Reset</a>
         </form>
         <p class="mb-4 text-sm text-slate-600" role="status" aria-live="polite">
             {{ $arsips->total() > 0 ? 'Ditemukan ' . $arsips->total() . ' data yang sesuai.' : 'Tidak ditemukan data arsip yang sesuai.' }}
@@ -257,10 +260,38 @@
             </div>
         </div>
 
-        <!-- PAGINATION -->
         @if(isset($arsips) && $arsips instanceof \Illuminate\Contracts\Pagination\Paginator)
-            <div class="mt-6 flex w-full justify-center">
-                {{ $arsips->withQueryString()->links() }}
+            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-center">
+                <p class="text-left text-xs text-gray-500">Menampilkan {{ $arsips->count() }} dari {{ $arsips->total() }} arsip (maks. 10 per halaman)</p>
+                @if ($arsips->hasPages())
+                    <nav class="flex items-center justify-center gap-1" aria-label="Pagination">
+                        @if ($arsips->previousPageUrl())
+                            <a href="{{ $arsips->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                            </a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                            </span>
+                        @endif
+                        @foreach ($arsips->getUrlRange(max(1, $arsips->currentPage() - 2), min($arsips->lastPage(), $arsips->currentPage() + 2)) as $page => $url)
+                            @if ($page === $arsips->currentPage())
+                                <span aria-current="page" class="flex h-7 min-w-5 items-center justify-center rounded-sm bg-blue-600 px-1 text-xs font-semibold text-white">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="flex h-7 min-w-5 items-center justify-center rounded-sm px-1 text-xs font-semibold text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if ($arsips->nextPageUrl())
+                            <a href="{{ $arsips->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400">
+                                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            </span>
+                        @endif
+                    </nav>
+                @endif
             </div>
         @endif
 

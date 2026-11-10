@@ -209,9 +209,38 @@
                 </table>
             </div>
 
-            @if ($arsips->hasPages())
-                <div class="mt-6">{{ $arsips->links() }}</div>
-            @endif
+            <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-center">
+                <p class="text-left text-xs text-gray-500">Menampilkan {{ $arsips->count() }} dari {{ $arsips->total() }} arsip (maks. 10 per halaman)</p>
+                @if ($arsips->hasPages())
+                    <nav class="flex items-center justify-center gap-1" aria-label="Pagination">
+                        @if ($arsips->previousPageUrl())
+                            <a href="{{ $arsips->previousPageUrl() }}" rel="prev" aria-label="Halaman sebelumnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                            </a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400">
+                                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                            </span>
+                        @endif
+                        @foreach ($arsips->getUrlRange(max(1, $arsips->currentPage() - 2), min($arsips->lastPage(), $arsips->currentPage() + 2)) as $page => $url)
+                            @if ($page === $arsips->currentPage())
+                                <span aria-current="page" class="flex h-7 min-w-5 items-center justify-center rounded-sm bg-blue-600 px-1 text-xs font-semibold text-white">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="flex h-7 min-w-5 items-center justify-center rounded-sm px-1 text-xs font-semibold text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if ($arsips->nextPageUrl())
+                            <a href="{{ $arsips->nextPageUrl() }}" rel="next" aria-label="Halaman berikutnya" class="flex h-7 w-5 items-center justify-center rounded-sm text-xs text-gray-900 transition hover:bg-gray-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            </a>
+                        @else
+                            <span aria-disabled="true" class="flex h-7 w-5 items-center justify-center text-xs text-gray-400">
+                                <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            </span>
+                        @endif
+                    </nav>
+                @endif
+            </div>
         </section>
     </main>
 

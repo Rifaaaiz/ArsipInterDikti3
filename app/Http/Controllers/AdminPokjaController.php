@@ -116,7 +116,7 @@ class AdminPokjaController extends Controller
             ->when($filters['tanggal_dokumen'] ?? null, fn ($builder, $date) => $builder->whereDate('tanggal_dokumen', $date))
             ->when($filters['klasifikasi_arsip_id'] ?? null, fn ($builder, $id) => $builder->where('klasifikasi_arsip_id', $id))
             ->latest('created_at')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         $view = Auth::user()->role?->slug === 'ketua_pokja'

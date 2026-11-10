@@ -42,6 +42,7 @@ class SuperadminArsipVitalController extends Controller
             'kategoris' => KategoriArsip::orderBy('name')->get(),
             'sifatSurats' => SifatSurat::orderBy('name')->get(),
             'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
+            'pokjas' => Pokja::orderBy('name')->get(),
             'user' => $request->user(),
         ]);
     }
