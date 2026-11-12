@@ -39,14 +39,6 @@
             </nav>
         </div>
 
-        <div class="p-6">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="flex items-center gap-3 text-red-600 font-bold hover:text-red-500 transition text-sm">
-                    <i class="fa-solid fa-arrow-right-from-bracket fa-flip-horizontal"></i> Logout
-                </button>
-            </form>
-        </div>
         <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                 @csrf
                 <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-500 hover:text-red-400 transition flex items-center gap-2">
@@ -56,12 +48,7 @@
     </aside>
 
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
-        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ $user?->name ?? $user?->username ?? 'Admin TU' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
-        </header>
+        <header class="px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]"></header>
 
         <div class="px-8 pb-10 max-w-7xl w-full">
             

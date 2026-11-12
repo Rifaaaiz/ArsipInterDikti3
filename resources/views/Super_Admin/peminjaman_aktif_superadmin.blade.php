@@ -52,7 +52,7 @@
                 <a href="{{ route('superadmin.dashboard') }}" class="text-black hover:text-blue-600 text-2xl transition font-bold">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <h2 class="text-3xl font-extrabold text-black tracking-tight">Peminjaman Aktif</h2>
+                <h2 class="text-2xl font-bold text-black tracking-tight">Peminjaman Aktif</h2>
             </div>
 
             @if (session('success'))

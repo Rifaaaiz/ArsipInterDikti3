@@ -9,32 +9,30 @@ use App\Models\User;
 use App\Models\KategoriArsip;
 use App\Models\KlasifikasiArsip;
 use App\Models\SifatSurat;
-use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class SuperadminDashboardController extends Controller
 {
     public function users(Request $request)
     {
-        $search = $this->normalizeSearch($request->query('search'));
-        $searchPatterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($search));
+        $search = trim((string) $request->query('search', ''));
         $roleId = $request->integer('role_id') ?: null;
         $pokjaId = $request->integer('pokja_id') ?: null;
         $deleteMode = filter_var($request->query('delete_mode', false), FILTER_VALIDATE_BOOLEAN);
 
         $users = User::with(['role', 'pokja'])
-            ->when($searchPatterns !== [], function ($query) use ($searchPatterns) {
-                foreach ($searchPatterns as $pattern) {
-                    $query->where(function ($searchQuery) use ($pattern) {
-                        $searchQuery->whereRaw('LOWER(name) LIKE ?', [$pattern])
-                            ->orWhereRaw('LOWER(username) LIKE ?', [$pattern]);
-                    });
-                }
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('username', 'like', '%' . $search . '%');
+                });
             })
             ->when($roleId, fn ($query) => $query->where('role_id', $roleId))
             ->when($pokjaId, fn ($query) => $query->where('pokja_id', $pokjaId))
@@ -42,13 +40,9 @@ class SuperadminDashboardController extends Controller
             ->paginate(10);
         $users->appends($request->query());
 
-        $allowedRoles = \App\Models\Role::whereIn('slug', ['admin_pokja', 'ketua_pokja', 'admin_tu', 'superadmin'])
-            ->orderBy('name')
-            ->get();
-
         return view('Super_Admin.kelola_user_superadmin', [
             'users' => $users,
-            'roles' => $allowedRoles,
+            'roles' => \App\Models\Role::orderBy('name')->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
             'filters' => compact('search', 'roleId', 'pokjaId'),
             'deleteMode' => $deleteMode,
@@ -58,18 +52,14 @@ class SuperadminDashboardController extends Controller
     public function storeUser(Request $request)
     {
         $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
             'username' => ['required', 'string', 'max:255', 'unique:users,username'],
-            'password' => ['required', 'string', 'min:8', 'different:username'],
+            'password' => ['required', 'string', 'min:8'],
             'role_id' => ['required', 'exists:roles,id'],
             'pokja_id' => ['nullable', 'exists:pokjas,id'],
+            'status' => ['required', Rule::in(['active', 'inactive'])],
         ], [
-            'username.required' => 'Username wajib diisi.',
             'username.unique' => 'Username sudah digunakan.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 8 karakter.',
-            'password.different' => 'Username dan password tidak boleh sama.',
-            'role_id.required' => 'Role wajib dipilih.',
-            'pokja_id.exists' => 'Kelompok Kerja tidak valid.',
         ]);
 
         $role = \App\Models\Role::findOrFail($validated['role_id']);
@@ -78,52 +68,37 @@ class SuperadminDashboardController extends Controller
             : null;
 
         if (in_array($role->slug, ['admin_pokja', 'ketua_pokja'], true) && ! $pokjaId) {
-            return back()->withInput()->withErrors(['pokja_id' => 'Kelompok Kerja wajib dipilih untuk role ini.']);
+            return back()->withInput()->withErrors(['pokja_id' => 'Pokja wajib dipilih untuk role ini.']);
         }
 
         User::create([
-            'name' => $validated['username'],
+            'name' => $validated['name'],
             'username' => $validated['username'],
             'email' => $validated['username'] . '@simarsip.local',
             'password' => Hash::make($validated['password']),
             'role_id' => $validated['role_id'],
             'pokja_id' => $pokjaId,
-            'status' => 'active',
+            'status' => $validated['status'],
         ]);
 
         return redirect()->route('superadmin.users')->with('success', 'User berhasil ditambahkan.');
     }
 
-    public function deleteUser(Request $request, User $user)
+    public function deleteUser(User $user)
     {
         abort_unless(Auth::user()?->role?->slug === 'superadmin', 403);
 
         if ($user->is(Auth::user())) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Anda tidak dapat menghapus akun yang sedang digunakan.'], 422);
-            }
-
-            return back()->with('error', 'Anda tidak dapat menghapus akun yang sedang digunakan.');
+            return back()->withErrors(['user' => 'Anda tidak dapat menghapus akun yang sedang digunakan.']);
         }
 
-        if ($user->peminjamans()->exists()
-            || $user->arsips()->exists()
-            || $user->validations()->exists()
-            || $user->suratMasukBalasans()->exists()) {
-            if ($request->expectsJson()) {
-                return response()->json(['message' => 'Gagal menghapus user. User masih memiliki data terkait dan tidak dapat dihapus.'], 422);
-            }
-
-            return back()->with('error', 'Gagal menghapus user. User masih memiliki data terkait dan tidak dapat dihapus.');
+        if ($user->peminjamans()->exists() || $user->arsips()->exists() || $user->validations()->exists()) {
+            return back()->withErrors(['user' => 'User masih memiliki data terkait dan tidak dapat dihapus.']);
         }
 
         $user->delete();
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Selamat, anda telah menghapus user ini.']);
-        }
-
-        return back()->with('success', 'Selamat, anda telah menghapus user ini.');
+        return back()->with('success', 'User berhasil dihapus.');
     }
 
     public function activeLoans(Request $request)
@@ -237,9 +212,7 @@ class SuperadminDashboardController extends Controller
             'file_arsip.max' => 'Ukuran file maksimal 5 MB.',
         ]);
 
-        $klasifikasi = isset($validatedData['klasifikasi_arsip_id'])
-            ? KlasifikasiArsip::query()->findOrFail($validatedData['klasifikasi_arsip_id'])
-            : null;
+        $klasifikasi = KlasifikasiArsip::query()->findOrFail($validatedData['klasifikasi_arsip_id']);
         $file = $request->file('file_arsip');
         $storedPath = null;
 
@@ -255,7 +228,7 @@ class SuperadminDashboardController extends Controller
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'kategori_arsip_id' => $validatedData['kategori_arsip_id'],
                     'sifat_surat_id' => $validatedData['sifat_surat_id'],
-                    'klasifikasi_arsip_id' => $klasifikasi?->id,
+                    'klasifikasi_arsip_id' => $klasifikasi->id,
                     'pokja_id' => $validatedData['pokja_id'] ?? null,
                     'tanggal_dokumen' => $validatedData['tanggal_dokumen'],
                     'tanda_tangan' => $validatedData['tanda_tangan'],
@@ -268,7 +241,7 @@ class SuperadminDashboardController extends Controller
                     'submission_token' => $validatedData['submission_token'],
                 ]);
             });
-        } catch (QueryException $e) {
+        } catch (QueryException $exception) {
             if ($storedPath && Storage::disk('public')->exists($storedPath)) {
                 Storage::disk('public')->delete($storedPath);
             }
@@ -286,13 +259,13 @@ class SuperadminDashboardController extends Controller
                     ->with('success', 'Pengiriman ganda diabaikan; arsip sudah tersimpan.');
             }
 
-            throw $e;
-        } catch (\Throwable $e) {
+            throw $exception;
+        } catch (\Throwable $exception) {
             if ($storedPath && Storage::disk('public')->exists($storedPath)) {
                 Storage::disk('public')->delete($storedPath);
             }
 
-            throw $e;
+            throw $exception;
         }
 
         if (! ($validatedData['pokja_id'] ?? null)) {
@@ -344,7 +317,7 @@ class SuperadminDashboardController extends Controller
 
         $newFilePath = $arsip->file_path;
         $oldFilePath = $arsip->file_path;
-        $removeExistingFile = filter_var($request->boolean('remove_existing_file'), FILTER_VALIDATE_BOOLEAN);
+        $removeExistingFile = $request->boolean('remove_existing_file');
 
         if ($request->hasFile('file_arsip')) {
             $file = $request->file('file_arsip');
@@ -360,10 +333,6 @@ class SuperadminDashboardController extends Controller
 
         try {
             DB::transaction(function () use ($request, $arsip, $validatedData, $newFilePath, $oldFilePath, $removeExistingFile) {
-                if ($request->hasFile('file_arsip') && $oldFilePath && $oldFilePath !== $newFilePath && Storage::disk('public')->exists($oldFilePath)) {
-                    // keep old file until new upload is successfully persisted
-                }
-
                 $arsip->update([
                     'nama_arsip' => $validatedData['nama_arsip'],
                     'nomor_dokumen' => $validatedData['nomor_dokumen'] ?? null,
@@ -378,20 +347,16 @@ class SuperadminDashboardController extends Controller
                     'file_size' => $request->hasFile('file_arsip') ? $request->file('file_arsip')->getSize() : ($removeExistingFile ? null : $arsip->file_size),
                 ]);
 
-                if ($request->hasFile('file_arsip') && $oldFilePath && $oldFilePath !== $newFilePath && Storage::disk('public')->exists($oldFilePath)) {
-                    Storage::disk('public')->delete($oldFilePath);
-                }
-
-                if ($removeExistingFile && $oldFilePath && Storage::disk('public')->exists($oldFilePath)) {
+                if (($request->hasFile('file_arsip') || $removeExistingFile) && $oldFilePath && $oldFilePath !== $newFilePath && Storage::disk('public')->exists($oldFilePath)) {
                     Storage::disk('public')->delete($oldFilePath);
                 }
             });
-        } catch (\Throwable $e) {
+        } catch (\Throwable $exception) {
             if ($request->hasFile('file_arsip') && $newFilePath && Storage::disk('public')->exists($newFilePath)) {
                 Storage::disk('public')->delete($newFilePath);
             }
 
-            throw $e;
+            throw $exception;
         }
 
         if (($validatedData['return_to'] ?? null) === 'arsip-vital' && $arsip->arsipVital()->exists()) {
@@ -427,13 +392,11 @@ class SuperadminDashboardController extends Controller
 
         $filePath = $arsip->file_path;
 
-        DB::transaction(function () use ($arsip, $filePath) {
-            $arsip->update([
-                'file_path' => null,
-                'file_type' => null,
-                'file_size' => null,
-            ]);
-        });
+        DB::transaction(fn () => $arsip->update([
+            'file_path' => null,
+            'file_type' => null,
+            'file_size' => null,
+        ]));
 
         if (Storage::disk('public')->exists($filePath)) {
             Storage::disk('public')->delete($filePath);
@@ -446,10 +409,6 @@ class SuperadminDashboardController extends Controller
     {
         $filters = $this->archiveFilters($request);
         $arsips = $this->archiveQuery($request)->paginate(10)->withQueryString();
-        $statistics = $this->archiveStatistics();
-        $statistics['totalArsipTu'] = (clone Arsip::whereNotIn('status', ['dihapus']))
-            ->whereHas('pokja', fn ($query) => $query->where('name', 'Tata Usaha dan Barang Milik Negara'))
-            ->count();
 
         return view('Super_Admin.laporan_arsip_superadmin', [
             'arsips' => $arsips,
@@ -457,7 +416,7 @@ class SuperadminDashboardController extends Controller
             'sifatSurats' => SifatSurat::orderBy('name')->get(),
             'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
             'pokjas' => Pokja::orderBy('name')->get(),
-            ...$statistics,
+            ...$this->archiveStatistics(),
             'filters' => $filters,
         ]);
     }
@@ -504,27 +463,10 @@ class SuperadminDashboardController extends Controller
     {
         $filters = $this->archiveFilters($request);
 
-        return Arsip::with(['kategori', 'pokja', 'uploader.role', 'sifatSurat', 'klasifikasiArsip'])
+        return Arsip::with(['kategori', 'sifatSurat', 'klasifikasiArsip', 'pokja', 'uploader.role'])
             ->whereNotIn('status', ['dihapus'])
-            ->when($filters['search'] !== '', function ($builder) use ($filters) {
-                $patterns = array_map(fn ($token) => $this->searchLikePattern($token), $this->searchTokens($filters['search']));
-
-                foreach ($patterns as $pattern) {
-                    $builder->where(function ($searchQuery) use ($pattern) {
-                        $searchQuery->whereRaw('LOWER(nama_arsip) LIKE ?', [$pattern])
-                            ->orWhereRaw('LOWER(nomor_dokumen) LIKE ?', [$pattern])
-                            ->orWhereHas('kategori', fn ($kategoriQuery) => $kategoriQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
-                            ->orWhereHas('sifatSurat', fn ($sifatQuery) => $sifatQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
-                            ->orWhereHas('pokja', fn ($pokjaQuery) => $pokjaQuery->whereRaw('LOWER(name) LIKE ?', [$pattern]))
-                            ->orWhereHas('klasifikasiArsip', function ($klasifikasiQuery) use ($pattern) {
-                                $klasifikasiQuery->whereRaw('LOWER(kode) LIKE ?', [$pattern])
-                                    ->orWhereRaw('LOWER(judul) LIKE ?', [$pattern])
-                                    ->orWhereRaw('LOWER(uraian) LIKE ?', [$pattern]);
-                            });
-                    });
-                }
-            })
-            ->when($filters['tanggal'], fn ($builder) => $builder->whereDate('tanggal_dokumen', $filters['tanggal']))
+            ->when($filters['search'] !== '', fn ($builder) => $builder->where('nama_arsip', 'like', '%' . $filters['search'] . '%'))
+            ->when($filters['tanggal'], fn ($builder) => $builder->whereDate('created_at', $filters['tanggal']))
             ->when($filters['kategoriId'], fn ($builder) => $builder->where('kategori_arsip_id', $filters['kategoriId']))
             ->when($filters['sifatSuratId'], fn ($builder) => $builder->where('sifat_surat_id', $filters['sifatSuratId']))
             ->when($filters['klasifikasiId'], fn ($builder) => $builder->where('klasifikasi_arsip_id', $filters['klasifikasiId']))
@@ -538,24 +480,16 @@ class SuperadminDashboardController extends Controller
 
     private function archiveFilters(Request $request): array
     {
-        $validated = $request->validate([
-            'search' => ['nullable', 'string', 'max:255'],
-            'tanggal' => ['nullable', 'date'],
-            'kategori_id' => ['nullable', 'integer', 'exists:jenis_surats,id'],
-            'sifat_surat_id' => ['nullable', 'integer', 'exists:sifat_surats,id'],
-            'klasifikasi_arsip_id' => ['nullable', 'integer', 'exists:klasifikasi_arsips,id'],
-            'pokja_id' => ['nullable', 'integer', 'exists:pokjas,id'],
-            'sumber' => ['nullable', 'in:semua,kelompok_kerja,tu'],
-        ]);
+        $source = $request->query('sumber', 'semua');
 
         return [
-            'search' => $this->normalizeSearch($validated['search'] ?? null),
-            'tanggal' => $validated['tanggal'] ?? null,
-            'kategoriId' => $validated['kategori_id'] ?? null,
-            'sifatSuratId' => $validated['sifat_surat_id'] ?? null,
-            'klasifikasiId' => $validated['klasifikasi_arsip_id'] ?? null,
-            'pokjaId' => $validated['pokja_id'] ?? null,
-            'source' => $validated['sumber'] ?? 'semua',
+            'search' => trim((string) $request->query('search', '')),
+            'tanggal' => $request->query('tanggal'),
+            'kategoriId' => $request->integer('kategori_id') ?: null,
+            'sifatSuratId' => $request->integer('sifat_surat_id') ?: null,
+            'klasifikasiId' => $request->integer('klasifikasi_arsip_id') ?: null,
+            'pokjaId' => $request->integer('pokja_id') ?: null,
+            'source' => in_array($source, ['semua', 'kelompok_kerja', 'tu'], true) ? $source : 'semua',
         ];
     }
 
@@ -576,39 +510,31 @@ class SuperadminDashboardController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        $totalArsip = Arsip::whereNotIn('status', ['dihapus'])
-            ->whereNotNull('pokja_id')
-            ->count();
+        $totalArsip = Arsip::whereNotIn('status', ['dihapus'])->count();
 
         // Reuse scope yang sudah ada di Model Peminjaman (sama seperti
         // yang dipakai PeminjamanApprovalController::tuDashboard()),
         // supaya definisi "aktif" konsisten di seluruh dashboard.
         $totalPeminjamanAktif = Peminjaman::activeNow()->count();
 
-        $totalUserAktif = User::where('status', 'active')->count();
+        $totalUserAktif = User::where('status', 'active')
+            ->whereHas('role', function ($query) {
+                $query->whereIn('slug', ['admin_pokja', 'ketua_pokja', 'admin_tu']);
+            })
+            ->count();
 
         $totalPokja = Pokja::count();
         $pokjas = Pokja::orderBy('name')->get();
 
-        $arsipTerbaru = Arsip::with(['kategori', 'pokja', 'sifatSurat', 'klasifikasiArsip'])
+        $arsipTerbaru = Arsip::with(['kategori', 'pokja'])
             ->whereNotIn('status', ['dihapus'])
-            ->whereNotNull('pokja_id')
             ->latest('created_at')
-            ->limit(2)
+            ->take(5)
             ->get();
 
-        $peminjamanTerbaru = Peminjaman::with([
-                'user.pokja',
-                'kategori',
-                'sifatSurat',
-                'klasifikasiArsip',
-                'arsip.kategori',
-                'arsip.sifatSurat',
-                'arsip.klasifikasiArsip',
-            ])
-            ->readyForFinalValidation()
+        $peminjamanTerbaru = Peminjaman::with(['user.pokja', 'kategori', 'arsip'])
             ->latest('created_at')
-            ->limit(5)
+            ->take(5)
             ->get();
 
         $notificationSince = now()->subDays(7);
@@ -633,6 +559,7 @@ class SuperadminDashboardController extends Controller
             ->orderByDesc('ketua_validated_at')
             ->limit(5)
             ->get();
+
         $adminTuApproval = fn ($query) => $query
             ->where('status', 'disetujui')
             ->where('validated_at', '>=', $notificationSince)
@@ -655,6 +582,7 @@ class SuperadminDashboardController extends Controller
             ->orderByDesc('admin_tu_validated_at')
             ->limit(5)
             ->get();
+
         $adminTuRejection = fn ($query) => $query
             ->where('status', 'ditolak')
             ->where('validated_at', '>=', $notificationSince)
@@ -700,6 +628,7 @@ class SuperadminDashboardController extends Controller
             ->sortByDesc('occurred_at')
             ->take(5)
             ->values();
+
         $notificationCount = $pendingValidationCount + $suratMasukNotificationCount + $rejectedByAdminTuCount;
         $suratMasukIndexUrl = $suratMasukTerbaru->first()
             ? route('superadmin.surat-masuk', $suratMasukTerbaru->first()->user->pokja->slug)

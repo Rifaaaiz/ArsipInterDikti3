@@ -128,22 +128,14 @@
         </form>
     </aside>
 
-    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
-        <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
-            <div class="flex items-center gap-4">
+    <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">        
+        <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
+            <div class="mb-6 flex items-center gap-3">
                 <a href="/dashboard-pokja/upload" class="text-black hover:text-blue-600 text-lg transition" aria-label="Kembali">
                     <i class="fa-solid fa-chevron-left"></i>
                 </a>
-                <span class="text-sm font-bold text-gray-500">Upload File Arsip - admin Pokja</span>
+                <h2 class="text-4xl font-bold text-black">Upload File Kearsipan</h2>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->name ?? auth()->user()?->username }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
-        </header>
-        
-        <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
-            <h2 class="text-4xl font-bold mb-6 text-black">Upload File Kearsipan</h2>
 
                 @if ($errors->has('pokja_id'))
                     <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">

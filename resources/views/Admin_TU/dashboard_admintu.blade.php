@@ -62,12 +62,7 @@
     <main class="w-full min-w-0 flex-1 ml-0 md:ml-64 flex flex-col min-h-screen">
         
         <!-- Navbar Atas -->
-        <header class="px-4 sm:px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">admin TU</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
-        </header>
+        <header class="px-4 sm:px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]"></header>
 
         <!-- KONTEN UTAMA DASHBOARD -->
         <div class="w-full min-w-0 px-4 sm:px-8 pb-10">

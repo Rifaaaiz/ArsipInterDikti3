@@ -62,10 +62,6 @@
         
         <!-- Navbar Atas -->
         <header class="px-4 sm:px-8 py-6 flex items-center justify-end sticky top-0 z-10 bg-[#f8f9fa]">
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->username ?? auth()->user()?->name ?? 'User' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
         </header>
 
         <!-- KONTEN UTAMA PROFIL -->

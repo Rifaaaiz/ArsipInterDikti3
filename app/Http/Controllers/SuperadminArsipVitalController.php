@@ -8,7 +8,9 @@ use App\Models\KategoriArsip;
 use App\Models\KlasifikasiArsip;
 use App\Models\Pokja;
 use App\Models\SifatSurat;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -99,7 +101,7 @@ class SuperadminArsipVitalController extends Controller
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_size' => $file->getSize(),
                     'status' => 'aktif',
-                    'uploaded_by' => auth()->id(),
+                    'uploaded_by' => Auth::id(),
                     'submission_token' => $validated['submission_token'],
                 ]);
 
@@ -125,7 +127,10 @@ class SuperadminArsipVitalController extends Controller
         $arsip = $arsipVital->arsip;
         abort_unless($arsip && $arsip->file_path && Storage::disk('public')->exists($arsip->file_path), 404);
 
-        return Storage::disk('public')->response($arsip->file_path);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->response($arsip->file_path);
     }
 
     public function deleteInactive(Request $request, ArsipVital $arsipVital)

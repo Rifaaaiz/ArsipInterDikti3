@@ -74,12 +74,7 @@
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         
         <!-- Navbar Atas -->
-        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
-            </div>
-        </header>
+        <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8"></header>
 
         <!-- KONTEN UTAMA -->
         <div class="box-border w-full min-w-0 px-5 pb-10 sm:px-8">
@@ -185,11 +180,10 @@
                         Reset
                     </a>
                 </div>
-                </div>
             </form>
 
-            <div class="mb-8 w-full min-w-0 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-                <table class="min-w-[1120px] w-full border-collapse text-left">
+            <div class="mx-auto mb-8 w-full min-w-0 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+                <table class="w-full min-w-[900px] border-collapse text-left">
                     <thead class="border-b border-gray-200 bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-sm font-bold text-gray-700">Nama Arsip</th>

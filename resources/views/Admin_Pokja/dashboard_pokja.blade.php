@@ -65,15 +65,6 @@
     </aside>
 
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
-        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <span class="text-sm font-semibold text-gray-700">Dashboard Admin Pokja</span>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-semibold text-gray-700">{{ Auth::user()->name ?? 'Admin Pokja' }}</span>
-                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-            </div>
-        </header>
 
         <div class="p-8">
             <h2 class="text-2xl font-bold mb-6">Dashboard Admin Pokja</h2>

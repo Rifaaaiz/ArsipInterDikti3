@@ -9,7 +9,9 @@ use App\Models\Peminjaman;
 use App\Models\Pokja;
 use App\Models\SifatSurat;
 use App\Models\SuratMasukBalasan;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -44,7 +46,7 @@ class SuperadminSuratMasukController extends Controller
         abort_unless($config, 404);
 
         $pokja = Pokja::where('slug', $config['slug'])->firstOrFail();
-        $user = auth()->user();
+        $user = Auth::user();
         $pokjas = Pokja::orderBy('name')->get();
 
         $suratMasuk = Peminjaman::with([
@@ -100,7 +102,7 @@ class SuperadminSuratMasukController extends Controller
             'pokja' => $pokja,
             'pokjas' => Pokja::orderBy('name')->get(),
             'hasFile' => $hasFile,
-            'user' => auth()->user(),
+            'user' => Auth::user(),
             'jenisSurats' => KategoriArsip::orderBy('name')->get(),
             'sifatSurats' => SifatSurat::orderBy('name')->get(),
             'klasifikasis' => KlasifikasiArsip::orderedForSelection()->get(),
@@ -131,7 +133,7 @@ class SuperadminSuratMasukController extends Controller
             'pokjas' => Pokja::orderBy('name')->get(),
             'balasans' => $peminjaman->balasans()->with('user')->paginate(10)->withQueryString(),
             'hasFile' => $hasFile,
-            'user' => auth()->user(),
+            'user' => Auth::user(),
         ]);
     }
 
@@ -192,7 +194,7 @@ class SuperadminSuratMasukController extends Controller
             'arsip' => $arsip,
             'balasans' => $balasans,
             'hasFile' => $hasFile,
-            'user' => auth()->user(),
+            'user' => Auth::user(),
         ]);
     }
 
@@ -217,7 +219,7 @@ class SuperadminSuratMasukController extends Controller
             'pokja' => $pokja,
             'pokjas' => Pokja::orderBy('name')->get(),
             'hasFile' => $hasFile,
-            'user' => auth()->user(),
+            'user' => Auth::user(),
         ]);
     }
 
@@ -273,7 +275,10 @@ class SuperadminSuratMasukController extends Controller
         abort_unless((int) $arsip->pokja_id === (int) $pokja->id && $arsip->status !== 'dihapus', 404);
         abort_unless($arsip->file_path && Storage::disk('public')->exists($arsip->file_path), 404);
 
-        return Storage::disk('public')->response(
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk('public');
+
+        return $disk->response(
             $arsip->file_path,
             basename($arsip->file_path),
             [

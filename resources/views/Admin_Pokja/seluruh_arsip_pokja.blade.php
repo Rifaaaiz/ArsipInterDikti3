@@ -63,12 +63,6 @@
 
     <main class="ml-64 flex min-h-screen flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-8 py-6">
-            <a href="" class="text-lg text-black transition hover:text-blue-600" aria-label="Kembali">
-            </a>
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()->name ?? 'Admin Pokja' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
         </header>
 
         <section class="w-full max-w-[1600px] px-5 pb-10 sm:px-8">

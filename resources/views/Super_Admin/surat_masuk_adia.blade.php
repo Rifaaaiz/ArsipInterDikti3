@@ -25,7 +25,6 @@
                 <button type="button" data-sidebar-toggle aria-label="Buka navigasi" aria-expanded="false" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm md:hidden">
                     <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
-                <h1 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">Surat Masuk ADIA</h1>
             </div>
             <div class="flex shrink-0 items-center gap-3">
                 <span class="text-sm font-bold text-gray-900">{{ $user?->name ?? 'Super Admin' }}</span>

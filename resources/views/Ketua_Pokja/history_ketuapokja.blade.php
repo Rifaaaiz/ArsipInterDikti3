@@ -61,15 +61,7 @@
     </aside>
 
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col bg-[#f4f4f5]">
-        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-5 py-6 sm:px-8">
-            <a href="{{ route('ketua.dashboard') }}" aria-label="Kembali ke Dashboard Ketua Pokja" class="text-lg text-black transition hover:text-blue-600">
-                <i class="fa-solid fa-chevron-left"></i>
-            </a>
-            <div class="flex items-center gap-3">
-                <span class="text-right text-sm font-bold text-gray-900 sm:text-base">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
-            </div>
-        </header>
+        <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f4f5] px-5 py-6 sm:px-8"></header>
 
         <div class="box-border w-full min-w-0 px-5 pb-10 sm:px-8">
             <h2 class="mb-6 text-2xl font-bold text-gray-900 sm:text-3xl">History Arsip</h2>

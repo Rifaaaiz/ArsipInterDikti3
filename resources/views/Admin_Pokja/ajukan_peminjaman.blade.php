@@ -71,19 +71,6 @@
 
     <!-- AREA KONTEN UTAMA -->
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">  
-        
-        <!-- Navbar Atas -->
-        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-semibold text-gray-600">Ajukan Peminjaman Arsip</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-800">{{ auth()->user()?->name ?? auth()->user()?->username ?? 'admin Pokja Kelembagaan' }}</span>
-                <div class="w-8 h-8 rounded-full bg-[#e8efff] flex items-center justify-center text-blue-700">
-                    <i class="fa-solid fa-user text-sm"></i>
-                </div>
-            </div>
-        </header>
 
         <!-- KONTEN UTAMA -->
         <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">

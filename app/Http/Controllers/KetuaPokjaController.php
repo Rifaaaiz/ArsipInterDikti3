@@ -7,6 +7,7 @@ use App\Models\KategoriArsip;
 use App\Models\KlasifikasiArsip;
 use App\Models\Peminjaman;
 use App\Models\SifatSurat;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,11 @@ class KetuaPokjaController extends Controller
 {
     public function dashboard()
     {
-        $user = Auth::user()->loadMissing('pokja');
+        $user = Auth::user();
+        if (! ($user instanceof User)) {
+            abort(403);
+        }
+        $user->loadMissing('pokja');
         $pokjaId = $user->pokja_id;
 
         $arsipQuery = Arsip::where('pokja_id', $pokjaId)

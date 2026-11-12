@@ -71,10 +71,6 @@
     <!-- AREA KONTEN UTAMA -->
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-10 flex items-center justify-end bg-[#f4f4f5] px-5 py-6 sm:px-8">
-            <div class="flex items-center gap-2 text-sm font-bold text-gray-900">
-                <span>admin Pokja Kelembagaan</span>
-                <i class="fa-solid fa-circle-user text-lg" aria-hidden="true"></i>
-            </div>
         </header>
 
         <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">

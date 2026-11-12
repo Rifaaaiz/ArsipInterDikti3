@@ -56,20 +56,11 @@
     <button id="admin-tu-sidebar-backdrop" type="button" aria-label="Tutup menu" class="fixed inset-0 z-10 hidden bg-slate-950/40 md:hidden"></button>
 
     <main id="admin-tu-main" class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
-        <header class="sticky top-0 z-10 flex items-center justify-between gap-4 bg-[#f4f7f6] px-4 py-5 sm:px-6 lg:px-8">
-            <div class="flex min-w-0 items-center gap-3">
-                <button id="admin-tu-sidebar-toggle" type="button" aria-label="Buka menu" aria-expanded="false" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600 md:hidden">
-                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
-                </button>
-                <h1 class="truncate text-xl font-bold text-gray-900 sm:text-2xl">Validasi Peminjaman</h1>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-900">{{ $user?->name ?? $user?->username ?? 'Admin TU' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
-            </div>
-        </header>
+        <header class="sticky top-0 z-10 flex items-center justify-between gap-4 bg-[#f4f7f6] px-4 py-5 sm:px-6 lg:px-8"></header>
 
         <div class="w-full min-w-0 flex-1 px-4 pb-8 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-black">Validasi Peminjaman</h2>
+            
             @if (session('success'))
                 <div class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700 shadow-sm">{{ session('success') }}</div>
             @endif

@@ -82,20 +82,16 @@
         
         <!-- Navbar Atas -->
         <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
-            <div class="flex items-center gap-4">
-                <a href="{{ route('arsip.index') }}" class="text-black hover:text-blue-600 text-lg transition">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </a>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()->name ?? 'Admin Pokja' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
         </header>
 
         <!-- KONTEN UTAMA -->
         <div class="box-border w-full min-w-0 max-w-none px-5 pb-10 sm:px-8">
-            <h2 class="text-3xl font-bold mb-6 text-black">Riwayat Arsip Terakhir</h2>
+            <div class="mb-6 flex items-center gap-3">
+                <a href="{{ route('peminjaman.ajukan') }}" class="text-black hover:text-blue-600 text-lg transition">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <h2 class="text-2xl font-bold text-black">Riwayat Arsip Terakhir</h2>
+            </div>
 
             <form method="GET" action="{{ route('arsip.riwayat') }}" class="mb-8 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                 <div class="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">

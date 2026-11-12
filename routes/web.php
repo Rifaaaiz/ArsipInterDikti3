@@ -39,94 +39,54 @@ use App\Http\Controllers\SuperadminArsipVitalController;
 // ==========================================
 
 
-    Route::middleware(['auth', 'role:admin_pokja'])->group(function () {
+    Route::middleware(['auth', 'role:admin_pokja'])
+        ->prefix('dashboard-pokja')
+        ->group(function () {
+            Route::get('/', [AdminPokjaController::class, 'dashboard']);
 
-        Route::get('/dashboard-pokja',[AdminPokjaController::class, 'dashboard']);
+            Route::get('/ajukan', [AdminPokjaController::class, 'ajukan'])
+                ->name('peminjaman.ajukan');
 
-        Route::get(
-            '/dashboard-pokja/ajukan',
-            [AdminPokjaController::class, 'ajukan']
-        )->name('peminjaman.ajukan');
+            Route::get('/upload', [AdminPokjaController::class, 'upload'])
+                ->name('arsip.index');
 
-        // Route untuk halaman Upload Arsip (Utama)
-        Route::get('/dashboard-pokja/upload', [AdminPokjaController::class, 'upload']);
+            Route::get('/seluruh-arsip', [AdminPokjaController::class, 'seluruhArsip'])
+                ->name('arsip.seluruh');
+            Route::get('/seluruh-arsip/{arsipId}/metadata', [AdminPokjaController::class, 'metadataSeluruhArsip'])
+                ->name('arsip.seluruh.metadata');
 
-        Route::get(
-            '/dashboard-pokja/seluruh-arsip',
-            [AdminPokjaController::class, 'seluruhArsip']
-        )->name('arsip.seluruh');
-        Route::get(
-            '/dashboard-pokja/seluruh-arsip/{arsipId}/metadata',
-            [AdminPokjaController::class, 'metadataSeluruhArsip']
-        )->name('arsip.seluruh.metadata');
+            Route::get('/history', [AdminPokjaController::class, 'history'])
+                ->name('pokja.history');
 
-        // Route untuk halaman History
-        Route::get(
-            '/dashboard-pokja/history',
-            [AdminPokjaController::class, 'history']
-        )->name('pokja.history');
+            Route::get('/profil', [AdminPokjaController::class, 'profil']);
 
-        // Route untuk halaman Profil
-        Route::get('/dashboard-pokja/profil', [AdminPokjaController::class, 'profil']);
+            Route::get('/form-peminjaman-pokja', [AdminPokjaController::class, 'formPeminjaman'])
+                ->name('peminjaman.form');
+            Route::post('/form-peminjaman-pokja', [AdminPokjaController::class, 'storePeminjaman'])
+                ->name('peminjaman.store');
 
-        Route::get(
-            '/dashboard-pokja/form-peminjaman-pokja',
-            [AdminPokjaController::class, 'formPeminjaman']
-        )->name('peminjaman.form');
+            Route::get('/form-upload-pokja', [AdminPokjaController::class, 'formUpload'])
+                ->name('arsip.form');
+            Route::post('/form-upload-pokja', [AdminPokjaController::class, 'storeArsip'])
+                ->name('arsip.store');
 
-        Route::post(
-            '/dashboard-pokja/form-peminjaman-pokja',
-            [AdminPokjaController::class, 'storePeminjaman']
-        )->name('peminjaman.store');
+            Route::get('/riwayat-peminjaman-terakhir-pokja', [AdminPokjaController::class, 'riwayatPeminjamanTerakhir'])
+                ->name('peminjaman.riwayat');
+            Route::get('/riwayat-arsip-terakhir-pokja', [AdminPokjaController::class, 'riwayatArsipTerakhir'])
+                ->name('arsip.riwayat');
 
-        // Route untuk halaman Form Upload (Isian Form)
-        // Route untuk halaman Upload Arsip (Utama)
-        Route::get(
-            '/dashboard-pokja/upload',
-            [AdminPokjaController::class, 'upload']
-        )->name('arsip.index');
+            Route::get('/peminjaman-aktif', [AdminPokjaController::class, 'peminjamanAktif'])
+                ->name('pokja.peminjaman.aktif');
+            Route::get('/peminjaman-aktif/{peminjaman}', [AdminPokjaController::class, 'detailPeminjamanAktif'])
+                ->name('pokja.peminjaman.aktif.detail');
+            Route::get('/peminjaman-aktif/{peminjaman}/balasan/file', [AdminPokjaController::class, 'showPeminjamanReplyFile'])
+                ->name('pokja.peminjaman.aktif.balasan.file');
 
-        // ... route lain tetap sama ...
-
-        // Route untuk halaman Form Upload (Isian Form)
-        Route::get(
-            '/dashboard-pokja/form-upload-pokja',
-            [AdminPokjaController::class, 'formUpload']
-        )->name('arsip.form');
-
-        // Route untuk memproses submit form Upload Arsip
-        Route::post(
-            '/dashboard-pokja/form-upload-pokja',
-            [AdminPokjaController::class, 'storeArsip']
-        )->name('arsip.store');
-
-        // Route untuk Riwayat Peminjaman Terakhir
-        Route::get(
-            '/dashboard-pokja/riwayat-peminjaman-terakhir-pokja',
-            [AdminPokjaController::class, 'riwayatPeminjamanTerakhir']
-        )->name('peminjaman.riwayat');
-
-        // Route untuk Riwayat Arsip Terakhir
-        Route::get(
-            '/dashboard-pokja/riwayat-arsip-terakhir-pokja',
-            [AdminPokjaController::class, 'riwayatArsipTerakhir']
-        )->name('arsip.riwayat');
-
-        // Route untuk Peminjaman Aktif
-        Route::get('/dashboard-pokja/peminjaman-aktif', [AdminPokjaController::class, 'peminjamanAktif'])
-            ->name('pokja.peminjaman.aktif');
-        Route::get('/dashboard-pokja/peminjaman-aktif/{peminjaman}', [AdminPokjaController::class, 'detailPeminjamanAktif'])
-            ->name('pokja.peminjaman.aktif.detail');
-        Route::get('/dashboard-pokja/peminjaman-aktif/{peminjaman}/balasan/file', [AdminPokjaController::class, 'showPeminjamanReplyFile'])
-            ->name('pokja.peminjaman.aktif.balasan.file');
-
-        Route::get('/dashboard-pokja/surat-masuk', [AdminPokjaController::class, 'suratMasuk'])
-            ->name('pokja.surat-masuk');
-
-        Route::get('/dashboard-pokja/surat-keluar', [AdminPokjaController::class, 'suratKeluar'])
-            ->name('pokja.surat-keluar');
-
-    });
+            Route::get('/surat-masuk', [AdminPokjaController::class, 'suratMasuk'])
+                ->name('pokja.surat-masuk');
+            Route::get('/surat-keluar', [AdminPokjaController::class, 'suratKeluar'])
+                ->name('pokja.surat-keluar');
+        });
 
     Route::middleware('auth')->post(
         '/logout',

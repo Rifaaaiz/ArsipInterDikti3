@@ -74,21 +74,14 @@
     </aside>
 
     <main class="ml-64 flex min-h-screen min-w-0 flex-1 flex-col">
-        <header class="px-8 py-6 flex items-center justify-between sticky top-0 z-10 bg-[#f4f4f5]">
-            <div class="flex items-center gap-4">
-                <a href="{{ route($isKetuaPokja ? 'ketua.ajukan' : 'peminjaman.ajukan') }}" class="text-black hover:text-blue-600 text-lg transition">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </a>
-                <span class="text-sm font-bold text-gray-500">Input Peminjaman - admin Pokja</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">{{ auth()->user()?->name ?? auth()->user()?->username }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black"></i>
-            </div>
-        </header>
 
         <div class="box-border w-full min-w-0 max-w-none p-5 sm:p-8">
-            <h2 class="text-4xl font-bold mb-6 text-black">Ajukan Peminjaman</h2>
+            <div class="mb-6 flex items-center gap-3">
+                <a href="{{ route($isKetuaPokja ? 'ketua.ajukan' : 'peminjaman.ajukan') }}" aria-label="Kembali ke pengajuan" title="Kembali ke pengajuan" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-black transition hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </a>
+                <h2 class="text-4xl font-bold text-black">Ajukan Peminjaman</h2>
+            </div>
 
             <form id="peminjaman-form" action="{{ route(auth()->user()?->role?->slug === 'ketua_pokja' ? 'ketua.peminjaman.store' : 'peminjaman.store') }}" method="POST" enctype="multipart/form-data" class="w-full">
                 @csrf

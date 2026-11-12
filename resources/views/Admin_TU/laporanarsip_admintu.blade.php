@@ -74,13 +74,7 @@
     <button id="admin-tu-sidebar-backdrop" type="button" aria-label="Tutup menu" class="fixed inset-0 z-10 hidden bg-slate-950/40 md:hidden"></button>
 
 <main id="admin-tu-main" class="flex min-h-screen min-w-0 flex-1 flex-col">
-    <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-4 py-5 sm:px-6 lg:px-8">
-        <button id="admin-tu-sidebar-toggle" type="button" aria-label="Buka menu" aria-expanded="false" class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:border-blue-500 hover:text-blue-600 md:hidden">
-            <i class="fa-solid fa-bars" aria-hidden="true"></i>
-        </button>
-        <span class="ml-auto font-bold">{{ auth()->user()->name ?? 'Admin TU' }}</span>
-        <i class="fa-solid fa-circle-user ml-3 text-2xl" aria-hidden="true"></i>
-    </header>
+    <header class="sticky top-0 z-10 flex items-center justify-between bg-[#f4f7f9] px-4 py-5 sm:px-6 lg:px-8"></header>
 
     <div class="w-full min-w-0 flex-1 px-4 pb-8 sm:px-6 lg:px-8">
         @if (session('success'))

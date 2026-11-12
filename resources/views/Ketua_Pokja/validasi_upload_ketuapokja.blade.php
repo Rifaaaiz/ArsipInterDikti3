@@ -63,12 +63,7 @@
     </aside>
 
     <main class="ml-64 flex min-h-screen flex-1 flex-col bg-[#f4f4f5] p-5 sm:p-8">
-        <header class="mb-8 flex justify-end">
-            <div class="flex items-center gap-3">
-                <span class="text-base font-bold text-gray-900">Ketua Pokja {{ auth()->user()->pokja?->name ?? '-' }}</span>
-                <i class="fa-solid fa-circle-user text-2xl text-black" aria-hidden="true"></i>
-            </div>
-        </header>
+        <header class="mb-8 flex justify-end"></header>
         <h2 class="mb-5 text-3xl font-bold text-black">Validasi Usulan Upload</h2>
         @if (session('success'))
             <div data-flash-success="{{ session('success') }}" class="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{{ session('success') }}</div>

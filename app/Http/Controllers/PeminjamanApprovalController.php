@@ -204,7 +204,7 @@ class PeminjamanApprovalController extends Controller
                     'file_type' => $file->getClientOriginalExtension(),
                     'file_size' => $file->getSize(),
                     'status' => 'aktif',
-                    'uploaded_by' => auth()->id(),
+                    'uploaded_by' => Auth::id(),
                 ]);
             });
         } catch (\Throwable $e) {

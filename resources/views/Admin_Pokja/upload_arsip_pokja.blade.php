@@ -70,19 +70,6 @@
     <!-- AREA KONTEN UTAMA -->
     <main class="flex-1 ml-64 flex flex-col min-h-screen">
 
-        <!-- Navbar Atas -->
-        <header class="bg-white shadow-sm px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-semibold text-gray-600">Upload File Arsip Kelompok Kerja</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-bold text-gray-800">{{ auth()->user()?->name ?? auth()->user()?->username ?? 'admin Pokja Kelembagaan' }}</span>
-                <div class="w-8 h-8 rounded-full bg-[#e8efff] flex items-center justify-center text-blue-700">
-                    <i class="fa-solid fa-user text-sm"></i>
-                </div>
-            </div>
-        </header>
-
         <!-- KONTEN UTAMA -->
         <div class="p-8 w-full">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">Upload Arsip</h2>
@@ -101,7 +88,7 @@
                 </button>
                 <a href="{{ route('arsip.form') }}" class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">
                     Upload Arsip <i class="fa-solid fa-arrow-right ml-1 text-sm"></i>
-                </a>a
+                </a>
             </div>
 
             <h3 class="text-xl font-bold mb-4 text-gray-900">Riwayat Upload Arsip Terakhir</h3>
